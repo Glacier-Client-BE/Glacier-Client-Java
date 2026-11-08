@@ -1,0 +1,21 @@
+# Build and tooling output
+build/
+.gradle/
+.idea/
+.vscode/
+*.iml
+out/
+bin/
+
+# Dev runtime
+run/
+
+# Logs and temp
+*.log
+*.tmp
+tmp/
+hs_err_pid*
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,12 +1,13 @@
 package net.glacier.hud.impl;
 
 import net.glacier.hud.HudModule;
+import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.ToggleSetting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 /**
  * Real-time clock, HH:mm (or h:mm AM/PM), followed by optional compass and recovery compass item icons.
@@ -19,7 +20,10 @@ public class ClockHud extends HudModule {
 	private final ToggleSetting showClock = add(new ToggleSetting("Show Clock", true));
 	private final ToggleSetting showCompass = add(new ToggleSetting("Show Compass", false));
 	private final ToggleSetting showRecovery = add(new ToggleSetting("Show Recovery Compass", false));
-	private int lastKey = -1;
+	private final ToggleSetting showSeconds = add(new ToggleSetting("Show Seconds", false));
+	private final ToggleSetting showDate = add(new ToggleSetting("Show Date", false));
+	private final ChoiceSetting dateFormat = add(new ChoiceSetting("Date Format", "DD/MM", "DD/MM", "MM/DD", "YYYY-MM-DD"));
+	private long lastKey = -1;
 	private String text = "00:00";
 	private ItemStack compass;
 	private ItemStack recovery;
@@ -33,22 +37,37 @@ public class ClockHud extends HudModule {
 		return (showCompass.on() ? 1 : 0) + (showRecovery.on() ? 1 : 0);
 	}
 
+	private static String two(int v) {
+		return (v < 10 ? "0" : "") + v;
+	}
+
 	@Override
 	public void onTick() {
-		LocalTime t = LocalTime.now();
+		LocalDateTime t = LocalDateTime.now();
 		int h = t.getHour();
 		int m = t.getMinute();
+		int sec = showSeconds.on() ? t.getSecond() : 0;
 		boolean twelve = twelveHour.on();
-		int key = (h * 60 + m) * 2 + (twelve ? 1 : 0);
+		boolean date = showDate.on();
+		long key = ((t.getDayOfYear() * 24L + h) * 60 + m) * 60 + sec;
+		key = key * 32 + (twelve ? 1 : 0) + (showSeconds.on() ? 2 : 0) + (date ? 4 : 0) + dateFormat.index() * 8L;
 		if (key == lastKey) return;
 		lastKey = key;
-		String mm = (m < 10 ? "0" : "") + m;
-		if (twelve) {
-			int hh = h % 12 == 0 ? 12 : h % 12;
-			text = hh + ":" + mm + (h < 12 ? " AM" : " PM");
-		} else {
-			text = (h < 10 ? "0" : "") + h + ":" + mm;
+		StringBuilder sb = new StringBuilder(24);
+		if (twelve) sb.append(h % 12 == 0 ? 12 : h % 12);
+		else sb.append(two(h));
+		sb.append(':').append(two(m));
+		if (showSeconds.on()) sb.append(':').append(two(sec));
+		if (twelve) sb.append(h < 12 ? " AM" : " PM");
+		if (date) {
+			sb.append("  ");
+			switch (dateFormat.index()) {
+				case 1 -> sb.append(two(t.getMonthValue())).append('/').append(two(t.getDayOfMonth()));
+				case 2 -> sb.append(t.getYear()).append('-').append(two(t.getMonthValue())).append('-').append(two(t.getDayOfMonth()));
+				default -> sb.append(two(t.getDayOfMonth())).append('/').append(two(t.getMonthValue()));
+			}
 		}
+		text = sb.toString();
 	}
 
 	@Override

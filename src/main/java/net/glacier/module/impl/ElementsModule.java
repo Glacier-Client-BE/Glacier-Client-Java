@@ -2,6 +2,7 @@ package net.glacier.module.impl;
 
 import net.glacier.module.Category;
 import net.glacier.module.Module;
+import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
 
@@ -15,6 +16,16 @@ public class ElementsModule extends Module {
 	public final ToggleSetting hideBossName = add(new ToggleSetting("Hide Boss Name", false));
 	public final ToggleSetting showBossPercent = add(new ToggleSetting("Show Boss Percentage", false));
 	public final SliderSetting bossPadding = add(new SliderSetting("Boss Bar Vertical Padding", 4, 0, 20, 1));
+	/** Replaces the vanilla boss bar with the Glacier renderer (hud/BetterBossBar). */
+	public final ToggleSetting betterBossBar = add(new ToggleSetting("Better Boss Bar", true));
+	public final ChoiceSetting bossBarStyle = add(new ChoiceSetting("Boss Bar Style", "Glacier", "Glacier", "Slim", "Segmented"));
+	public final SliderSetting bossBarWidth = add(new SliderSetting("Bar Width", 182, 120, 320, 2));
+	public final ChoiceSetting bossBarPosition = add(new ChoiceSetting("Boss Bar Position", "Top Center", "Top Center", "Top Left", "Top Right"));
+	/** Percent, 100 = normal size. */
+	public final SliderSetting bossBarScale = add(new SliderSetting("Boss Bar Scale", 100, 50, 200, 5));
+	public final ToggleSetting bossSmoothFill = add(new ToggleSetting("Smooth Fill", true));
+	public final ToggleSetting bossColorByColor = add(new ToggleSetting("Color By Boss Color", true));
+	public final ToggleSetting bossNotches = add(new ToggleSetting("Show Overlay Notches", true));
 	public final ToggleSetting hideScoreboard = add(new ToggleSetting("Hide Scoreboard", false));
 	public final ToggleSetting hideScores = add(new ToggleSetting("Hide Scores", false));
 	public final ToggleSetting hideVignette = add(new ToggleSetting("Hide Vignette", false));

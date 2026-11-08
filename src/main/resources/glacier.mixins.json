@@ -26,7 +26,17 @@
 		"MixinTitleScreenSwap",
 		"MixinScreenSwap",
 		"MixinLevelLoadingAccessor",
-		"MixinProgressScreenAccessor"
+		"MixinProgressScreenAccessor",
+		"MixinBlockOutline",
+		"MixinHideArmor",
+		"MixinToastManager",
+		"Nr2StreamerNametag",
+		"Nr2StreamerTab",
+		"Nr2SmoothChat",
+		"Nr2ClearBackground",
+		"PkHideElytra",
+		"PkSpinProjectile",
+		"PkOverlayTexture"
 	],
 	"injectors": {
 		"defaultRequire": 1

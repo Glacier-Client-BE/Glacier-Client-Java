@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.loader.api.FabricLoader;
-import net.glacier.ui.screen.PauseWebScreen;
+import net.glacier.ui.screen.NativePauseScreen;
 import net.glacier.ui.screen.ProgressWebScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
@@ -34,9 +34,9 @@ public abstract class MixinScreenSwap {
 	private Screen glacier$swapScreens(Screen screen) {
 		if (!GLACIER_CUSTOM_SCREENS || screen == null) return screen;
 		Class<?> type = screen.getClass();
-		if (type == PauseScreen.class) return new PauseWebScreen(((PauseScreen) screen).showsPauseMenu());
+		if (type == PauseScreen.class) return net.glacier.ui.screen.ScreenFactory.pause(((PauseScreen) screen).showsPauseMenu());
 		// the wrapper reads progress from the vanilla instance, which keeps receiving the updates
-		if (type == LevelLoadingScreen.class || type == ProgressScreen.class) return new ProgressWebScreen(screen);
+		if (type == LevelLoadingScreen.class || type == ProgressScreen.class) return net.glacier.ui.screen.ScreenFactory.progress(screen);
 		return screen;
 	}
 

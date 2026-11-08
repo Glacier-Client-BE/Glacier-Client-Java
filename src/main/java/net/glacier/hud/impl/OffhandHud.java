@@ -1,19 +1,18 @@
 package net.glacier.hud.impl;
 
-import net.glacier.hud.HudModule;
+import net.glacier.hud.SlotHudModule;
 import net.glacier.ui.Theme;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 
 /** The item in the off hand with its count (stackables) or remaining durability. Hidden when empty. */
-public class OffhandHud extends HudModule {
-	private static final int SLOT = 16;
+public class OffhandHud extends SlotHudModule {
 	private static final int GAP = 4;
 	private ItemStack stack = ItemStack.EMPTY;
 	private String text = "";
 
 	public OffhandHud() {
-		super("Offhand HUD", "Shows the item in your off hand with its count or durability.");
+		super("Offhand HUD", "Shows the item in your off hand with its count or durability.", 22);
 		setPos(0.08f, 0.92f);
 	}
 
@@ -39,18 +38,18 @@ public class OffhandHud extends HudModule {
 
 	@Override
 	public int contentWidth() {
-		return SLOT + (text.isEmpty() ? 0 : GAP + textWidth(text));
+		return slot() + (text.isEmpty() ? 0 : GAP + textWidth(text));
 	}
 
 	@Override
 	public int contentHeight() {
-		return SLOT;
+		return slot();
 	}
 
 	@Override
 	protected void drawContent(GuiGraphics g, int x, int y) {
 		if (stack.isEmpty()) return;
-		g.renderItem(stack, x, y);
-		if (!text.isEmpty()) drawText(g, text, x + SLOT + GAP, y + (SLOT - lineHeight()) / 2 + 1, TEXT);
+		drawSlot(g, stack, x, y);
+		if (!text.isEmpty()) drawText(g, text, x + slot() + GAP, y + (slot() - lineHeight()) / 2 + 1, TEXT);
 	}
 }

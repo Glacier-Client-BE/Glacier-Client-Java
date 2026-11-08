@@ -1,0 +1,9 @@
+Glacier Client - Copyright (c) 2025-2026 Pepe. All rights reserved.
+
+No permission is granted to copy, modify, distribute, sublicense or sell this
+software or its assets (textures, models, fonts, UI) without prior written
+permission from the copyright holder.
+
+Bundled third-party mods (Sodium, Lithium, FerriteCore, ImmediatelyFast) and
+libraries (Rhino) remain under their own licenses; see
+src/main/resources/assets/glacier/THIRD_PARTY.md.

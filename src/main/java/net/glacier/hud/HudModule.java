@@ -58,6 +58,18 @@ public abstract class HudModule extends Module {
 	private int stackH;
 	private int stackW;
 
+	/** Puts the panel look back to the current defaults; position, scale and text colour are kept. */
+	public final void resetLook() {
+		opacity.resetToDefault();
+		bgFill.resetToDefault();
+		bgShape.resetToDefault();
+		padding.resetToDefault();
+		background.resetToDefault();
+		accent.resetToDefault();
+		accentColor.resetToDefault();
+		border.resetToDefault();
+	}
+
 	/** Cached lookup of the Elements module, which holds the global design toggles. */
 	private static ElementsModule elements;
 	/** Components for Glacier-font text, so per-frame drawing does not rebuild them. */
@@ -289,7 +301,8 @@ public abstract class HudModule extends Module {
 			r = radius();
 			fill = Draw.alpha(Theme.HUD_BOX, opacity.f());
 		}
-		Draw.round(g, 0, 0, w, h, r, fill);
+		if (r > 0 && w >= 16 && h >= 16) Draw.sprite(g, "base_bg", 0, 0, w, h, Draw.alpha(0xFFFFFFFF, opacity.f()));
+		else Draw.round(g, 0, 0, w, h, r, fill);
 		if (frosted()) Draw.outline(g, 0, 0, w, h, r, Theme.GLACIER_EDGE, 1);
 		if (border.on()) Draw.outline(g, 0, 0, w, h, r, Draw.alpha(accentColor.argb(), 0.6f), 1);
 		int ac = accentColor.argb();

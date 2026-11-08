@@ -39,8 +39,8 @@ public final class StartApi {
 		put(bridge, o, "multiplayer", () -> open(new JoinMultiplayerScreen(screen)));
 		put(bridge, o, "realms", () -> open(new RealmsMainScreen(screen)));
 		put(bridge, o, "options", () -> open(new OptionsScreen(screen, mc.options)));
-		put(bridge, o, "modMenu", () -> open(net.glacier.ui.screen.NativeMenuScreen.open(null)));
-		put(bridge, o, "cosmetics", () -> open(net.glacier.ui.screen.NativeMenuScreen.open("cosmetics")));
+		put(bridge, o, "modMenu", () -> open(net.glacier.ui.screen.ScreenFactory.menu(null)));
+		put(bridge, o, "cosmetics", () -> open(net.glacier.ui.screen.ScreenFactory.menu("cosmetics")));
 		put(bridge, o, "quit", () -> {
 			mc.stop();
 			return Undefined.instance;

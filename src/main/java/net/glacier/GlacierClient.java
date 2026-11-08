@@ -10,7 +10,6 @@ import net.glacier.hud.HudExtras;
 import net.glacier.hud.HudModule;
 import net.glacier.module.ModuleManager;
 import net.glacier.social.GlacierRegistry;
-import net.glacier.ui.screen.WebScreen;
 import net.glacier.util.PerfStats;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -43,7 +42,7 @@ public class GlacierClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (openMenuKey.consumeClick()) {
 				if (client.screen == null) {
-					client.setScreen(new net.glacier.ui.screen.HudQuickScreen());
+					client.setScreen(net.glacier.ui.screen.ScreenFactory.quickBar());
 				}
 			}
 			ModuleManager.tick();

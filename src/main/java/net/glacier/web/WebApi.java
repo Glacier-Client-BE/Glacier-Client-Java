@@ -81,11 +81,11 @@ public final class WebApi {
 			return Undefined.instance;
 		});
 		fn(g, "openMenu", a -> {
-			open(net.glacier.ui.screen.NativeMenuScreen.open(null));
+			open(net.glacier.ui.screen.ScreenFactory.menu(null));
 			return Undefined.instance;
 		});
 		fn(g, "openQuickBar", a -> {
-			open(WebScreen.quickBar());
+			open(net.glacier.ui.screen.ScreenFactory.quickBar());
 			return Undefined.instance;
 		});
 		fn(g, "close", a -> {

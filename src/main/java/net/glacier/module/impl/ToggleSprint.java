@@ -7,6 +7,8 @@ import net.glacier.setting.ToggleSetting;
 /** Keeps sprint held while you move forward, so the sprint key never needs to be held. */
 public class ToggleSprint extends Module {
 	private final ToggleSetting whileSneaking = add(new ToggleSetting("Sprint While Sneaking", false));
+	private final ToggleSetting allDirections = add(new ToggleSetting("All Directions", false));
+	private final ToggleSetting whileUsingItem = add(new ToggleSetting("Sprint While Using Item", true));
 	private boolean forced;
 
 	public ToggleSprint() {
@@ -16,7 +18,9 @@ public class ToggleSprint extends Module {
 	@Override
 	public void onTick() {
 		if (mc.player == null || mc.screen != null) return;
-		boolean forward = mc.options.keyUp.isDown();
+		boolean forward = mc.options.keyUp.isDown()
+				|| (allDirections.on() && (mc.options.keyDown.isDown() || mc.options.keyLeft.isDown() || mc.options.keyRight.isDown()));
+		if (!whileUsingItem.on() && mc.player.isUsingItem()) forward = false;
 		boolean sneak = mc.options.keyShift.isDown();
 		if (forward && (!sneak || whileSneaking.on())) {
 			mc.options.keySprint.setDown(true);

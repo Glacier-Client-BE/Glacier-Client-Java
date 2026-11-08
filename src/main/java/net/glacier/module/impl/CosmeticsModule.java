@@ -33,6 +33,7 @@ public class CosmeticsModule extends Module {
 
 	/** The cape to draw on the local player, or null when none is selected or capes are hidden. */
 	public Capes.Cape activeCape() {
+		if (previewCape != null) return Capes.byName(previewCape);
 		if (!showCape.on()) return null;
 		return Capes.byName(cape.get());
 	}
@@ -42,14 +43,72 @@ public class CosmeticsModule extends Module {
 	 * "Bracelet", "Halo", "Ears"). Returns "None" when nothing is selected, the name is unknown, or the module is off.
 	 */
 	public String accessory(String typeName) {
-		if (!isEnabled()) return Accessories.NONE;
 		for (Accessories.Type t : Accessories.Type.values()) {
 			if (t.displayName.equals(typeName)) {
+				if (tileActive) return t == tileType ? tileDesign : Accessories.NONE;
+					String pv = previewAcc[t.ordinal()];
+				if (pv != null) return pv;
+				if (!isEnabled()) return Accessories.NONE;
 				ChoiceSetting s = settingFor(t);
 				return s == null ? Accessories.NONE : s.get();
 			}
 		}
 		return Accessories.NONE;
+	}
+
+	// ---- try-on preview (Mod Menu cosmetics page only; cleared when that screen closes)
+
+	/** Cape name to show instead of the equipped one, or null for no override. */
+	private static volatile String previewCape;
+	private static final String[] previewAcc = new String[Accessories.Type.values().length];
+
+	public static void setPreviewCape(String name) {
+		previewCape = name;
+	}
+
+	public static void setPreviewAccessory(Accessories.Type t, String design) {
+		previewAcc[t.ordinal()] = design;
+	}
+
+	public static void clearPreview() {
+		previewCape = null;
+		java.util.Arrays.fill(previewAcc, null);
+		clearTiles();
+	}
+
+	public static String previewCape() {
+		return previewCape;
+	}
+
+	// ---- per-tile 3D previews: accessories are read while the GUI entity is rendered (end of frame), so each tile's
+	// render state is registered here and AccessoryLayer calls bindRenderState(state) before reading selections.
+
+	private static final java.util.IdentityHashMap<Object, Object[]> tileStates = new java.util.IdentityHashMap<>();
+	private static volatile boolean tileActive;
+	private static volatile Accessories.Type tileType;
+	private static volatile String tileDesign;
+
+	/** Registers a tile render state that shows only {@code design} of {@code type} (type null = no accessories). */
+	public static void registerTile(Object state, Accessories.Type type, String design) {
+		tileStates.put(state, new Object[]{type, design});
+	}
+
+	/** Called by AccessoryLayer for every rendered state: selects the tile override of that state, if any. */
+	public static void bindRenderState(Object state) {
+		Object[] o = tileStates.isEmpty() ? null : tileStates.get(state);
+		if (o == null) {
+			tileActive = false;
+			return;
+		}
+		tileType = (Accessories.Type) o[0];
+		tileDesign = (String) o[1];
+		tileActive = true;
+	}
+
+	/** Drops every tile registration and the active binding (screen close, start of each page frame). */
+	public static void clearTiles() {
+		tileStates.clear();
+		tileActive = false;
 	}
 
 	/** The setting holding the selected design for one accessory type. */

@@ -21,10 +21,15 @@ public class DayEvent extends CachedRowsHud {
 		long tick = time % 24000L;
 		int hours = (int) ((tick / 1000L + 6) % 24);
 		int minutes = (int) ((tick % 1000L) * 60 / 1000L);
-		String s = "Day " + day + "  " + pad2(hours) + ":" + pad2(minutes) + "  " + PHASES[(int) (day % 8)];
+		String s = "Day " + day + "  " + pad2(hours) + ":" + pad2(minutes) + "  " + moonPhase(day);
 		if (s.equals(last)) return;
 		last = s;
 		setRows(single(part(s, TEXT)));
+	}
+
+	/** Moon phase name for an in-game day. */
+	static String moonPhase(long day) {
+		return PHASES[(int) (day % 8)];
 	}
 
 	private static String pad2(int v) {

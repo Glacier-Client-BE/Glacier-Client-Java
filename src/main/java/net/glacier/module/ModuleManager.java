@@ -157,6 +157,9 @@ public final class ModuleManager {
 		register(new net.glacier.module.impl.WindowTitle());
 		register(new net.glacier.hud.impl.NearestPlayerHud());
 
+		net.glacier.module.registry.HudRegistry.registerAll(ModuleManager::register);
+		net.glacier.module.registry.UtilityRegistry.registerAll(ModuleManager::register);
+
 		get(ElementsModule.class).setEnabled(true);
 		get(EditorsModule.class).setEnabled(true);
 
@@ -195,8 +198,10 @@ public final class ModuleManager {
 		return Collections.unmodifiableList(MODULES);
 	}
 
+	private static final List<HudModule> HUD_VIEW = Collections.unmodifiableList(HUD);
+
 	public static List<HudModule> hud() {
-		return Collections.unmodifiableList(HUD);
+		return HUD_VIEW;
 	}
 
 	public static Module byId(String id) {

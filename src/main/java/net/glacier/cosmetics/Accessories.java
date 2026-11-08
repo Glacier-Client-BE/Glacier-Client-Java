@@ -19,12 +19,35 @@ public final class Accessories {
 	private static final String NAMESPACE = "glacier";
 
 	public enum Type {
-		BANDANA("Bandana", "bandana", "Red Classic", "Glacier Blue", "Black Skull", "Navy Stripes"),
-		GLASSES("Glasses", "glasses", "Classic", "Shades", "Gold Round", "Hearts", "Pixel"),
-		WINGS("Wings", "wings", "Angel", "Bat", "Dragon", "Ice", "Butterfly"),
-		BRACELET("Bracelet", "bracelet", "Gold Cuff", "Silver Gem", "Rainbow", "Leather", "Neon"),
-		HALO("Halo", "halo", "Gold Halo", "Ice Halo", "Neon Halo"),
-		EARS("Ears", "ears", "Cat", "Fox", "Bear");
+		BANDANA("Bandana", "bandana",
+				"Red Classic", "Glacier Blue", "Black Skull", "Navy Stripes", "Camo", "Flame",
+				"Tie Dye", "Bandit", "Stars", "Plaid", "Frost", "Paisley",
+				"Sakura", "Rainbow", "Cyber Grid", "Hazard", "Checker Pop", "Galaxy",
+				"Pirate", "Toxic", "Hachimaki", "Royal Gold"),
+		GLASSES("Glasses", "glasses",
+				"Classic", "Shades", "Gold Round", "Hearts", "Pixel", "Aviator",
+				"3D Glasses", "Cyber Visor", "Star Shades", "Round Neon", "Welding", "Sunset Tint",
+				"Ski Goggles", "Wayfarer", "Matrix", "Steampunk", "Nerd", "Rainbow Lens",
+				"Ice Lens", "Toxic Goggles", "Emerald"),
+		WINGS("Wings", "wings",
+				"Angel", "Bat", "Dragon", "Ice", "Butterfly", "Phoenix",
+				"Crystal", "Mecha", "Void", "Fairy", "Moth", "Raven",
+				"Seraph", "Cyber Grid", "Lava", "Storm", "Candy", "Pixel Rainbow",
+				"Skeleton", "Steampunk", "Glacier", "Galaxy", "Autumn", "Sakura",
+				"Toxic", "Gold Plated", "Shadow", "Ice Shard", "Dragonfly"),
+		BRACELET("Bracelet", "bracelet",
+				"Gold Cuff", "Silver Gem", "Rainbow", "Leather", "Neon", "Gold Chain",
+				"Spiked", "Friendship", "Tech Watch", "Ruby Band", "Diamond", "Obsidian",
+				"Jade", "Cyber Cuff", "Pearl Strand", "Bead Pop", "Runic"),
+		HALO("Halo", "halo",
+				"Gold Halo", "Ice Halo", "Neon Halo", "Thorn", "Laurel", "Rainbow",
+				"Neon Lime", "Eclipse", "Storm", "Flame", "Crystal", "Void",
+				"Candy Cane", "Sakura", "Aurora", "Starlight", "Holy Light"),
+		EARS("Ears", "ears",
+				"Cat", "Fox", "Bear", "Wolf", "Panda", "Bunny",
+				"Deer", "Devil", "Elf", "Robot", "Mouse", "Tiger",
+				"Frog", "Husky", "Raccoon", "Snow Leopard", "Neon Cat", "Pug",
+				"Dragon");
 
 		/** Name used for this type in the cosmetics settings. */
 		public final String displayName;

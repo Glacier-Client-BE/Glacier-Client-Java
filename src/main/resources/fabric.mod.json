@@ -3,9 +3,13 @@
 	"id": "glacier",
 	"version": "${version}",
 	"name": "Glacier Client",
-	"description": "A Minecraft client with a custom HTML/CSS/JS-rendered UI.",
-	"authors": ["Glacier"],
-	"license": "ARR",
+	"description": "A lightweight Minecraft client mod: HUD modules, cosmetics, zoom, free look and built-in performance mods, tuned for low-end laptops.",
+	"authors": ["Pepe"],
+	"contact": {
+		"homepage": "https://github.com/PepeOnGithub",
+		"sources": "https://github.com/PepeOnGithub"
+	},
+	"license": "All-Rights-Reserved",
 	"icon": "assets/glacier/icon.png",
 	"environment": "client",
 	"entrypoints": {
@@ -19,5 +23,11 @@
 		"minecraft": "~1.21.11",
 		"java": ">=21",
 		"fabric-api": "*"
+	},
+	"recommends": {
+		"modmenu": "*"
+	},
+	"breaks": {
+		"optifabric": "*"
 	}
 }

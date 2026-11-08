@@ -24,11 +24,14 @@ public final class Config {
 	private Config() {
 	}
 
+	/** Bumped when HUD defaults change; configs older than this get their panel look reset once. */
+	private static final int STYLE_VERSION = 2;
+
 	private static Path file() {
 		return FabricLoader.getInstance().getConfigDir().resolve("glacier").resolve("config.json");
 	}
 
-	public static void save() {
+	public static synchronized void save() {
 		JsonObject modules = new JsonObject();
 		for (Module m : ModuleManager.all()) {
 			JsonObject mo = new JsonObject();
@@ -43,6 +46,7 @@ public final class Config {
 		}
 		JsonObject root = new JsonObject();
 		root.add("modules", modules);
+		root.addProperty("styleVersion", STYLE_VERSION);
 
 		try {
 			Path f = file();
@@ -72,7 +76,7 @@ public final class Config {
 		}
 	}
 
-	public static void load() {
+	public static synchronized void load() {
 		Path f = file();
 		if (!Files.exists(f)) {
 			save();
@@ -92,7 +96,7 @@ public final class Config {
 			backupCorrupt(f);
 			return;
 		}
-		if (root == null || !root.has("modules") || !root.get("modules").isJsonObject()) return;
+		if (!root.has("modules") || !root.get("modules").isJsonObject()) return;
 		JsonObject modules = root.getAsJsonObject("modules");
 
 		for (Module m : ModuleManager.all()) {
@@ -113,7 +117,7 @@ public final class Config {
 						m.setKeyCode(key.getAsInt());
 					}
 					JsonElement en = mo.get("enabled");
-					if (en != null && en.isJsonPrimitive()) {
+					if (en != null && en.isJsonPrimitive() && en.getAsJsonPrimitive().isBoolean()) {
 						m.setEnabled(en.getAsBoolean());
 					}
 				}
@@ -125,6 +129,26 @@ public final class Config {
 			} catch (RuntimeException e) {
 				GlacierClient.LOGGER.error("afterLoad failed for module {}", m.name(), e);
 			}
+		}
+
+		int old = 0;
+		try {
+			JsonElement sv = root.get("styleVersion");
+			if (sv != null && sv.isJsonPrimitive()) old = sv.getAsInt();
+		} catch (RuntimeException e) {
+			GlacierClient.LOGGER.warn("Ignoring invalid styleVersion in config", e);
+		}
+		if (old < STYLE_VERSION) {
+			for (Module m : ModuleManager.all()) {
+				if (m instanceof net.glacier.hud.HudModule h) h.resetLook();
+			}
+			net.glacier.module.impl.ElementsModule em = ModuleManager.get(net.glacier.module.impl.ElementsModule.class);
+			if (em != null) {
+				em.glacierDesign.resetToDefault();
+				em.useFrostedGlass.resetToDefault();
+				em.useBaseBg.resetToDefault();
+			}
+			save();
 		}
 	}
 }

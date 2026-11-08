@@ -86,6 +86,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 	@Override
 	public void submit(PoseStack pose, SubmitNodeCollector collector, int light, AvatarRenderState state,
 			float limbSwing, float limbAmount) {
+		net.glacier.module.impl.CosmeticsModule.bindRenderState(state);
 		if (state.isInvisible || !isLocalPlayer(state)) return;
 
 		PlayerModel model = getParentModel();

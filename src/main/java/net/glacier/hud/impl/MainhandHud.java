@@ -1,14 +1,13 @@
 package net.glacier.hud.impl;
 
-import net.glacier.hud.HudModule;
+import net.glacier.hud.SlotHudModule;
 import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.ToggleSetting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 
 /** The held item icon followed by its durability (damageable items) or stack count. Text is rebuilt per tick. */
-public class MainhandHud extends HudModule {
-	private static final int SLOT = 16;
+public class MainhandHud extends SlotHudModule {
 	private static final int GAP = 4;
 	private final ChoiceSetting durability = add(new ChoiceSetting("Durability", "Absolute", "Absolute", "Percentage"));
 	private final ToggleSetting showTotal = add(new ToggleSetting("Show Total Durability", false));
@@ -23,7 +22,7 @@ public class MainhandHud extends HudModule {
 	private int color = TEXT;
 
 	public MainhandHud() {
-		super("Mainhand HUD", "Shows your held item with its count or durability.");
+		super("Mainhand HUD", "Shows your held item with its count or durability.", 22);
 		setPos(0.92f, 0.85f);
 	}
 
@@ -63,15 +62,15 @@ public class MainhandHud extends HudModule {
 
 	@Override
 	public int contentWidth() {
-		if (stack.isEmpty()) return SLOT;
-		int w = showIcon.on() ? SLOT : 0;
+		if (stack.isEmpty()) return slot();
+		int w = showIcon.on() ? slot() : 0;
 		if (!text.isEmpty()) w += (w > 0 ? GAP : 0) + textWidth(text);
 		return w;
 	}
 
 	@Override
 	public int contentHeight() {
-		return SLOT;
+		return slot();
 	}
 
 	@Override
@@ -79,9 +78,9 @@ public class MainhandHud extends HudModule {
 		if (stack.isEmpty()) return;
 		int tx = x;
 		if (iconShown()) {
-			g.renderItem(stack, x, y);
-			tx += SLOT + GAP;
+			drawSlot(g, stack, x, y);
+			tx += slot() + GAP;
 		}
-		if (!text.isEmpty()) drawText(g, text, tx, y + (SLOT - lineHeight()) / 2 + 1, color);
+		if (!text.isEmpty()) drawText(g, text, tx, y + (slot() - lineHeight()) / 2 + 1, color);
 	}
 }

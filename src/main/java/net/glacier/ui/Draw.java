@@ -24,12 +24,81 @@ public final class Draw {
 
 	/** Filled rectangle with anti-aliased rounded corners. */
 	public static void round(GuiGraphics g, int x, int y, int w, int h, int radius, int argb) {
+		int r = Math.min(Math.min(radius, 16), Math.min(w, h) / 2);
+		if (r >= 1 && w >= 2 * r + 1 && h >= 2 * r + 1) {
+			sprite(g, "r" + r, x, y, w, h, argb);
+			return;
+		}
 		shape(g, x, y, w, h, radius, 0, false, argb);
+	}
+
+	/** Source texture scale: the PNGs hold 4 texels per logical (GUI) pixel. */
+	private static final int NINE_SCALE = 4;
+	private static final java.util.Map<String, NineSlice> NINES = new java.util.HashMap<>();
+
+	/** One nine-slice texture: its id, size in texels and corner size in logical pixels. */
+	private record NineSlice(net.minecraft.resources.Identifier id, int tex, int border) {
+	}
+
+	private static NineSlice nine(String name) {
+		NineSlice n = NINES.get(name);
+		if (n != null) return n;
+		int logical, border;
+		if (name.startsWith("ring")) {
+			border = Integer.parseInt(name.substring(4, name.indexOf('_')));
+			logical = 2 * border + 2;
+		} else if (name.startsWith("r") && Character.isDigit(name.charAt(1))) {
+			border = Integer.parseInt(name.substring(1));
+			logical = 2 * border + 2;
+		} else if (name.equals("base_bg") || name.equals("secondary_bg")) {
+			logical = 80;
+			border = 8;
+		} else {
+			logical = 32;
+			border = name.equals("mm_panel") ? 10 : 8;
+		}
+		n = new NineSlice(Identifier.fromNamespaceAndPath("glacier", "textures/ui_nine/" + name + ".png"),
+				logical * NINE_SCALE, border);
+		NINES.put(name, n);
+		return n;
+	}
+
+	/**
+	 * Draws one of the nine-slice panel textures in assets/glacier/textures/ui_nine (the Glacier v7 pack panels and
+	 * generated rounded shapes) stretched to w x h: four fixed corners, four stretched edges and a stretched centre, so
+	 * nine quads per panel. argb tints the texture (its alpha is the opacity). w and h must be at least 2x the corner
+	 * size; smaller shapes should use {@link #round}.
+	 */
+	public static void sprite(GuiGraphics g, String name, int x, int y, int w, int h, int argb) {
+		if (w <= 0 || h <= 0 || (argb >>> 24) == 0) return;
+		NineSlice n = nine(name);
+		int b = Math.min(n.border, Math.min(w, h) / 2);
+		int sb = n.border * NINE_SCALE;
+		int t = n.tex;
+		int[] dx = {x, x + b, x + w - b};
+		int[] dw = {b, w - 2 * b, b};
+		int[] dy = {y, y + b, y + h - b};
+		int[] dh = {b, h - 2 * b, b};
+		int[] su = {0, sb, t - sb};
+		int[] sw = {sb, t - 2 * sb, sb};
+		for (int j = 0; j < 3; j++) {
+			if (dh[j] <= 0) continue;
+			for (int i = 0; i < 3; i++) {
+				if (dw[i] <= 0) continue;
+				g.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, n.id, dx[i], dy[j],
+						(float) su[i], (float) su[j], dw[i], dh[j], sw[i], sw[j], t, t, argb);
+			}
+		}
 	}
 
 	/** Anti-aliased rounded rectangle ring, drawn inside the given bounds. */
 	public static void outline(GuiGraphics g, int x, int y, int w, int h, int radius, int argb, int thickness) {
 		if (thickness <= 0) return;
+		int r = Math.min(Math.min(radius, 16), Math.min(w, h) / 2);
+		if (thickness <= 2 && r > thickness && w >= 2 * r + 1 && h >= 2 * r + 1) {
+			sprite(g, "ring" + r + "_" + thickness, x, y, w, h, argb);
+			return;
+		}
 		shape(g, x, y, w, h, radius, thickness, true, argb);
 	}
 

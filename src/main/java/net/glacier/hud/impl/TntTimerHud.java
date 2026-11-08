@@ -1,11 +1,15 @@
 package net.glacier.hud.impl;
 
+import net.glacier.setting.ToggleSetting;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.PrimedTnt;
 
-/** Seconds until the nearest lit TNT within 64 blocks explodes. */
+import java.util.Locale;
+
+/** Seconds until the nearest lit TNT within 64 blocks explodes; the label can take the fuse colour too. */
 public class TntTimerHud extends LabelValueHud {
 	private static final double RANGE_SQ = 64 * 64;
+	private final ToggleSetting coloredLabel = add(new ToggleSetting("Colored Label", false));
 	private int fuse = -1;
 
 	public TntTimerHud() {
@@ -25,11 +29,16 @@ public class TntTimerHud extends LabelValueHud {
 				fuse = t.getFuse();
 			}
 		}
-		return fuse < 0 ? "-" : String.format("%.1fs", fuse / 20.0);
+		return fuse < 0 ? "-" : String.format(Locale.ROOT, "%.1fs", fuse / 20.0);
 	}
 
 	@Override
 	protected int valueColor() {
 		return fuse < 0 ? TEXT : goodHigh(fuse, 60, 30);
+	}
+
+	@Override
+	protected int labelColor() {
+		return coloredLabel.on() && fuse >= 0 ? valueColor() : super.labelColor();
 	}
 }

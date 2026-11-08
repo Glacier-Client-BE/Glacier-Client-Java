@@ -67,8 +67,8 @@ public final class ScreenApi {
 		}));
 		put(js, o, "screenshot", a -> run(() -> Screenshot.grab(mc.gameDirectory, mc.getMainRenderTarget(),
 				msg -> mc.execute(() -> mc.gui.getChat().addMessage(msg)))));
-		put(js, o, "mods", a -> run(() -> mc.setScreen(net.glacier.ui.screen.NativeMenuScreen.open(null))));
-		put(js, o, "cosmetics", a -> run(() -> mc.setScreen(net.glacier.ui.screen.NativeMenuScreen.open("cosmetics"))));
+		put(js, o, "mods", a -> run(() -> mc.setScreen(net.glacier.ui.screen.ScreenFactory.menu(null))));
+		put(js, o, "cosmetics", a -> run(() -> mc.setScreen(net.glacier.ui.screen.ScreenFactory.menu("cosmetics"))));
 		put(js, o, "disconnect", a -> run(() -> {
 			if (mc.isLocalServer()) mc.disconnectWithSavingScreen();
 			else mc.disconnect(new JoinMultiplayerScreen(new StartScreen()), false);

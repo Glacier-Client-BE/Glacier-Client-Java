@@ -2,6 +2,7 @@ package net.glacier.hud.impl;
 
 import net.glacier.hud.HudModule;
 import net.glacier.setting.ColorSetting;
+import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
 import net.glacier.ui.Draw;
 import net.glacier.ui.Theme;
@@ -11,12 +12,8 @@ import java.util.ArrayDeque;
 
 /** WASD, LMB/RMB with click-per-second counters, and an optional space bar cap. */
 public class Keystrokes extends HudModule {
-	private static final int TILE = 20;
-	private static final int GAP = 2;
-	private static final int ROW = TILE + GAP;
-	private static final int WIDTH = TILE * 3 + GAP * 2;
-	private static final int WIDE = (WIDTH - GAP) / 2;
-	private static final int MOUSE_H = 26;
+	/** Extra height of a mouse cap over a key cap, which holds the CPS line. */
+	private static final int CPS_EXTRA = 6;
 	private static final int SPACE_H = 12;
 	private static final int SPACE_BAR_H = 2;
 	/** Small gap between the label and the CPS line under it. */
@@ -27,6 +24,12 @@ public class Keystrokes extends HudModule {
 	private final ColorSetting pressedColor = add(new ColorSetting("Pressed Color", Theme.HUD_KEY_PRESSED));
 	private final ColorSetting keyColor = add(new ColorSetting("Key Color", Theme.HUD_KEY_IDLE));
 	private final ToggleSetting showSpace = add(new ToggleSetting("Show Space Bar", false));
+	private final ToggleSetting showMouse = add(new ToggleSetting("Show Mouse Buttons", true));
+	private final ToggleSetting showCps = add(new ToggleSetting("Show CPS In Keys", true));
+	private final ToggleSetting showSneak = add(new ToggleSetting("Show Sneak", false));
+	private final ToggleSetting showSprint = add(new ToggleSetting("Show Sprint", false));
+	private final SliderSetting keySize = add(new SliderSetting("Key Size", 20, 12, 32, 1));
+	private final SliderSetting keyGap = add(new SliderSetting("Key Gap", 2, 0, 8, 1));
 
 	private final ArrayDeque<Long> leftClicks = new ArrayDeque<>();
 	private final ArrayDeque<Long> rightClicks = new ArrayDeque<>();
@@ -71,15 +74,38 @@ public class Keystrokes extends HudModule {
 		while (!q.isEmpty() && now - q.peekFirst() > ONE_SECOND_NS) q.pollFirst();
 	}
 
+	private int tile() {
+		return keySize.i();
+	}
+
+	private int gap() {
+		return keyGap.i();
+	}
+
+	private int width() {
+		return tile() * 3 + gap() * 2;
+	}
+
+	private int wide() {
+		return (width() - gap()) / 2;
+	}
+
+	private int mouseH() {
+		return showCps.on() ? tile() + CPS_EXTRA : tile();
+	}
+
 	@Override
 	public int contentWidth() {
-		return WIDTH;
+		return width();
 	}
 
 	@Override
 	public int contentHeight() {
-		int h = ROW + ROW + MOUSE_H;
-		return showSpace.on() ? h + GAP + SPACE_H : h;
+		int h = (tile() + gap()) * 2 - gap();
+		if (showMouse.on()) h += gap() + mouseH();
+		if (showSpace.on()) h += gap() + SPACE_H;
+		if (showSneak.on() || showSprint.on()) h += gap() + SPACE_H;
+		return h;
 	}
 
 	/** Idle cap fill: the Glacier smoked glass when Glacier design is on and the colour is still the default. */
@@ -102,16 +128,22 @@ public class Keystrokes extends HudModule {
 
 	/** Mouse cap: the button label with the CPS line below, the pair centred vertically in the cap. */
 	private void mouseCap(GuiGraphics g, int x, int y, String label, int cps, boolean pressed) {
-		Draw.round(g, x, y, WIDE, MOUSE_H, radius(), pressed ? pressedFill() : idleFill());
+		int wide = wide();
+		int mh = mouseH();
+		Draw.round(g, x, y, wide, mh, radius(), pressed ? pressedFill() : idleFill());
+		if (!showCps.on()) {
+			drawText(g, label, x + (wide - textWidth(label)) / 2, y + (mh - lineHeight()) / 2 + 1, pressed ? Theme.HUD_INK : TEXT);
+			return;
+		}
 		int cpsH = Math.round(lineHeight() * CPS_SCALE);
 		int blockH = lineHeight() + LABEL_CPS_GAP + cpsH;
-		int top = y + (MOUSE_H - blockH) / 2;
+		int top = y + (mh - blockH) / 2;
 
-		int lx = x + (WIDE - textWidth(label)) / 2;
+		int lx = x + (wide - textWidth(label)) / 2;
 		drawText(g, label, lx, top, pressed ? Theme.HUD_INK : TEXT);
 
 		String c = cps + " CPS";
-		float cx = x + (WIDE - textWidth(c) * CPS_SCALE) / 2f;
+		float cx = x + (wide - textWidth(c) * CPS_SCALE) / 2f;
 		var p = g.pose();
 		p.pushMatrix();
 		try {
@@ -130,26 +162,45 @@ public class Keystrokes extends HudModule {
 		boolean a = o.keyLeft.isDown();
 		boolean s = o.keyDown.isDown();
 		boolean d = o.keyRight.isDown();
-		boolean lmb = mc.mouseHandler.isLeftPressed();
-		boolean rmb = mc.mouseHandler.isRightPressed();
 
-		cap(g, x + ROW, y, TILE, TILE, "W", w);
-		cap(g, x, y + ROW, TILE, TILE, "A", a);
-		cap(g, x + ROW, y + ROW, TILE, TILE, "S", s);
-		cap(g, x + ROW * 2, y + ROW, TILE, TILE, "D", d);
+		int t = tile();
+		int gp = gap();
+		int row = t + gp;
+		int width = width();
+		cap(g, x + row, y, t, t, "W", w);
+		cap(g, x, y + row, t, t, "A", a);
+		cap(g, x + row, y + row, t, t, "S", s);
+		cap(g, x + row * 2, y + row, t, t, "D", d);
 
-		int my = y + ROW * 2;
-		mouseCap(g, x, my, "LMB", leftClicks.size(), lmb);
-		mouseCap(g, x + WIDE + GAP, my, "RMB", rightClicks.size(), rmb);
+		int cy = y + row * 2;
+		if (showMouse.on()) {
+			boolean lmb = mc.mouseHandler.isLeftPressed();
+			boolean rmb = mc.mouseHandler.isRightPressed();
+			mouseCap(g, x, cy, "LMB", leftClicks.size(), lmb);
+			mouseCap(g, x + wide() + gp, cy, "RMB", rightClicks.size(), rmb);
+			cy += mouseH() + gp;
+		}
 
 		if (showSpace.on()) {
 			boolean jump = o.keyJump.isDown();
-			int sy = my + MOUSE_H + GAP;
-			Draw.round(g, x, sy, WIDTH, SPACE_H, radius(), jump ? pressedFill() : idleFill());
-			int bw = WIDTH / 2;
-			int bx = x + (WIDTH - bw) / 2;
-			int by = sy + (SPACE_H - SPACE_BAR_H) / 2;
+			Draw.round(g, x, cy, width, SPACE_H, radius(), jump ? pressedFill() : idleFill());
+			int bw = width / 2;
+			int bx = x + (width - bw) / 2;
+			int by = cy + (SPACE_H - SPACE_BAR_H) / 2;
 			g.fill(bx, by, bx + bw, by + SPACE_BAR_H, jump ? Theme.HUD_INK : textColor.argb());
+			cy += SPACE_H + gp;
+		}
+		if (showSneak.on() || showSprint.on()) {
+			boolean both = showSneak.on() && showSprint.on();
+			int w2 = both ? wide() : width;
+			int cx = x;
+			if (showSneak.on()) {
+				cap(g, cx, cy, w2, SPACE_H, "Sneak", o.keyShift.isDown());
+				cx += w2 + gp;
+			}
+			if (showSprint.on()) {
+				cap(g, cx, cy, w2, SPACE_H, "Sprint", mc.player != null && mc.player.isSprinting());
+			}
 		}
 	}
 }

@@ -7,7 +7,14 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.BossHealthOverlay;
 import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.network.chat.Component;
+import net.glacier.hud.BetterBossBar;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import java.util.Map;
+import java.util.UUID;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
@@ -15,6 +22,23 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(BossHealthOverlay.class)
 public class MixinBossHealthOverlay {
+	@Shadow
+	@Final
+	Map<UUID, LerpingBossEvent> events;
+
+	/** Draws the Glacier boss bars instead of vanilla's; Hide Boss Bar just cancels. */
+	@Inject(method = "render", at = @At("HEAD"), cancellable = true)
+	private void glacier$better(GuiGraphics g, CallbackInfo ci) {
+		ElementsModule e = ModuleManager.get(ElementsModule.class);
+		if (e == null) return;
+		if (e.hideBossBar.on()) {
+			ci.cancel();
+		} else if (e.betterBossBar.on()) {
+			BetterBossBar.render(g, events, e);
+			ci.cancel();
+		}
+	}
+
 	/** Skips the boss name line in BossHealthOverlay.render; the bar itself is still drawn. */
 	@Redirect(method = "render", at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;III)V"))

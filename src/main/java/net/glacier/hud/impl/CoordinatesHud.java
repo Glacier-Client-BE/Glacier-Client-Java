@@ -1,5 +1,6 @@
 package net.glacier.hud.impl;
 
+import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
 import net.glacier.ui.Draw;
@@ -19,6 +20,11 @@ public class CoordinatesHud extends CachedRowsHud {
 
 	private final ToggleSetting showVanilla = add(new ToggleSetting("Show Vanilla", true));
 	private final SliderSetting vanillaOpacity = add(new SliderSetting("Vanilla Opacity", 0.7, 0.0, 1.0, 0.1));
+	private final ToggleSetting showX = add(new ToggleSetting("Show X", true));
+	private final ToggleSetting showY = add(new ToggleSetting("Show Y", true));
+	private final ToggleSetting showZ = add(new ToggleSetting("Show Z", true));
+	private final ChoiceSetting format = add(new ChoiceSetting("Format", "Rows", "Rows", "Single Line"));
+	private final SliderSetting decimals = add(new SliderSetting("Decimals", 0, 0, 2, 1));
 	private final ToggleSetting showChunk = add(new ToggleSetting("Show Chunk", false));
 	private final SliderSetting chunkOpacity = add(new SliderSetting("Chunk Opacity", 0.7, 0.0, 1.0, 0.1));
 	private final ToggleSetting showNether = add(new ToggleSetting("Show Nether", false));
@@ -37,22 +43,19 @@ public class CoordinatesHud extends CachedRowsHud {
 		if (mc.player == null || mc.level == null) return "Unknown";
 		BlockPos pos = mc.player.blockPosition();
 		return mc.level.getBiome(pos).unwrapKey()
-				.map(k -> prettify(k.identifier().getPath()))
+				.map(k -> pretty(k.identifier().getPath()))
 				.orElse("Unknown");
-	}
-
-	private static String prettify(String id) {
-		StringBuilder sb = new StringBuilder();
-		for (String part : id.replace('_', ' ').split(" ")) {
-			if (part.isEmpty()) continue;
-			sb.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1)).append(' ');
-		}
-		return sb.toString().trim();
 	}
 
 	/** Text colour with the line's own opacity applied. */
 	private int tint(SliderSetting op) {
 		return Draw.alpha(textColor.argb(), op.f());
+	}
+
+	/** One axis value: the floored block by default, or the exact position with the chosen decimals. */
+	private String axis(double exact, int floored) {
+		int d = decimals.i();
+		return d == 0 ? String.valueOf(floored) : String.format("%." + d + "f", exact);
 	}
 
 	@Override
@@ -70,9 +73,15 @@ public class CoordinatesHud extends CachedRowsHud {
 
 		if (showVanilla.on()) {
 			int c = tint(vanillaOpacity);
-			out.add(new Part[]{part("X: " + x, c)});
-			out.add(new Part[]{part("Y: " + y, c)});
-			out.add(new Part[]{part("Z: " + z, c)});
+			List<String> axes = new ArrayList<>(3);
+			if (showX.on()) axes.add("X: " + axis(mc.player.getX(), x));
+			if (showY.on()) axes.add("Y: " + axis(mc.player.getY(), y));
+			if (showZ.on()) axes.add("Z: " + axis(mc.player.getZ(), z));
+			if (format.is("Single Line")) {
+				if (!axes.isEmpty()) out.add(new Part[]{part(String.join("  ", axes), c)});
+			} else {
+				for (String a : axes) out.add(new Part[]{part(a, c)});
+			}
 		}
 		if (showChunk.on()) {
 			out.add(new Part[]{part("C: " + (x >> 4) + "/" + (z >> 4), tint(chunkOpacity))});
@@ -89,7 +98,7 @@ public class CoordinatesHud extends CachedRowsHud {
 			out.add(new Part[]{part("Biome: ", TEXT), part(biomeName(), Theme.HUD_BIOME)});
 		}
 		if (showDimension.on() && mc.level != null) {
-			out.add(new Part[]{part("Dim: " + prettify(dim), TEXT)});
+			out.add(new Part[]{part("Dim: " + pretty(dim), TEXT)});
 		}
 		setRows(out.isEmpty() ? List.of() : out);
 	}

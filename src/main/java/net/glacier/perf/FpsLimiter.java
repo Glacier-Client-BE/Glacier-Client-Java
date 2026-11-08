@@ -5,12 +5,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.loader.api.FabricLoader;
+import net.glacier.GlacierClient;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.logging.Logger;
 
 /**
  * Reads the unfocused-window FPS cap from config/glacier/performance.json (key "unfocusedFpsCap").
@@ -23,7 +23,6 @@ public final class FpsLimiter {
     public static final int DEFAULT_UNFOCUSED_CAP = 30;
     static final String KEY = "unfocusedFpsCap";
 
-    private static final Logger LOG = Logger.getLogger("Glacier/FpsLimiter");
     private static final long RELOAD_INTERVAL_NS = 5_000_000_000L;
     private static final int MAX_CAP = 260;
 
@@ -85,7 +84,7 @@ public final class FpsLimiter {
     private static void warnMalformed(Path file, String reason) {
         if (!warnedMalformed) {
             warnedMalformed = true;
-            LOG.warning("Ignoring " + file + " for " + KEY + ": " + reason + "; using " + DEFAULT_UNFOCUSED_CAP);
+            GlacierClient.LOGGER.warn("[perf] Ignoring {} for {}: {}; using {}", file, KEY, reason, DEFAULT_UNFOCUSED_CAP);
         }
     }
 

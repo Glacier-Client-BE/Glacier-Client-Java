@@ -18,6 +18,6 @@ public class MixinParticleLimiter {
 	@Inject(method = "createParticle", at = @At("HEAD"), cancellable = true)
 	private void glacier$limit(ParticleOptions options, double x, double y, double z, double dx, double dy, double dz,
 			CallbackInfoReturnable<Particle> cir) {
-		if (ParticleLimiter.shouldDrop()) cir.setReturnValue(null);
+		if (ParticleLimiter.shouldDrop(options)) cir.setReturnValue(null);
 	}
 }
