@@ -1028,6 +1028,404 @@ BRACELETS = [("Gold Cuff", (br_cuff, GC[3], GC[1])), ("Silver Gem", (br_gem, SV[
              ("Pearl Strand", (br_pearl, (232, 216, 220), (160, 136, 152))), ("Bead Pop", (br_beads, BP[0], mul(BP[0], .6))),
              ("Runic", (br_runic, RN[2], RN[0]))]
 
+# ================================================================ glacier brand art
+# Palette sampled from the Glacier v7 panorama / pause screen backgrounds (navy-teal night) and the logo blue (5b87ea).
+NAVY = P("0c1620 122539 1a2a3e 24384f 2e5c8a")
+BLU = P("24477e 3a5cb8 5b87ea 8fb4ff c8e0ff e8f4ff")
+_LOGO = None
+def logo_mask(w, h, thr=40, dil=5):
+    """The bear-head logo (assets/glacier/textures/ui/logo.png) thickened and box-downscaled to a w x h boolean mask."""
+    global _LOGO
+    from PIL import ImageFilter
+    if _LOGO is None:
+        a = Image.open(os.path.join(ROOT, "src/main/resources/assets/glacier/textures/ui/logo.png")).convert("RGBA").split()[3]
+        _LOGO = a.crop(a.getbbox())
+    m = _LOGO.filter(ImageFilter.MaxFilter(dil)).resize((w, h), Image.BOX)
+    return [[m.getpixel((x, y)) > thr for x in range(w)] for y in range(h)]
+def emblem(mask, x, y, ox=0, oy=0):
+    mx, my = x - ox, y - oy
+    return 0 <= my < len(mask) and 0 <= mx < len(mask[0]) and mask[my][mx]
+_EMB_CAPE = logo_mask(10, 9)
+_EMB_BP = logo_mask(7, 6)
+_EMB_HAT = logo_mask(7, 5)
+
+def c_glacier_set(x, y):
+    if emblem(_EMB_CAPE, x, y, 0, 2): return BLU[3] if y < 6 else BLU[2]
+    ridge = 12 + (1 if math.sin(x * 1.3 + 0.6) > 0 else 0) - (1 if x in (3, 4) else 0)
+    if y >= ridge: return rp(BLU[3:], .9 - (y - ridge) * .22, x, y)
+    if rnd(x, y, 31) > .93 and y < 12: return BLU[5]
+    return rp(NAVY, .12 + .5 * (y / 15) ** 1.4 + .12 * vnoise(x, y, 5, 3), x, y)
+
+# ================================================================ generic cuboid painter (new accessory types)
+FACES = ("top", "bot", "front", "right", "left", "back")
+SHADE = {"top": 1.14, "bot": .62, "front": 1.0, "back": .94, "right": .8, "left": .8}
+def paint_box(img, u, v, w, h, d, fn, edge=.8):
+    """fn(face, x, y, fw, fh) -> colour or None. Adds per-face shading and darker edge pixels (outline)."""
+    dims = {"top": (w, d), "bot": (w, d), "front": (w, h), "back": (w, h), "right": (d, h), "left": (d, h)}
+    def mk(face):
+        fw, fh = dims[face]
+        def f(x, y):
+            c = fn(face, x, y, fw, fh)
+            if c is None: return None
+            c = mul(c, SHADE[face])
+            if fw > 2 and fh > 2 and (x in (0, fw - 1) or y in (0, fh - 1)): c = mul(c, edge)
+            return c
+        return f
+    img.box(u, v, w, h, d, *[mk(f) for f in FACES])
+
+def pat(kind, x, y, W, H, s=1):
+    """Pattern -> (slot, tone): slot 0 = base palette, 1 = accent palette, 2 = rainbow index."""
+    n = vnoise(x, y, s, 2.4)
+    t = .5 + (n - .5) * .4 - (y / max(1, H - 1) - .5) * .18
+    a = 0
+    if kind == "hstripe": a = (y // 2) % 2
+    elif kind == "vstripe": a = (x // 2) % 2
+    elif kind == "diag": a = ((x + y) // 2) % 2
+    elif kind == "checker": a = ((x // 2) + (y // 2)) % 2
+    elif kind == "dots": a = int(x % 4 == 1 and y % 3 == 1)
+    elif kind == "plaid":
+        v_, h_ = x % 6 in (2, 3), y % 6 in (2, 3)
+        a = int(v_ or h_); t -= .22 if (v_ and h_) else 0
+    elif kind == "camo":
+        m = vnoise(x, y, s + 7, 3.0)
+        if m > .6: a = 1
+        elif m < .34: t -= .32
+    elif kind == "stars":
+        t = .22 + (n - .5) * .3
+        if rnd(x, y, s + 3) > .93: a, t = 1, .9
+        elif any(rnd(x + dx, y + dy, s + 3) > .975 for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))): a, t = 1, .35
+    elif kind == "speck":
+        t = .12 + .55 * max(0, vnoise(x + y * .5, y, s + 5, 3.5) - .35)
+        if rnd(x, y, s + 6) > .9: a, t = 1, .5 + rnd(x, y, s + 8) * .5
+    elif kind == "grid": a = int(x % 4 == 0 or y % 4 == 0)
+    elif kind == "knit": t += (.14 if (x + y) % 2 == 0 else -.1) + (.1 if y % 3 == 0 else 0)
+    elif kind == "rainbow": return 2, min(5.0, y * 6.0 / max(1, H))
+    elif kind == "rainbowv": return 2, float(x % 6)
+    if a and kind not in ("stars", "speck"): t = .5 + (n - .5) * .4 - (y / max(1, H - 1) - .5) * .12
+    return a, t
+def pcol(pal, acc, kind, x, y, W, H, s=1):
+    a, t = pat(kind, x, y, W, H, s)
+    if a == 2: return RBW[int(t)]
+    return rp(acc if a else pal, t, x, y)
+
+# ---------------------------------------------------------------- backpack (64x32)
+# parts: main 7x9x3 (0,0) | lid 8x3x4 (0,12) | pocket 5x3x1 (0,19) | strap 1x8x1 (24,0) | bridge 1x1x5 (28,0)
+def bp_glacier_deco(part, face, x, y, W, H):
+    if part == "main" and face == "back" and emblem(_EMB_BP, x, y, 0, 1): return BLU[3] if y < 3 else BLU[2]
+    if part == "lid" and face == "back" and y == 2: return BLU[4]
+    if part == "pocket" and face == "back" and y == 1 and x in (1, 3): return BLU[4]
+    return None
+BACKPACKS = [  # name, base, accent, pattern, deco
+ ("Glacier Bear", P("0c1620 122539 1a3452 24477e 3a5cb8"), P("24477e 3a5cb8 5b87ea 8fb4ff e8f4ff"), "solid", bp_glacier_deco),
+ ("Hiker Green", P("1c2a14 2e4420 466430 648a44 88b45e"), P("5a4020 826030 a88448 d0ac68 f0d898"), "solid", None),
+ ("Leather Brown", P("2a1608 4a2a14 6a4224 8a5c34 b0824a"), P("8a6a1a c8981c e8c040 ffe480 fff4b8"), "solid", None),
+ ("School Red", P("5a0e12 8a1a1e c02a2c e04848 f08a7a"), P("a07a08 d8a812 ffd22a ffe97a fff4b0"), "solid", None),
+ ("Camo Pack", P("1c2412 36441e 566a30 7c9040 a6b45e"), P("3a2c18 5a4426 7c5e36 a08450 c4a874"), "camo", None),
+ ("Cyber Pack", P("0a0e22 141e3a 1e3058 2a4478 38629a"), P("7a1a82 b4208f ff4fd8 ff9cf0 ffe0fa"), "grid", None),
+ ("Rainbow Pack", P("2a2a44 3a3a5c 4a4a74 5a5a8c 6a6aa4"), P("5a5a8c 8a8ab8 b8b8dc d8d8f0 ffffff"), "rainbow", None),
+ ("Star Pack", P("0a1030 141c48 202c70 2e3e98 4a5cc0"), P("b88a1a e8b830 ffd84a fff0a0 ffffff"), "stars", None),
+ ("Galaxy Pack", P("0a0620 160c3c 261468 42209a 6e32cc"), P("6e32cc aa52e8 d08aff ffb0ff ffffff"), "speck", None),
+ ("Candy Pack", P("c03a78 ff6fa8 ff9cc4 ffd0e4 ffffff"), P("3a9a80 5ec8a8 96f0d4 d2fff0 ffffff"), "diag", None),
+ ("Treasure", P("3a2410 5a3a1a 7a5028 9a6a38 c08a4c"), P("8a6a1a c8981c e8c040 ffe480 fff4b8"), "hstripe", None),
+]
+def make_backpack(spec):
+    _, pal, acc, kind, deco = spec
+    img = Img(64, 32)
+    def part(name):
+        def fn(face, x, y, W, H):
+            if deco:
+                c = deco(name, face, x, y, W, H)
+                if c is not None: return c
+            if name in ("strap", "bridge"):
+                return rp(acc, .42 + (.22 if (x + y) % 3 == 0 else 0) + (.1 if face == "top" else 0), x, y)
+            if name == "lid":
+                if face == "back" and x in (3, 4) and y in (1, 2): return acc[4] if y == 1 else acc[3]
+                return rp(acc, .5 + (.2 if y == 0 else 0) - (.18 if y == H - 1 else 0) + .1 * (vnoise(x, y, 3, 2) - .5), x, y)
+            if name == "pocket":
+                if face == "back":
+                    if y == 0: return acc[3] if x % 2 == 0 else acc[1]
+                    if x == 2 and y == 1: return acc[4]
+                return pcol(pal, acc, kind, x, y, W, H, 4) if kind in ("solid", "camo") else rp(pal, .4, x, y)
+            c = pcol(pal, acc, kind, x, y, W, H, 2)
+            if face == "back" and (x in (1, W - 2) or y in (1, H - 2)) and (x + y) % 2 == 0: c = lit(c, .22)   # stitching
+            return c
+        return fn
+    paint_box(img, 0, 0, 7, 9, 3, part("main")); paint_box(img, 0, 12, 8, 3, 4, part("lid"))
+    paint_box(img, 0, 19, 5, 3, 1, part("pocket")); paint_box(img, 24, 0, 1, 8, 1, part("strap"))
+    paint_box(img, 28, 0, 1, 1, 5, part("bridge"))
+    return img
+
+# ---------------------------------------------------------------- hat (64x32)
+# parts: crown 9x5x9 (0,0) | brim 12x1x12 (0,14) | orn 3x2x3 (36,0) | bill 9x1x4 (36,5)
+STAR3 = ("010", "111", "010")
+GOLD3 = P("c8981c ffd84a fff0a0")
+def hat_crown(spec, face, x, y, W, H):
+    name, cp, ca, kind, brim, bill, orn, style = spec
+    side = face in ("front", "back", "left", "right")
+    if style == "crown":
+        if face in ("top", "bot"): return None
+        if y == 0 and x % 2 == 1: return None
+        if y == 3 and x in (2, 6): return ca[2]                                   # ruby
+        if y == 3 and x == 4: return (90, 168, 255)                               # sapphire
+        return rp(cp, .72 - .1 * y / 4 + (.25 if (x + y) % 3 == 0 else 0) - (.3 if y == 4 else 0), x, y)
+    if style == "glacier":
+        if face == "bot": return NAVY[1]
+        if y == 4 and side: return rp(BLU[3:], .6 + .2 * (x % 2), x, y)           # ice cuff
+        if face == "front" and emblem(_EMB_HAT, x, y, 1, 0): return BLU[3] if y < 2 else BLU[2]
+        return pcol(cp, ca, "knit", x, y, W, H, 3)
+    if style == "beanie":
+        if side and y >= 3: return rp(ca, .45 + (.25 if x % 2 == 0 else 0), x, y)
+        return pcol(cp, ca, "knit", x, y, W, H, 3)
+    if style == "santa":
+        if side and y >= 4: return rp(ca, .72 + .25 * (vnoise(x, y, 8, 1.4) - .5), x, y)
+        return rp(cp, .5 + .35 * (vnoise(x, y, 9, 2) - .5) + (.1 if face == "top" else 0), x, y)
+    if style == "chef":
+        if y == 4 and side: return rp(ca, .45, x, y)
+        return rp(cp, .75 - (.28 if x % 3 == 0 else 0) + .2 * (vnoise(x, y, 4, 2) - .5), x, y)
+    if style == "cap":
+        if face == "front" and 3 <= x <= 5 and 1 <= y <= 3 and STAR3[y - 1][x - 3] == "1": return ca[1]
+        return rp(cp, .52 + .3 * (vnoise(x, y, 5, 2) - .5) + (.14 if face == "top" else 0) - (.1 if x % 3 == 0 and side else 0), x, y)
+    if style == "captain":
+        if y == 4 and side: return rp(ca, .45, x, y)
+        if face == "front" and 3 <= x <= 5 and 1 <= y <= 3 and STAR3[y - 1][x - 3] == "1": return GOLD3[1]
+        return rp(cp, .7 - (.2 if face == "top" and (x + y) % 2 else 0) + .1 * (vnoise(x, y, 4, 2) - .5), x, y)
+    if style == "wizard":
+        if y == 4 and side: return GOLD3[1] if x % 2 == 0 else GOLD3[0]
+        return pcol(cp, ca, "stars", x, y, W, H, 6)
+    if style == "cowboy":
+        if y == 4 and side:
+            return GOLD3[1] if face == "front" and x in (2, 6) else rp(ca, .42 + (.2 if x % 2 == 0 else 0), x, y)
+        if face == "top" and x == 4: return mul(cp[1], .8)                           # crease
+        return rp(cp, .55 + .25 * (vnoise(x, y, 5, 2) - .5) + (.1 if face == "top" else 0) - (.14 if y == 3 else 0), x, y)
+    if style == "party":
+        if rnd(x, y, 14) > .93: return ((255, 225, 74), (90, 232, 106), (255, 255, 255))[int(rnd(x, y, 15) * 3)]
+        return pcol(cp, ca, "diag", x, y, W, H, 7)
+    if style == "top":
+        if y == 4 and side: return rp(ca, .5 + (.3 if face == "front" and x == 4 else 0), x, y)
+        return rp(cp, .5 + .3 * (vnoise(x, y, 5, 2.5) - .5) + (.12 if x in (1, 2) and side else 0) + (.1 if face == "top" else 0), x, y)
+    return pcol(cp, ca, kind, x, y, W, H, 2)
+
+def make_hat(spec):
+    name, cp, ca, kind, brim, bill, orn, style = spec
+    img = Img(64, 32)
+    paint_box(img, 0, 0, 9, 5, 9, lambda f, x, y, W, H: hat_crown(spec, f, x, y, W, H))
+    if brim:
+        def bf(f, x, y, W, H):
+            if f in ("top", "bot") and min(x, y, W - 1 - x, H - 1 - y) == 1 and style in ("wizard", "cowboy", "top"):
+                return rp(ca, .55, x, y)
+            return rp(brim, .55 + .3 * (vnoise(x, y, 5, 2.2) - .5) + (.08 if f == "top" else 0), x, y)
+        paint_box(img, 0, 14, 12, 1, 12, bf)
+    if bill:
+        paint_box(img, 36, 5, 9, 1, 4, lambda f, x, y, W, H: rp(bill, .5 + (.14 if f == "top" and x in (2, 4, 6) else 0) + (.06 if f == "top" else 0), x, y))
+    if orn:
+        paint_box(img, 36, 0, 3, 2, 3, lambda f, x, y, W, H: rp(orn, .7 + .3 * (rnd(x, y, 4) - .5) - (.15 if y == H - 1 and f not in ("top", "bot") else 0), x, y))
+    return img
+
+HATS = [  # name, crown pal, accent, kind, brim pal, bill pal, orn pal, style
+ ("Glacier Beanie", P("0c1620 122539 1a3452 24477e 3a5cb8"), P("8fb4ff c8e0ff e8f4ff"), "knit", None, None, P("c8e0ff e8f4ff ffffff"), "glacier"),
+ ("Top Hat", P("14101c 221c30 30283f 463c5a"), P("6a0a1e a8182e d8304a"), "solid", P("14101c 221c30 30283f 463c5a"), None, None, "top"),
+ ("Baseball Cap", P("5a0e12 8a1a1e c02a2c e04848"), P("f4f4ff ffffff"), "solid", None, P("5a0e12 8a1a1e c02a2c e04848"), None, "cap"),
+ ("Royal Crown", P("8a5a10 c8981c e8c040 ffe480 fff4b8"), P("6a0a1e a8182e d8304a ff7a8a"), "solid", None, None, None, "crown"),
+ ("Cozy Beanie", P("2a3a6a 3e5aa0 5a82d8 8ab0f8"), P("e8e8f4 f8f8ff"), "knit", None, None, P("c8d8f8 f0f4ff ffffff"), "beanie"),
+ ("Wizard", P("1a1048 2a1a70 3e2a9a 5a42c4"), P("ffd84a"), "stars", P("1a1048 2a1a70 3e2a9a 5a42c4"), None, P("c8981c ffd84a fff0a0"), "wizard"),
+ ("Cowboy", P("6a4a28 8a6a3a b08c52 d0aa70"), P("3a2410 5a3a1a 7a5028 9a6a38"), "solid", P("5a3e20 7a5a30 9a7a44 bc9a60"), None, None, "cowboy"),
+ ("Santa", P("7a0a10 b01820 d83030 f06a5a"), P("d8dce8 f4f6fc ffffff"), "solid", None, None, P("d8dce8 f4f6fc ffffff"), "santa"),
+ ("Chef", P("c8c8d8 e4e4f0 f4f4fa ffffff"), P("a8a8bc 8a8aa0"), "solid", None, None, P("d8d8e8 f4f4fa ffffff"), "chef"),
+ ("Captain", P("c8ccd8 e8ecf4 f8faff ffffff"), P("14284a 1e3c6a 2c5290"), "solid", None, P("14284a 1e3c6a 2c5290 3c6ab8"), None, "captain"),
+ ("Party Hat", P("ff3fa8 ff6fc0 ff9ad4 ffc8e8"), P("2ad8e8 5aeaf4 98f6fc d8ffff"), "diag", None, None, P("ffd23a ffe46a fff4a8"), "party"),
+]
+
+# ---------------------------------------------------------------- tail (64x32, four segments along +Z)
+# seg0 3x3x4 (0,0) | seg1 3x3x4 (0,7) | seg2 2x2x4 (14,0) | seg3 3x3x3 (26,0)
+TAILSEG = [(0, 0, 3, 3, 4), (0, 7, 3, 3, 4), (14, 0, 2, 2, 4), (26, 0, 3, 3, 3)]
+def tail_ab(i, face, x, y, W, H):
+    d = TAILSEG[i][4]; base = (0, 4, 8, 12)[i]
+    if face == "top": return base + (d - 1 - y), x, W
+    if face == "bot": return base + y, x, W
+    if face == "right": return base + (d - 1 - x), y, H
+    if face == "left": return base + x, y, H
+    return base + (0 if face == "front" else d), x, W
+def tail_color(spec, i, face, x, y, W, H):
+    name, pal, acc, kind, tip = spec
+    a, c, cw = tail_ab(i, face, x, y, W, H)
+    n = vnoise(a, c + i * 3, 11, 2.2)
+    if i == 3 and tip:
+        return rp(tip, .55 + .35 * (n - .5) + (.2 if c in (0, cw - 1) else 0) - (.1 if a > 13 else 0), a, c)
+    t = .5 + (n - .5) * .4 + (.12 if face == "top" else 0)
+    if kind == "fade": return rp(pal, .15 + .8 * min(1, a / 15) + (n - .5) * .12, a, c)
+    if kind == "rings" and (a // 2) % 2 == 1: return rp(acc, .5 + (n - .5) * .3, a, c)
+    if kind == "stripes" and a % 3 == 1 and face != "bot" and c != 1: return rp(acc, .45, a, c)
+    if kind == "spots" and rnd(a, c, 17 + i) > .78: return rp(acc, .5 + (n - .5) * .3, a, c)
+    if kind == "scales":
+        hit = (a + (c % 2) * 2) % 4 == 0
+        return rp(acc if hit else pal, t + (.1 if hit else 0), a, c)
+    if kind == "bolt" and ((a + c * 2) % 5 == 0): return rp(acc, .8, a, c)
+    return rp(pal, t, a, c)
+def make_tail(spec):
+    img = Img(64, 32)
+    for i, (u, v, w, h, d) in enumerate(TAILSEG):
+        paint_box(img, u, v, w, h, d, lambda f, x, y, W, H, i=i: tail_color(spec, i, f, x, y, W, H))
+    return img
+TAILS = [  # name, base, accent, pattern, tip palette
+ ("Glacier Frost", P("122539 1a3e6a 24477e 3a5cb8 5b87ea 8fb4ff c8e0ff"), None, "fade", P("8fb4ff c8e0ff e8f4ff ffffff")),
+ ("Fox", P("7a2a08 b84a10 e0661c f0782a ffa860"), None, "solid", P("c8c4c0 e8e4dc f8f4ec ffffff")),
+ ("Tabby", P("4a4a58 6a6a7a 8a8a9a b0b0be"), P("2a2a34 3a3a48 4a4a5a"), "stripes", P("2a2a34 3a3a48 4a4a5a")),
+ ("Wolf", P("3a3a44 5a5a66 7a7a88 a0a0ae c8c8d4"), None, "solid", P("2a2a32 3c3c48 52525e")),
+ ("Dragon", P("123416 1f5a1a 359428 62cc3c b2ee68"), P("8c241a d4503a f08a5a"), "scales", P("8c241a d4503a f08a5a ffb890")),
+ ("Devil", P("5a0a14 8a1420 c8283a ff4a5a"), None, "solid", P("f4c030 ff6a2a ff3a30 ffe070")),
+ ("Bunny Puff", P("c8c0c8 e8e0e8 f8f4f8 ffffff"), None, "solid", P("e8e0e8 f8f4f8 ffffff ffffff")),
+ ("Raccoon", P("6a6a76 8a8a98 a8a8b6 c8c8d4"), P("1c1c24 2c2c38 3c3c4a"), "rings", P("1c1c24 2c2c38 3c3c4a")),
+ ("Mermaid", P("0a5a78 1a8ab0 2ad0d8 7af0e8"), P("a84ad8 d07aff e8b0ff"), "scales", P("a84ad8 d07aff e8b0ff ffd8ff")),
+ ("Skunk", P("1c1c24 2c2c38 3c3c4a 54545e"), P("e8e8f0 f8f8ff ffffff"), "stripes", P("f4f4fa ffffff ffffff")),
+ ("Neon Pulse", P("0a0e22 141e3a 1e3a58 2a5a80"), P("38f2ff 98f8ff d8ffff"), "bolt", P("ff4fd8 ff9cf0 ffe0fa ffffff")),
+]
+
+# ---------------------------------------------------------------- shoulder pet (64x32)
+# body 4x3x5 (0,0) | head 3x3x3 (18,0) | ear 1x1x1 (30,0) | tail 1x1x3 (34,0)
+def make_pet(spec):
+    name, pal, face, kind, ear, tail, tip, vest = spec
+    pal = P(pal); img = Img(64, 32)
+    def body(f, x, y, W, H):
+        al = x if f in ("left", "right") else y          # along the body for top / sides
+        if kind == "belly" and (f == "bot" or (f != "top" and y == H - 1)): return pal[4]
+        if kind == "stripes" and f in ("top", "left", "right") and al % 2 == 1: return pal[1]
+        if kind == "spots" and f != "bot" and rnd(x, y, 21 + len(name)) > .78: return pal[1]
+        if kind == "vest" and f in ("top", "left", "right") and 1 <= al <= 3: return pal[vest]
+        return rp(pal, .55 + .3 * (vnoise(x, y, 6, 1.8) - .5) + (.12 if f == "top" else 0), x, y)
+    def head(f, x, y, W, H):
+        if f == "front":
+            ch = face[y][x]
+            return pal[2] if ch == "." else pal[int(ch, 16)]
+        if f == "top": return rp(pal, .78 + .1 * (rnd(x, y, 3) - .5), x, y)
+        if f == "back": return pal[1] if y == 2 else rp(pal, .45, x, y)
+        return pal[1] if f == "bot" else (pal[2] if y < 2 else pal[1])
+    paint_box(img, 0, 0, 4, 3, 5, body); paint_box(img, 18, 0, 3, 3, 3, head)
+    if ear is not None: paint_box(img, 30, 0, 1, 1, 1, lambda f, x, y, W, H: pal[ear])
+    if tail is not None:
+        paint_box(img, 34, 0, 1, 1, 3, lambda f, x, y, W, H: pal[tip] if (tip is not None and (y if f in ("top", "bot") else x) == 2) else pal[tail])
+    return img
+PETS = [  # name, palette, face rows (3x3), body kind, ear colour idx, tail idx, tail tip idx, vest idx
+ ("Glacier Bear", "122539 a8b8d8 e8f0fa ffffff 5b87ea 1a2a3e", ["222", "020", "303"], "vest", 2, 2, None, 4),
+ ("Tabby Cat", "2a1408 8a4a14 d8782a f8b868 ffe8c8 5ae070", ["222", "525", "404"], "stripes", 1, 2, 1, 1),
+ ("Red Fox", "2a1008 b84a10 f0782a ffa860 fff0e0 3a2a28", ["222", "020", "404"], "belly", 5, 2, 4, 4),
+ ("Snowy Owl", "2a2a34 8a8a9a d8dce8 ffffff f8c030 5a4a3a", ["222", "424", "252"], "spots", None, 1, None, 1),
+ ("Penguin", "0e1220 1e2a44 2e3e66 f4f8ff e8eef8 f0a030", ["222", "323", "252"], "belly", None, 1, None, 1),
+ ("Bunny", "6a5a60 d8ccd4 f8f4f8 ffffff ffb0c8 e04a60", ["222", "020", "242"], "belly", 3, 3, None, 1),
+ ("Frog", "0e2a10 2e7a2a 5ac048 98f070 d8ffa0 f8f8f0", ["222", "222", "010"], "spots", 5, None, None, 1),
+ ("Panda", "16161c 3a3a44 f4f4f8 ffffff 8a8a96 5a5a64", ["222", "020", "202"], "vest", 0, 3, None, 0),
+ ("Parrot", "7a0a10 d82020 ff5050 ffc030 3aa0f0 f8f8f0", ["222", "505", "232"], "vest", 3, 4, 3, 4),
+ ("Hatchling", "123416 1f5a1a 359428 62cc3c e8f8b0 f08a2a", ["222", "020", "242"], "belly", 5, 2, 5, 4),
+ ("Raven", "10121c 222840 3c466a 6a78a8 e8c038 8a90c0", ["222", "040", "242"], "plain", None, 1, 0, 1),
+]
+
+# ---------------------------------------------------------------- scarf (64x32)
+# collar 9x3x5 (0,0) | flapA 3x8x1 (0,8) | flapB 3x5x1 (8,8)
+def snowflake(part, face, x, y, W, H):
+    if part == "flapA" and face == "front" and 2 <= y <= 4 and STAR3[y - 2][x] == "1": return BLU[5]
+    return None
+SCARVES = [  # name, base, accent, pattern, fringe, deco
+ ("Glacier Knit", P("122539 1a3e6a 24477e 3a5cb8"), P("8fb4ff c8e0ff e8f4ff"), "stripe", True, snowflake),
+ ("Red Wool", P("5a0e12 8a1a1e c02a2c e04848"), P("e8e0d0 f8f0e4 ffffff"), "stripe", True, None),
+ ("Candy Stripe", P("c82030 e8384a ff5a6a ff8a96"), P("e8e8f0 f8f8ff ffffff"), "diag", True, None),
+ ("Rainbow Knit", P("2a2a44 3a3a5c 4a4a74"), P("8a8ab8 b8b8dc"), "rainbow", True, None),
+ ("Cozy Plaid", P("1a3a22 2a5a34 3e7a4a 5aa066"), P("8a1a1e c02a2c e04848"), "plaid", True, None),
+ ("Midnight Silk", P("1a1030 2a1a4a 3e2a6a 5a42a0"), P("c8981c ffd84a"), "solid", True, None),
+ ("Autumn Wrap", P("7a3a0a b8541a e0782a ffa04a"), P("5a2a08 8a4a14 b86a2a"), "stripe", True, None),
+ ("Starry Night", P("0a1030 141c48 202c70 2e3e98"), P("b88a1a e8b830 ffd84a fff0a0 ffffff"), "stars", False, None),
+ ("Sakura Wrap", P("e8a0b8 f4b8cc f8cede ffe0ea"), P("c8587c e07a9c f090b4"), "dots", True, None),
+ ("Frost Fluff", P("8ab8d8 b4d8ee d0e8f6 f0f8ff"), P("e8f4ff f8fcff ffffff"), "knit", True, None),
+ ("Ocean Blue", P("0a4575 0c5f90 1a86b8 4fb3d9"), P("e8f4ff c8e0ff"), "stripe", True, None),
+]
+def make_scarf(spec):
+    name, pal, acc, kind, fringe, deco = spec
+    ck, fk = ("vstripe", "hstripe") if kind == "stripe" else ("rainbowv", "rainbow") if kind == "rainbow" else (kind, kind)
+    img = Img(64, 32)
+    def part(pname, k):
+        def fn(f, x, y, W, H):
+            if deco:
+                c = deco(pname, f, x, y, W, H)
+                if c is not None: return c
+            if fringe and pname != "collar" and y == H - 1: return None if x % 2 == 1 else pal[1]
+            c = pcol(pal, acc, k, x, y, W, H, 5)
+            if pname == "collar" and f in ("front", "back") and y == 0: c = lit(c, .1)
+            return c
+        return fn
+    paint_box(img, 0, 0, 9, 3, 5, part("collar", ck))
+    paint_box(img, 0, 8, 3, 8, 1, part("flapA", fk)); paint_box(img, 8, 8, 3, 5, 1, part("flapB", fk))
+    return img
+
+# ---------------------------------------------------------------- mask (64x32)
+# plate 8x6x1 (0,0) | strap 8x2x8 (0,7)
+MASKS = {  # name -> (palette, 6 rows of 8 chars, strap palette index or None); '.' transparent
+ "Glacier Visor": ("122539 24477e 5b87ea 8fb4ff e8f4ff c8e0ff60 ffffff",
+                   ["........", ".122221.", "15655551", "15555561", ".133331.", "........"], 1),
+ "Oni": ("5a0a10 a01820 d8303c ff6a5a f8e8c8 1c1c24 e8b830",
+         ["62222226", "20322302", "2..22..2", "2..22..2", "22222222", "24455442"], 0),
+ "Kitsune": ("8a1a1a d83a3a f4f0e8 d8d0c4 ffffff 2a2a34 e8a8a8",
+             ["22222222", "21222212", "2..22..2", "2..22..2", "12255221", "22222222"], 1),
+ "Surgical": ("5a7aa8 88a8d4 b4cce8 d8e8f8 ffffff",
+              ["........", "........", "........", "...22...", ".233332.", "24111142"], None),
+ "Ninja": ("10141c 1e2430 2e3648 44506a 6a7a98 c82030",
+           ["32323232", "55555555", "2......2", "3......3", "23232323", "32323232"], 2),
+ "Domino": ("2a1a4a 4a2a7a 7a4ab0 ffd84a fff0a0",
+            ["........", ".222222.", "2..00..2", ".2....2.", "........", "........"], 1),
+ "Hockey": ("6a6a78 b8b8c8 f0f0f4 ffffff c82030 2a2a34",
+            ["42222224", "23333332", "2..33..2", "2..33..2", "22525222", "25252522"], 1),
+ "Skull Mask": ("6a6458 a89c84 d8ceb4 f4eede ffffff 2a2630",
+                ["23333332", "23333332", "2..33..2", "2..33..2", "22255222", "23535352"], 1),
+ "Venetian": ("8a6a1a c8981c ffd84a fff0a0 ffffff 7a2ad8 2ad8c8",
+              ["..2332..", "22355322", "2..22..2", ".2....2.", "........", "........"], 1),
+ "Wolf Mask": ("2a2a30 4a4a56 7a7a88 aaaab8 e8e8f0 f0a0a0",
+               ["21222212", "22333322", "2..33..2", "2..33..2", "23300332", "22422422"], 1),
+ "Robo Plate": ("202630 3e4656 6a788c 9aaac0 d0def0 18c8e8 ff4060",
+                ["........", "........", "........", "...22...", ".233332.", "23555532"], 1),
+}
+def make_mask(name):
+    pal, rows, strap = MASKS[name]; pal = P(pal)
+    G = [[None if ch == '.' else pal[int(ch, 16)] for ch in r] for r in rows]
+    img = Img(64, 32)
+    def plate(f, x, y, W, H):
+        if f == "front": return G[y][x]
+        if f == "back":
+            c = G[y][W - 1 - x]
+            return mul(c, .6) if c else None
+        if f == "top": return G[0][x]
+        if f == "bot": return G[5][x]
+        return G[y][0 if f == "right" else 7]
+    paint_box(img, 0, 0, 8, 6, 1, plate, edge=1.0)
+    if strap is not None:
+        sc_ = pal[strap]
+        paint_box(img, 0, 7, 8, 2, 8, lambda f, x, y, W, H: None if f == "front" else rp([mul(sc_, .7), sc_, lit(sc_, .15)], .5 + (.2 if y == 0 else 0) + .1 * (vnoise(x, y, 7, 2) - .5), x, y), edge=1.0)
+    return img
+
+# ================================================================ Glacier set: one branded design per older type
+GAU = P("122539 1a3e6a 24477e 3a5cb8 5b87ea 8fb4ff c8e0ff e8f4ff")
+_EMB_WING = logo_mask(10, 9)
+def w_gaurora(w):
+    if w.r >= w.L - (0 if w.x == 1 else 1) - (1 if (w.i + w.x) % 2 else 0): return None
+    if emblem(_EMB_WING, w.c, w.r, 2, 2): return GAU[7] if w.r < 6 else GAU[6]
+    if w.r >= w.L - 2: return GAU[7] if w.x != 1 else GAU[6]                      # frosted tips
+    t = .12 + .62 * w.g + (.1 if w.x == 1 else 0) - (.12 if sc(w) else 0) + .08 * (nz(w, 3, 2) - .5)
+    return rp(GAU, t, w.c, w.r)
+WINGS.insert(0, ("Glacier Aurora", w_gaurora, ol_soft, (GAU[7], GAU[5], GAU[1])))
+
+GBN = P("122539 24477e 5b87ea 8fb4ff e8f4ff")
+def b_gfrost(U, y):
+    if (U % 6 == 2 and y == 0) or (U % 6 == 5 and y == 1): return GBN[4]
+    if (U % 6 in (1, 3) and y == 0) or (U % 6 in (4, 0) and y == 1): return GBN[3]
+    return rp(GBN[:4], .45 + .3 * (vn(U, y, 3) - .5) + (.15 if y == 0 else 0), U, y)
+BANDANAS.insert(0, ("Glacier Frost", b_gfrost))
+
+def br_gcuff(U, y):
+    x = U % 5
+    if y == 1: return GBN[1] if x in (0, 4) else GBN[2]
+    return GBN[4] if x == 2 else GBN[3] if x != 4 else GBN[2]
+BRACELETS.insert(0, ("Glacier Cuff", (br_gcuff, GBN[3], GBN[1])))
+HALOS = {"Glacier Ring": ("24477e 5b87ea 8fb4ff e8f4ff ffffff 122539", "13431", "01210", "23532"), **HALOS}
+GLS = {"Glacier Lens": ("122539 24477e 5b87ea 8fb4ff c8e0ff ffffff", ["1221", "2354", "1221"], "2222", "120", 2, "2110"), **GLS}
+EARS = {"Glacier Bear": ("5a6c8c 8c9eba c8d6ea f0f6ff 5b87ea 3a5cb8 122539", ["232", "242"], "22", "."), **EARS}
+
+
 def _wing(spec):
     name, fn, ol, bone = spec
     return make_wing((fn, ol_default if ol == 'd' else ol, bone))
@@ -1039,9 +1437,16 @@ DESIGNS = {  # folder -> [(display name, builder)] ; sizes in SIZES
     "bracelet": [(n, (lambda s=s: make_bracelet(s))) for n, s in BRACELETS],
     "halo": [(n, (lambda n=n: make_halo(n))) for n in HALOS],
     "ears": [(n, (lambda n=n: make_ears(n))) for n in EARS],
+    "backpack": [(s[0], (lambda s=s: make_backpack(s))) for s in BACKPACKS],
+    "hat": [(s[0], (lambda s=s: make_hat(s))) for s in HATS],
+    "tail": [(s[0], (lambda s=s: make_tail(s))) for s in TAILS],
+    "pet": [(s[0], (lambda s=s: make_pet(s))) for s in PETS],
+    "scarf": [(s[0], (lambda s=s: make_scarf(s))) for s in SCARVES],
+    "mask": [(n, (lambda n=n: make_mask(n))) for n in MASKS],
 }
-SIZES = {"bandana": (36, 11), "glasses": (24, 10), "wings": (64, 32), "bracelet": (20, 7), "halo": (16, 8), "ears": (16, 8)}
-TYPE_ORDER = ["bandana", "glasses", "wings", "bracelet", "halo", "ears"]   # enum order in Accessories.java
+SIZES = {"bandana": (36, 11), "glasses": (24, 10), "wings": (64, 32), "bracelet": (20, 7), "halo": (16, 8), "ears": (16, 8),
+         "backpack": (64, 32), "hat": (64, 32), "tail": (64, 32), "pet": (64, 32), "scarf": (64, 32), "mask": (64, 32)}
+TYPE_ORDER = ["bandana", "glasses", "wings", "bracelet", "halo", "ears", "backpack", "hat", "tail", "pet", "scarf", "mask"]   # enum order in Accessories.java
 def slug(name): return name.lower().replace(" ", "_")
 
 # ---------------------------------------------------------------- previews
@@ -1113,6 +1518,9 @@ PREVIEW = {  # folder -> (view function, scale, columns)
     "wings": (view_wings, 6, 5), "bandana": (lambda i: view_strip(i, (0, 9, 36, 11)), 9, 3),
     "glasses": (view_glasses, 14, 5), "bracelet": (lambda i: view_strip(i, (0, 5, 20, 7)), 12, 4),
     "halo": (view_halo, 8, 3), "ears": (view_ears, 10, 3),
+    "backpack": (lambda i: i.im.crop((0, 0, 40, 23)), 5, 4), "hat": (lambda i: i.im.crop((0, 0, 62, 27)), 4, 3),
+    "tail": (lambda i: i.im.crop((0, 0, 38, 14)), 6, 3), "pet": (lambda i: i.im.crop((0, 0, 42, 8)), 6, 3),
+    "scarf": (lambda i: i.im.crop((0, 0, 28, 17)), 6, 3), "mask": (lambda i: i.im.crop((0, 0, 32, 17)), 6, 3),
 }
 
 # ---------------------------------------------------------------- build / check
@@ -1185,6 +1593,7 @@ def main():
     if "--check" in sys.argv: sys.exit(0 if check() else 1)
     if "--capes" in sys.argv:
         for n, fn in CAPES.items(): save(make_cape(fn), n + ".png")
+    make_cape(c_glacier_set).im.save(os.path.join(OUT, "glacier_set.png"), optimize=True, compress_level=9)
     n = build()
     print(n, "accessory textures written;", {f: len(DESIGNS[f]) for f in TYPE_ORDER})
     if "--no-check" not in sys.argv: sys.exit(0 if check() else 1)

@@ -7,7 +7,8 @@ import net.minecraft.resources.Identifier;
 import java.util.Locale;
 
 /**
- * Client-side accessories worn by the local player: bandanas, glasses, wings, bracelets, halos and ears. Each design
+ * Client-side accessories worn by the local player: bandanas, glasses, wings, bracelets, halos, ears, backpacks, hats, tails, shoulder pets, scarves and masks.
+ * The first design of every type belongs to the Glacier set. Each design
  * is a PNG under assets/glacier/textures/cosmetics/&lt;folder&gt;/&lt;slug&gt;.png, where the slug is the lowercase design
  * name with spaces replaced by underscores. Geometry lives in {@link AccessoryModels}, drawing in {@link AccessoryLayer}.
  */
@@ -20,34 +21,52 @@ public final class Accessories {
 
 	public enum Type {
 		BANDANA("Bandana", "bandana",
-				"Red Classic", "Glacier Blue", "Black Skull", "Navy Stripes", "Camo", "Flame",
+				"Glacier Frost", "Red Classic", "Glacier Blue", "Black Skull", "Navy Stripes", "Camo", "Flame",
 				"Tie Dye", "Bandit", "Stars", "Plaid", "Frost", "Paisley",
 				"Sakura", "Rainbow", "Cyber Grid", "Hazard", "Checker Pop", "Galaxy",
 				"Pirate", "Toxic", "Hachimaki", "Royal Gold"),
 		GLASSES("Glasses", "glasses",
-				"Classic", "Shades", "Gold Round", "Hearts", "Pixel", "Aviator",
+				"Glacier Lens", "Classic", "Shades", "Gold Round", "Hearts", "Pixel", "Aviator",
 				"3D Glasses", "Cyber Visor", "Star Shades", "Round Neon", "Welding", "Sunset Tint",
 				"Ski Goggles", "Wayfarer", "Matrix", "Steampunk", "Nerd", "Rainbow Lens",
 				"Ice Lens", "Toxic Goggles", "Emerald"),
 		WINGS("Wings", "wings",
-				"Angel", "Bat", "Dragon", "Ice", "Butterfly", "Phoenix",
+				"Glacier Aurora", "Angel", "Bat", "Dragon", "Ice", "Butterfly", "Phoenix",
 				"Crystal", "Mecha", "Void", "Fairy", "Moth", "Raven",
 				"Seraph", "Cyber Grid", "Lava", "Storm", "Candy", "Pixel Rainbow",
 				"Skeleton", "Steampunk", "Glacier", "Galaxy", "Autumn", "Sakura",
 				"Toxic", "Gold Plated", "Shadow", "Ice Shard", "Dragonfly"),
 		BRACELET("Bracelet", "bracelet",
-				"Gold Cuff", "Silver Gem", "Rainbow", "Leather", "Neon", "Gold Chain",
+				"Glacier Cuff", "Gold Cuff", "Silver Gem", "Rainbow", "Leather", "Neon", "Gold Chain",
 				"Spiked", "Friendship", "Tech Watch", "Ruby Band", "Diamond", "Obsidian",
 				"Jade", "Cyber Cuff", "Pearl Strand", "Bead Pop", "Runic"),
 		HALO("Halo", "halo",
-				"Gold Halo", "Ice Halo", "Neon Halo", "Thorn", "Laurel", "Rainbow",
+				"Glacier Ring", "Gold Halo", "Ice Halo", "Neon Halo", "Thorn", "Laurel", "Rainbow",
 				"Neon Lime", "Eclipse", "Storm", "Flame", "Crystal", "Void",
 				"Candy Cane", "Sakura", "Aurora", "Starlight", "Holy Light"),
 		EARS("Ears", "ears",
-				"Cat", "Fox", "Bear", "Wolf", "Panda", "Bunny",
+				"Glacier Bear", "Cat", "Fox", "Bear", "Wolf", "Panda", "Bunny",
 				"Deer", "Devil", "Elf", "Robot", "Mouse", "Tiger",
 				"Frog", "Husky", "Raccoon", "Snow Leopard", "Neon Cat", "Pug",
-				"Dragon");
+				"Dragon"),
+		BACKPACK("Backpack", "backpack",
+				"Glacier Bear", "Hiker Green", "Leather Brown", "School Red", "Camo Pack", "Cyber Pack",
+				"Rainbow Pack", "Star Pack", "Galaxy Pack", "Candy Pack", "Treasure"),
+		HAT("Hat", "hat",
+				"Glacier Beanie", "Top Hat", "Baseball Cap", "Royal Crown", "Cozy Beanie", "Wizard",
+				"Cowboy", "Santa", "Chef", "Captain", "Party Hat"),
+		TAIL("Tail", "tail",
+				"Glacier Frost", "Fox", "Tabby", "Wolf", "Dragon", "Devil",
+				"Bunny Puff", "Raccoon", "Mermaid", "Skunk", "Neon Pulse"),
+		PET("Pet", "pet",
+				"Glacier Bear", "Tabby Cat", "Red Fox", "Snowy Owl", "Penguin", "Bunny",
+				"Frog", "Panda", "Parrot", "Hatchling", "Raven"),
+		SCARF("Scarf", "scarf",
+				"Glacier Knit", "Red Wool", "Candy Stripe", "Rainbow Knit", "Cozy Plaid", "Midnight Silk",
+				"Autumn Wrap", "Starry Night", "Sakura Wrap", "Frost Fluff", "Ocean Blue"),
+		MASK("Mask", "mask",
+				"Glacier Visor", "Oni", "Kitsune", "Surgical", "Ninja", "Domino",
+				"Hockey", "Skull Mask", "Venetian", "Wolf Mask", "Robo Plate");
 
 		/** Name used for this type in the cosmetics settings. */
 		public final String displayName;
@@ -62,6 +81,11 @@ public final class Accessories {
 			this.displayName = displayName;
 			this.folder = folder;
 			this.DESIGNS = designs;
+		}
+
+		/** The Glacier set piece of this type: always the first design. */
+		public String glacier() {
+			return DESIGNS[0];
 		}
 
 		/** Index of the design with this name, or -1. */

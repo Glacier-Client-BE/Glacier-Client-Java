@@ -67,6 +67,8 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 	private static final float WING_YAW = 0.5236F;
 	private static final float CROUCH_TILT = -0.25F;
 	private static final Quaternionf ROT = new Quaternionf();
+	/** Per-segment pitch of the tail; poses accumulate, so it droops from the back and curls up at the tip. */
+	private static final float[] TAIL_PITCH = {-0.55F, -0.15F, 0.35F, 0.3F};
 
 	private final Map<Identifier, RenderType> renderTypes = new HashMap<>();
 
@@ -171,6 +173,98 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 
 			pose.popPose();
 		}
+
+		design = Accessories.selected(Type.HAT);
+		if (design != null) {
+			pose.pushPose();
+			model.head.translateAndRotate(pose);
+			draw(collector, pose, light, AccessoryModels.hat(), Accessories.texture(Type.HAT, design));
+			pose.popPose();
+		}
+
+		design = Accessories.selected(Type.MASK);
+		if (design != null) {
+			pose.pushPose();
+			model.head.translateAndRotate(pose);
+			draw(collector, pose, light, AccessoryModels.mask(), Accessories.texture(Type.MASK, design));
+			pose.popPose();
+		}
+
+		design = Accessories.selected(Type.BACKPACK);
+		if (design != null) {
+			pose.pushPose();
+			model.body.translateAndRotate(pose);
+			draw(collector, pose, light, AccessoryModels.backpack(), Accessories.texture(Type.BACKPACK, design));
+			pose.popPose();
+		}
+
+		design = Accessories.selected(Type.SCARF);
+		if (design != null) {
+			Identifier texture = Accessories.texture(Type.SCARF, design);
+			float speed = Mth.clamp(limbAmount, 0.0F, 1.0F);
+			float lean = -0.05F - 0.35F * speed + Mth.sin(age * 0.09F) * 0.05F;
+			pose.pushPose();
+			model.body.translateAndRotate(pose);
+			draw(collector, pose, light, AccessoryModels.scarfCollar(), texture);
+			hang(collector, pose, light, AccessoryModels.scarfFlapA(), texture, 2.0F, 2.0F, -3.0F, lean);
+			hang(collector, pose, light, AccessoryModels.scarfFlapB(), texture, -1.0F, 2.0F, -3.0F,
+					lean * 0.8F + Mth.sin(age * 0.11F + 1.3F) * 0.04F);
+			pose.popPose();
+		}
+
+		design = Accessories.selected(Type.TAIL);
+		if (design != null) {
+			Identifier texture = Accessories.texture(Type.TAIL, design);
+			float speed = Mth.clamp(limbAmount, 0.0F, 1.0F);
+			float wagAmp = 0.22F + 0.2F * speed;
+			float wagT = age * (0.1F + 0.12F * speed);
+			pose.pushPose();
+			model.body.translateAndRotate(pose);
+			pose.translate(0.0F, 10.0F * PX, 2.0F * PX);
+			for (int i = 0; i < TAIL_PITCH.length; i++) {
+				ROT.rotationX(TAIL_PITCH[i]).rotateY(Mth.sin(wagT - i * 0.7F) * wagAmp * (0.5F + 0.2F * i));
+				pose.mulPose(ROT);
+				draw(collector, pose, light, AccessoryModels.tailSegment(i), texture);
+				pose.translate(0.0F, 0.0F, AccessoryModels.tailLength(i) * PX);
+			}
+			pose.popPose();
+		}
+
+		design = Accessories.selected(Type.PET);
+		if (design != null) {
+			Identifier texture = Accessories.texture(Type.PET, design);
+			pose.pushPose();
+			model.body.translateAndRotate(pose);
+			pose.translate(-6.0F * PX, Mth.sin(age * 0.1F) * 0.35F * PX, 0.0F);
+			draw(collector, pose, light, AccessoryModels.petBody(), texture);
+
+			pose.pushPose();
+			pose.translate(0.0F, -3.0F * PX, -2.5F * PX);
+			ROT.rotationY(Mth.sin(age * 0.05F) * 0.45F).rotateX(Mth.sin(age * 0.07F + 1.0F) * 0.12F);
+			pose.mulPose(ROT);
+			draw(collector, pose, light, AccessoryModels.petHead(), texture);
+			pose.popPose();
+
+			pose.pushPose();
+			pose.translate(0.0F, -1.5F * PX, 2.5F * PX);
+			ROT.rotationY(Mth.sin(age * 0.2F) * 0.5F);
+			pose.mulPose(ROT);
+			draw(collector, pose, light, AccessoryModels.petTail(), texture);
+			pose.popPose();
+
+			pose.popPose();
+		}
+	}
+
+	/** Draws a hanging part (scarf end) pivoting about (x, y, z) in model pixels, swung about X by {@code swing}. */
+	private void hang(SubmitNodeCollector collector, PoseStack pose, int light, ModelPart part, Identifier texture,
+			float x, float y, float z, float swing) {
+		pose.pushPose();
+		pose.translate(x * PX, y * PX, z * PX);
+		ROT.rotationX(swing);
+		pose.mulPose(ROT);
+		draw(collector, pose, light, part, texture);
+		pose.popPose();
 	}
 
 	private static void applyTilt(PoseStack pose, boolean crouching) {

@@ -23,7 +23,7 @@ import java.util.Random;
 
 /**
  * Cosmetics tab (pages/cosmetics.js, .cos-* rules in pages-extra.css): the PREVIEW stage card on the left and, on the
- * right, five tabs (Capes, Hats and Head, Wings, Hands and Face, Equipped) over a 3 column tile grid. All numbers css px.
+ * right, six tabs (Capes, Head, Face, Back, Body, Equipped) over a 3 column tile grid. All numbers css px.
  * Cape art shows only the front and back faces (22x17 of the 64x32 sheet).
  */
 public final class CosmeticsPage {
@@ -37,9 +37,10 @@ public final class CosmeticsPage {
 
 	private static final Tab[] TABS = {
 			new Tab("capes", "Capes"),
-			new Tab("head", "Hats & Head", Accessories.Type.BANDANA, Accessories.Type.HALO, Accessories.Type.EARS),
-			new Tab("wings", "Wings", Accessories.Type.WINGS),
-			new Tab("hands", "Hands & Face", Accessories.Type.BRACELET, Accessories.Type.GLASSES),
+			new Tab("head", "Head", Accessories.Type.HAT, Accessories.Type.BANDANA, Accessories.Type.HALO, Accessories.Type.EARS),
+			new Tab("face", "Face", Accessories.Type.MASK, Accessories.Type.GLASSES),
+			new Tab("back", "Back", Accessories.Type.WINGS, Accessories.Type.BACKPACK, Accessories.Type.TAIL),
+			new Tab("body", "Body", Accessories.Type.SCARF, Accessories.Type.PET, Accessories.Type.BRACELET),
 			new Tab("equipped", "Equipped")};
 
 	private final Random random = new Random();
@@ -60,7 +61,7 @@ public final class CosmeticsPage {
 		float mx = x + 232 + 12, mw = w - 244;
 		float my = y;
 
-		float tw = (mw - 16) / 5f;
+		float tw = (mw - 4 * (TABS.length - 1)) / TABS.length;
 		for (int i = 0; i < TABS.length; i++) {
 			float tx = mx + i * (tw + 4);
 			boolean on = TABS[i].id().equals(tab);
@@ -244,7 +245,7 @@ public final class CosmeticsPage {
 		List<Accessories.Type> worn = new ArrayList<>();
 		for (Accessories.Type t : Accessories.Type.values()) if (!NONE.equals(selectedAccessory(t))) worn.add(t);
 		float wornH = worn.isEmpty() ? 12.5f : worn.size() * 50 + (worn.size() - 1) * 6;
-		float h = 2 + 28 + 12.5f + 10 + STAGE_H + 10 + 35.5f + 10 + 26 + 10 + 12.5f + 10 + wornH;
+		float h = 2 + 28 + 12.5f + 10 + STAGE_H + 10 + 35.5f + 10 + 26 + 10 + 26 + 10 + 12.5f + 10 + wornH;
 		k.box(x, y, 232, h, 18, 0xFF2C2F33, 0xFF393C41);
 		float ix = x + 15, iw = 202, cy = y + 15;
 		k.text("PREVIEW", ix, cy + 6.25f, 10, 0xFF8EA0E0);
@@ -256,6 +257,8 @@ public final class CosmeticsPage {
 		k.text(trying ? "Trying on, click to equip" : cape != null ? "Cape equipped" : "No cape equipped", ix,
 				cy + 20 + 3 + 6.25f, 10, trying ? 0xFF8EA0E0 : MUTED);
 		cy += 35.5f + 10;
+		button(k, "Equip Glacier Set", ix, cy, iw, this::equipGlacier);
+		cy += 26 + 10;
 		button(k, "Randomize outfit", ix, cy, iw, this::randomize);
 		cy += 26 + 10;
 		k.text("WORN", ix, cy + 6.25f, 10, MUTED);
@@ -417,6 +420,42 @@ public final class CosmeticsPage {
 				amp = 28f;
 				focus = 0.82f;
 				ppb = 88f;
+			}
+			case BACKPACK -> { // from behind, a little to the side
+				base = 180f;
+				amp = 26f;
+				focus = 1.05f;
+				ppb = 72f;
+			}
+			case TAIL -> { // three-quarter from behind, low on the back
+				base = 150f;
+				amp = 30f;
+				focus = 0.85f;
+				ppb = 76f;
+			}
+			case PET -> { // three-quarter front, on the right shoulder
+				base = 28f;
+				amp = 26f;
+				focus = 1.5f;
+				ppb = 112f;
+			}
+			case SCARF -> { // front, neck and chest
+				base = 0f;
+				amp = 30f;
+				focus = 1.38f;
+				ppb = 92f;
+			}
+			case HAT -> { // front on the head, framed higher for the crown
+				base = 0f;
+				amp = 32f;
+				focus = 1.7f;
+				ppb = 104f;
+			}
+			case MASK -> { // face plate straight on
+				base = 0f;
+				amp = 26f;
+				focus = 1.55f;
+				ppb = 130f;
 			}
 			default -> { // head items: bandana, halo, ears, glasses
 				base = 0f;
@@ -600,6 +639,12 @@ public final class CosmeticsPage {
 			case BRACELET -> 0xFFE0B15A;
 			case HALO -> 0xFF7FD6FF;
 			case EARS -> 0xFFFF8FB1;
+			case BACKPACK -> 0xFF5B87EA;
+			case HAT -> 0xFFB48CFF;
+			case TAIL -> 0xFFF08A3C;
+			case PET -> 0xFF5AD6A0;
+			case SCARF -> 0xFFE86A6A;
+			case MASK -> 0xFFC8D0DC;
 		};
 	}
 
@@ -611,6 +656,7 @@ public final class CosmeticsPage {
 			case WINGS -> new int[]{64, 32};
 			case BRACELET -> new int[]{20, 7};
 			case HALO, EARS -> new int[]{16, 8};
+			case BACKPACK, HAT, TAIL, PET, SCARF, MASK -> new int[]{64, 32};
 		};
 	}
 
@@ -663,6 +709,14 @@ public final class CosmeticsPage {
 			int pick = random.nextInt(t.DESIGNS.length + 1);
 			storeAccessory(t, pick == 0 ? NONE : t.DESIGNS[pick - 1]);
 		}
+		Config.save();
+	}
+
+	/** One click: the Glacier cape plus the Glacier design (first entry) of every accessory type. */
+	private void equipGlacier() {
+		if (module() == null) return;
+		storeCape(Capes.GLACIER_SET);
+		for (Accessories.Type t : Accessories.Type.values()) storeAccessory(t, t.glacier());
 		Config.save();
 	}
 

@@ -21,6 +21,12 @@ public class CosmeticsModule extends Module {
 	public final ChoiceSetting bracelet = accessory(Accessories.Type.BRACELET);
 	public final ChoiceSetting halo = accessory(Accessories.Type.HALO);
 	public final ChoiceSetting ears = accessory(Accessories.Type.EARS);
+	public final ChoiceSetting backpack = accessory(Accessories.Type.BACKPACK);
+	public final ChoiceSetting hat = accessory(Accessories.Type.HAT);
+	public final ChoiceSetting tail = accessory(Accessories.Type.TAIL);
+	public final ChoiceSetting pet = accessory(Accessories.Type.PET);
+	public final ChoiceSetting scarf = accessory(Accessories.Type.SCARF);
+	public final ChoiceSetting mask = accessory(Accessories.Type.MASK);
 
 	public CosmeticsModule() {
 		super("Cosmetics", "Client-side capes and accessories, visible only to you.", Category.SYSTEM);
@@ -40,7 +46,7 @@ public class CosmeticsModule extends Module {
 
 	/**
 	 * The design selected for an accessory type, looked up by its display name ("Bandana", "Glasses", "Wings",
-	 * "Bracelet", "Halo", "Ears"). Returns "None" when nothing is selected, the name is unknown, or the module is off.
+	 * "Bracelet", "Halo", "Ears", "Backpack", "Hat", "Tail", "Pet", "Scarf", "Mask"). Returns "None" when nothing is selected, the name is unknown, or the module is off.
 	 */
 	public String accessory(String typeName) {
 		for (Accessories.Type t : Accessories.Type.values()) {
@@ -124,6 +130,12 @@ public class CosmeticsModule extends Module {
 			case BRACELET: return bracelet;
 			case HALO: return halo;
 			case EARS: return ears;
+			case BACKPACK: return backpack;
+			case HAT: return hat;
+			case TAIL: return tail;
+			case PET: return pet;
+			case SCARF: return scarf;
+			case MASK: return mask;
 			default: return null;
 		}
 	}

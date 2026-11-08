@@ -16,6 +16,8 @@ public final class Capes {
 	}
 
 	public static final String NONE = "None";
+	/** The cape of the Glacier set (first entry); the matching accessories are the first design of each type. */
+	public static final String GLACIER_SET = "Glacier Set";
 	private static final String NAMESPACE = "glacier";
 
 	/**
@@ -37,6 +39,7 @@ public final class Capes {
 	}
 
 	public static final List<Cape> ALL = List.of(
+			new Cape("Glacier Set", 0xFF122539, 0xFF5B87EA, "glacier_set.png"),
 			new Cape("Glacier", 0xFF7289DA, 0xFFB9C6F2),
 			new Cape("Midnight", 0xFF1B2140, 0xFFC9D3FF),
 			new Cape("Ember", 0xFF7A1F10, 0xFFFF8A2A),
