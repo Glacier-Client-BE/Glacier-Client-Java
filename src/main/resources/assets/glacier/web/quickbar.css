@@ -1,0 +1,113 @@
+/* Glacier quick bar (DLL-style). Transparent so the HUD shows behind it. */
+:root {
+	--accent: #7289da;
+	--accent-hover: #8ea0e0;
+	--text: #ffffff;
+	--text-dim: #99aab5;
+	--navy: #161a2b;
+	--navy-hover: #1e2440;
+	--navy-border: rgba(255, 255, 255, 0.08);
+	--navy-border-hover: rgba(114, 137, 218, 0.55);
+	--grid-line: rgba(114, 137, 218, 0.22);
+}
+
+.qb-root {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+
+.qb-logo img {
+	width: 64px;
+	height: 64px;
+}
+
+.qb-word {
+	position: relative;
+	font-family: Roboto, sans-serif;
+	font-weight: 700;
+	font-size: 22px;
+	letter-spacing: 0.02em;
+}
+
+/* faux text shadow: the engine has no text-shadow, so a dark copy sits offset behind */
+.qb-word-shadow {
+	position: absolute;
+	left: 2px;
+	top: 2px;
+	color: rgba(0, 0, 0, 0.65);
+}
+
+.qb-word-text {
+	position: relative;
+	color: var(--text);
+}
+
+.qb-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.qb-btn {
+	width: 52px;
+	height: 42px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	background: var(--navy);
+	border: 1px solid var(--navy-border);
+	border-radius: 14px;
+	color: var(--text-dim);
+	cursor: pointer;
+}
+
+.qb-btn.qb-wide {
+	width: 104px;
+}
+
+.qb-btn .fa {
+	color: var(--text-dim);
+	font-size: 15px;
+}
+
+.qb-label {
+	color: var(--text);
+	font-family: Roboto, sans-serif;
+	font-weight: 700;
+	font-size: 13px;
+	letter-spacing: 0.06em;
+}
+
+.qb-btn:hover {
+	transform: translateY(-2px);
+	background: var(--navy-hover);
+	border-color: var(--navy-border-hover);
+}
+
+.qb-btn:hover .fa {
+	color: var(--text);
+}
+
+.qb-btn:active {
+	transform: translateY(0);
+}
+
+/* grid toggle on */
+.qb-btn.active {
+	border-color: var(--accent);
+}
+
+.qb-btn.active .fa {
+	color: var(--accent-hover);
+}

@@ -1,0 +1,47 @@
+<div class="pl-root" id="pl-root">
+  <div class="pl-window">
+    <div class="pl-header">
+      <button id="pl-back" class="pl-sq pl-card" title="Back"><i class="fa">&#xf060;</i></button>
+      <span class="pl-title">Play</span>
+      <div class="pl-search" id="pl-search">
+        <i class="fa pl-search-ico">&#xf002;</i>
+        <span id="pl-query" class="pl-query">Search Worlds...</span>
+      </div>
+      <button id="pl-settings" class="pl-sq pl-card" title="Glacier"><i class="fa">&#xf013;</i></button>
+    </div>
+
+    <div class="pl-tabs">
+      <button class="pl-tab pl-tab-on" data-tab="worlds"><i class="fa">&#xf0ac;</i> Worlds</button>
+      <button class="pl-tab" data-tab="friends"><i class="fa">&#xf0c0;</i> Friends</button>
+      <button class="pl-tab" data-tab="servers"><i class="fa">&#xf233;</i> Servers</button>
+    </div>
+
+    <div class="pl-body">
+      <div id="pl-worlds" class="pl-pane">
+        <div class="pl-row">
+          <button id="pl-create" class="pl-btn pl-accent">Create New World</button>
+          <button id="pl-browse" class="pl-btn pl-pill">Browse Worlds</button>
+        </div>
+        <div id="pl-wlist" class="pl-list"></div>
+        <div id="pl-wempty" class="pl-note">Loading worlds...</div>
+      </div>
+
+      <div id="pl-friends" class="pl-pane" style="display: none">
+        <div class="pl-row">
+          <button id="pl-addfriend" class="pl-btn pl-accent">Add Friend</button>
+          <button id="pl-code" class="pl-btn pl-pill">Join by Code</button>
+        </div>
+        <div class="pl-note">No friends to show yet.</div>
+      </div>
+
+      <div id="pl-servers" class="pl-pane" style="display: none">
+        <div class="pl-row">
+          <span class="pl-section">Servers</span>
+          <button id="pl-addserver" class="pl-btn pl-pill pl-small">Add Server</button>
+        </div>
+        <div id="pl-list" class="pl-list"></div>
+        <div id="pl-empty" class="pl-note" style="display: none">No saved servers.</div>
+      </div>
+    </div>
+  </div>
+</div>

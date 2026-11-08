@@ -1,0 +1,23 @@
+{
+	"schemaVersion": 1,
+	"id": "glacier",
+	"version": "${version}",
+	"name": "Glacier Client",
+	"description": "A Minecraft client with a custom HTML/CSS/JS-rendered UI.",
+	"authors": ["Glacier"],
+	"license": "ARR",
+	"icon": "assets/glacier/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["net.glacier.GlacierClient"]
+	},
+	"mixins": [
+		"glacier.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.0",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}

@@ -1,0 +1,586 @@
+/* Glacier v7 start screen (pack "Glacier Client v7 [Main]", Default layout).
+   1 Bedrock GUI unit = 2 css px; design height 540px. Colours sampled from the pack nine-slice PNGs. */
+:root {
+	--panel: #232728;
+	--panel-edge: #33373a;
+	--card: #2c2f33;
+	--card-edge: #393c41;
+	--card-hover: #33373c;
+	--card-hover-edge: #484c52;
+	--badge: #273833;
+	--badge-edge: #2e493f;
+	--accent: #7289da;
+	--accent-hover: #8296e0;
+	--row-hover: rgba(255, 255, 255, 0.075);
+	--text: #ffffff;
+	--dim: #b9bbbe;
+}
+
+.st-root {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	/* transparent: the panorama, dim and vignette are drawn natively by StartScreen behind the page */
+	background: transparent;
+	font-family: Roboto, sans-serif;
+	color: var(--text);
+}
+
+.st-ui {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+}
+
+/* shared surfaces */
+.st-cardbtn {
+	background: var(--card);
+	border: 2px solid var(--card-edge);
+	border-radius: 14px;
+	cursor: pointer;
+}
+
+.st-cardbtn:hover {
+	background: var(--card-hover);
+	border-color: var(--card-hover-edge);
+}
+
+.st-accent {
+	background: var(--accent);
+	border-radius: 12px;
+	cursor: pointer;
+}
+
+.st-accent:hover {
+	background: var(--accent-hover);
+}
+
+.st-btn {
+	box-sizing: border-box;
+	width: 352px;
+	height: 44px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 18px;
+	color: var(--text);
+}
+
+/* centre card 196x200 at offset [0,6] */
+.st-center {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	padding-top: 24px;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.st-card {
+	width: 392px;
+	height: 400px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(35, 39, 40, 0.94);
+	border: 2px solid var(--panel-edge);
+	border-radius: 18px;
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+
+.st-stack {
+	width: 352px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.st-brand {
+	position: relative;
+	width: 352px;
+	height: 80px;
+	margin-bottom: 12px;
+	background: var(--card);
+	border: 2px solid var(--card-edge);
+	border-radius: 14px;
+	box-sizing: border-box;
+}
+
+.st-brand-inset {
+	position: absolute;
+	left: 4px;
+	top: 4px;
+	width: 68px;
+	height: 68px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--panel);
+	border: 2px solid var(--panel-edge);
+	border-radius: 16px;
+	box-sizing: border-box;
+}
+
+.st-brand-logo {
+	width: 56px;
+	height: 56px;
+}
+
+.st-brand-word {
+	position: absolute;
+	left: 100px;
+	top: 7px;
+	width: 224px;
+	height: 62px;
+}
+
+.st-play {
+	height: 52px;
+	font-weight: 700;
+}
+
+.st-info-on {
+	background: var(--card-hover);
+	border-color: var(--card-hover-edge);
+}
+
+/* top-left player panel */
+.st-player {
+	position: absolute;
+	left: 6px;
+	top: 6px;
+	width: 300px;
+	height: 48px;
+	display: flex;
+	flex-direction: row;
+	gap: 6px;
+}
+
+.st-head {
+	width: 56px;
+	height: 48px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--card);
+	border: 2px solid var(--card-edge);
+	border-radius: 14px;
+	box-sizing: border-box;
+}
+
+.st-head-ico {
+	width: 18px;
+	font-size: 18px;
+	color: var(--accent);
+}
+
+.st-login {
+	width: 184px;
+	height: 48px;
+	padding-left: 16px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	background: var(--card);
+	border: 2px solid var(--card-edge);
+	border-radius: 14px;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.st-login-label {
+	font-size: 11px;
+	font-weight: 700;
+}
+
+.st-login-name {
+	font-size: 18px;
+	color: var(--accent);
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.st-sq {
+	width: 48px;
+	height: 48px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
+
+/* Font Awesome glyphs on the start screen (class fa / fab, font glacier:fa_solid / fa_brands) */
+.st-fa {
+	font-size: 18px;
+	color: var(--text);
+}
+
+/* top-right controls */
+.st-top {
+	position: absolute;
+	right: 4px;
+	top: 4px;
+	width: 304px;
+	height: 48px;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 4px;
+}
+
+.st-dd {
+	position: relative;
+	width: 152px;
+	height: 48px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(44, 47, 51, 0.92);
+	border: 2px solid var(--card-edge);
+	border-radius: 14px;
+	box-sizing: border-box;
+	cursor: pointer;
+}
+
+.st-dd:hover {
+	background: var(--card-hover);
+}
+
+.st-dd-label {
+	font-size: 16px;
+}
+
+.st-dd-arrow {
+	position: absolute;
+	right: 10px;
+	top: 16px;
+	width: 14px;
+	height: 14px;
+	font-size: 14px;
+	text-align: center;
+	color: var(--dim);
+}
+
+.st-exit {
+	width: 44px;
+	height: 44px;
+	margin-top: 2px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
+
+.st-exit-ico {
+	font-size: 18px;
+}
+
+.st-ddcatch {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+}
+
+/* list sits under the dropdown header: header right edge = 4 + 4 + 44 */
+.st-ddlist {
+	position: absolute;
+	right: 56px;
+	top: 56px;
+	width: 152px;
+	height: 92px;
+	padding: 4px;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	background: var(--panel);
+	border: 2px solid var(--panel-edge);
+	border-radius: 16px;
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+
+.st-row {
+	height: 38px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 16px;
+	border-radius: 12px;
+	color: var(--text);
+	cursor: pointer;
+}
+
+.st-row-on {
+	background: var(--accent);
+}
+
+.st-row-off {
+	color: var(--dim);
+}
+
+.st-row-off:hover {
+	background: var(--row-hover);
+}
+
+/* bottom-right news (6-frame flipbook, 5 s per frame) */
+.st-news {
+	position: absolute;
+	right: 10px;
+	bottom: 36px;
+	width: 202px;
+	height: 128px;
+	border-radius: 12px;
+}
+
+/* footer badges */
+.st-foot {
+	position: absolute;
+	left: 4px;
+	right: 4px;
+	bottom: 4px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: flex-end;
+}
+
+.st-badge {
+	padding: 2px 6px;
+	font-size: 18px;
+	background: rgba(39, 56, 51, 0.92);
+	border: 2px solid var(--badge-edge);
+	border-radius: 8px;
+}
+
+.st-badge-left {
+	left: 4px;
+}
+
+.st-badge-right {
+	right: 4px;
+}
+
+/* discord square sits beside the left badge */
+.st-foot-l {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+	gap: 6px;
+}
+
+.st-discord {
+	width: 34px;
+	height: 34px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
+
+.st-discord .fab {
+	font-size: 16px;
+	color: #7289da;
+}
+
+/* intro logo (90x90 units) */
+.st-introwrap {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.st-intro {
+	width: 180px;
+	height: 180px;
+	opacity: 0;
+}
+
+/* overlays */
+.st-overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.5);
+}
+
+.st-window {
+	display: flex;
+	flex-direction: column;
+	background: rgba(35, 39, 40, 0.96);
+	border: 2px solid var(--panel-edge);
+	border-radius: 18px;
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+	box-sizing: border-box;
+}
+
+.st-chooser {
+	width: 392px;
+	padding: 20px;
+	gap: 8px;
+	align-items: center;
+}
+
+.st-win-title {
+	font-size: 18px;
+	font-weight: 700;
+	margin-bottom: 6px;
+}
+
+.st-infowin {
+	width: 88%;
+	height: 86%;
+	padding: 16px;
+	gap: 12px;
+}
+
+.st-info-head {
+	position: relative;
+	height: 72px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.st-brand-sm {
+	width: 256px;
+	height: 60px;
+	margin-bottom: 0;
+}
+
+.st-brand-sm .st-brand-inset {
+	left: 4px;
+	top: 4px;
+	width: 48px;
+	height: 48px;
+	border-radius: 12px;
+}
+
+.st-brand-sm .st-brand-logo {
+	width: 40px;
+	height: 40px;
+}
+
+.st-brand-sm .st-brand-word {
+	left: 74px;
+	top: 6px;
+	width: 168px;
+	height: 46px;
+}
+
+.st-tabs {
+	position: absolute;
+	right: 80px;
+	top: 8px;
+	height: 56px;
+	display: flex;
+	flex-direction: row;
+	gap: 8px;
+}
+
+.st-tab {
+	height: 56px;
+	min-width: 56px;
+	padding: 0 14px;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	background: var(--card);
+	border: 2px solid var(--card-edge);
+	border-radius: 14px;
+	cursor: pointer;
+}
+
+.st-tab:hover {
+	background: var(--card-hover);
+}
+
+.st-tab-ico {
+	font-size: 20px;
+	color: var(--text);
+}
+
+.st-tab-label {
+	display: none;
+	font-size: 16px;
+	font-weight: 700;
+}
+
+.st-tab-on {
+	background: var(--accent);
+	border-color: var(--accent);
+}
+
+.st-tab-on:hover {
+	background: var(--accent-hover);
+}
+
+.st-tab-on .st-tab-label {
+	display: block;
+}
+
+.st-close {
+	position: absolute;
+	right: 8px;
+	top: 6px;
+	width: 60px;
+	height: 60px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
+
+.st-close-ico {
+	font-size: 20px;
+}
+
+.st-pane {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 4px 8px;
+	overflow: auto;
+}
+
+.st-ver-head {
+	font-size: 27px;
+	font-weight: 700;
+	color: var(--accent);
+	margin-bottom: 4px;
+}
+
+.st-sec {
+	font-size: 18px;
+	font-weight: 700;
+	margin-top: 6px;
+}
+
+.st-item {
+	font-size: 16px;
+	color: var(--dim);
+	padding-left: 12px;
+}

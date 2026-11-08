@@ -1,0 +1,105 @@
+<div class="st-root">
+  <div id="st-ui" class="st-ui">
+    <div class="st-center">
+      <div id="st-card" class="st-card">
+        <div class="st-stack">
+          <div class="st-brand">
+            <div class="st-brand-inset"><img class="st-brand-logo" src="glacier:textures/start/logo.png" alt=""></div>
+            <img class="st-brand-word" src="glacier:textures/start/wordmark.png" alt="">
+          </div>
+          <button id="st-play" class="st-btn st-accent st-play">Play Game</button>
+          <button id="st-options" class="st-btn st-cardbtn">Options</button>
+          <button id="st-market" class="st-btn st-cardbtn">Marketplace</button>
+          <button id="st-dress" class="st-btn st-cardbtn">Dressing Room</button>
+          <button id="st-info" class="st-btn st-cardbtn">Information</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="st-player">
+      <div class="st-head"><i class="fa st-head-ico">&#xf007;</i></div>
+      <div class="st-login">
+        <span class="st-login-label">Logged in as:</span>
+        <span id="st-name" class="st-login-name">Player</span>
+      </div>
+      <button id="st-skins" class="st-sq st-cardbtn" title="Dressing Room"><i class="fa st-fa">&#xf007;</i></button>
+    </div>
+
+    <div class="st-top">
+      <button id="st-ach" class="st-sq st-cardbtn" title="Achievements"><i class="fa st-fa">&#xf559;</i></button>
+      <button id="st-inbox" class="st-sq st-cardbtn" title="Inbox"><i class="fa st-fa">&#xf0e0;</i></button>
+      <button id="st-dd" class="st-dd">
+        <span class="st-dd-label">Default</span>
+        <i class="fa st-dd-arrow">&#xf078;</i>
+      </button>
+      <button id="st-exit" class="st-exit st-cardbtn" title="Quit"><i class="fa st-exit-ico">&#xf00d;</i></button>
+    </div>
+
+    <div id="st-ddcatch" class="st-ddcatch" style="display: none"></div>
+    <div id="st-ddlist" class="st-ddlist" style="display: none">
+      <button class="st-row st-row-on">Default</button>
+      <button class="st-row st-row-off">Legacy</button>
+    </div>
+
+    <img id="st-news" class="st-news" src="glacier:textures/start/news_0.png" alt="">
+
+    <div class="st-foot">
+      <div class="st-foot-l">
+        <div class="st-badge st-badge-left">Glacier v7</div>
+        <button id="st-discord" class="st-discord st-cardbtn" title="Copy Discord link"><i class="fab">&#xf392;</i></button>
+      </div>
+      <div id="st-ver" class="st-badge st-badge-right">1.21.11</div>
+    </div>
+  </div>
+
+  <div id="st-introwrap" class="st-introwrap"><img id="st-intro" class="st-intro" src="glacier:textures/start/logo.png" alt=""></div>
+
+  <div id="st-overlay" class="st-overlay" style="display: none">
+    <div id="st-chooser" class="st-window st-chooser" style="display: none">
+      <span class="st-win-title">Play Game</span>
+      <button id="st-sp" class="st-btn st-cardbtn">Singleplayer</button>
+      <button id="st-mp" class="st-btn st-cardbtn">Multiplayer</button>
+      <button id="st-realms" class="st-btn st-cardbtn">Realms</button>
+      <button class="st-close-btn st-btn st-accent">Back</button>
+    </div>
+
+    <div id="st-infowin" class="st-window st-infowin" style="display: none">
+      <div class="st-info-head">
+        <div class="st-brand st-brand-sm">
+          <div class="st-brand-inset"><img class="st-brand-logo" src="glacier:textures/start/logo.png" alt=""></div>
+          <img class="st-brand-word" src="glacier:textures/start/wordmark.png" alt="">
+        </div>
+        <div class="st-tabs">
+          <button class="st-tab st-tab-on" data-tab="changelog"><i class="fa st-tab-ico">&#xf02d;</i><span class="st-tab-label">Changelog</span></button>
+          <button class="st-tab" data-tab="tutorials"><i class="fa st-tab-ico">&#xf19d;</i><span class="st-tab-label">Tutorials</span></button>
+          <button class="st-tab" data-tab="credits"><i class="fa st-tab-ico">&#xf2b9;</i><span class="st-tab-label">Credits</span></button>
+        </div>
+        <button class="st-close st-cardbtn"><i class="fa st-close-ico">&#xf00d;</i></button>
+      </div>
+
+      <div id="st-pane-changelog" class="st-pane">
+        <span class="st-ver-head">Glacier Client - 7</span>
+        <span class="st-sec">Start Screen:</span>
+        <span class="st-item">New centred start card with Play Game, Options, Marketplace, Dressing Room and Information.</span>
+        <span class="st-item">Animated panorama background that slowly pans across the scene.</span>
+        <span class="st-item">Start screen logo animation refined with smoother bounce and slide transitions.</span>
+        <span class="st-item">Start screen UI now stays hidden during the logo intro animation.</span>
+        <span class="st-sec">Mod Menu:</span>
+        <span class="st-item">HTML/CSS Glacier menu with module settings, HUD editor and cosmetics.</span>
+        <span class="st-sec">Optimization:</span>
+        <span class="st-item">Performance mods tuned for low-end laptops.</span>
+      </div>
+      <div id="st-pane-tutorials" class="st-pane" style="display: none">
+        <span class="st-sec">Opening the Glacier menu:</span>
+        <span class="st-item">Press Right Shift in game to open the Glacier menu and toggle modules.</span>
+        <span class="st-sec">Moving HUD modules:</span>
+        <span class="st-item">Open the HUD editor from the Glacier menu, drag modules to move them and scroll to resize.</span>
+      </div>
+      <div id="st-pane-credits" class="st-pane" style="display: none">
+        <span class="st-sec">Glacier Client</span>
+        <span class="st-item">Made by Pepe.</span>
+        <span class="st-item">Minecraft is a trademark of Mojang AB.</span>
+      </div>
+    </div>
+  </div>
+</div>

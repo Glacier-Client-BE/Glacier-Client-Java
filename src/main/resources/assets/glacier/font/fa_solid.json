@@ -1,0 +1,11 @@
+{
+	"providers": [
+		{
+			"type": "ttf",
+			"file": "glacier:fa_solid.ttf",
+			"size": 9.0,
+			"oversample": 8.0,
+			"shift": [0.0, 0.0]
+		}
+	]
+}

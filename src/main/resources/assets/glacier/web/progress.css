@@ -1,0 +1,177 @@
+/* Glacier v7 progress screen (pack "Glacier Client v7 [Main]", glacier_progress). Card 264x158 units (2 css px per unit).
+   The panorama behind it is drawn natively by ProgressWebScreen and pans over 120 s. */
+:root {
+	--panel: #232728;
+	--panel-edge: #33373a;
+	--card: #2c2f33;
+	--card-edge: #393c41;
+	--card-hover: #33373c;
+	--card-hover-edge: #484c52;
+	--accent: #7289da;
+	--accent-hover: #8296e0;
+	--track: #1d1f22;
+	--text: #ffffff;
+	--muted: #b9bbbe;
+}
+
+.pg-root {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	font-family: Roboto, sans-serif;
+	color: var(--text);
+}
+
+.pg-center {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.pg-card {
+	width: 528px;
+	max-width: 92%;
+	box-sizing: border-box;
+	padding: 18px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	background: rgba(35, 39, 40, 0.97);
+	border: 2px solid var(--panel-edge);
+	border-radius: 16px;
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+
+.pg-brand {
+	position: relative;
+	width: 100%;
+	height: 72px;
+	box-sizing: border-box;
+	background: var(--card);
+	border: 2px solid var(--card-edge);
+	border-radius: 12px;
+}
+
+.pg-inset {
+	position: absolute;
+	left: 6px;
+	top: 6px;
+	width: 56px;
+	height: 56px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--panel);
+	border: 2px solid var(--panel-edge);
+	border-radius: 12px;
+	box-sizing: border-box;
+}
+
+.pg-logo {
+	width: 40px;
+	height: 40px;
+}
+
+.pg-word {
+	position: absolute;
+	left: 76px;
+	top: 16px;
+	width: 220px;
+	height: 40px;
+}
+
+.pg-status {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+}
+
+.pg-spin {
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--card);
+	border: 2px solid var(--card-edge);
+	border-radius: 8px;
+	box-sizing: border-box;
+}
+
+.pg-spin-ico {
+	font-size: 14px;
+	color: var(--accent);
+}
+
+.pg-title {
+	flex-grow: 1;
+	font-size: 16px;
+	font-weight: 700;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.pg-chip {
+	min-width: 56px;
+	height: 26px;
+	padding: 0 10px;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--accent);
+	border-radius: 9px;
+}
+
+.pg-pct {
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.pg-track {
+	position: relative;
+	width: 100%;
+	height: 14px;
+	background: var(--track);
+	border: 2px solid var(--card-edge);
+	border-radius: 7px;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.pg-fill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 0%;
+	height: 100%;
+	background: var(--accent);
+	border-radius: 7px;
+}
+
+.pg-exit {
+	align-self: center;
+	width: 168px;
+	height: 36px;
+	box-sizing: border-box;
+	font-size: 14px;
+	color: var(--text);
+	background: var(--card);
+	border: 2px solid var(--card-edge);
+	border-radius: 10px;
+	cursor: pointer;
+}
+
+.pg-exit:hover {
+	background: var(--card-hover);
+	border-color: var(--card-hover-edge);
+}
