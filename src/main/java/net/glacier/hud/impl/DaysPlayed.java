@@ -9,8 +9,8 @@ import java.time.LocalDate;
  * settings, so they persist through config.json.
  */
 public class DaysPlayed extends CachedRowsHud {
-	private final SliderSetting days = add(new SliderSetting("Days Played Count", 0, 0, 1000000, 1));
-	private final SliderSetting lastDay = add(new SliderSetting("Last Counted Day", 0, 0, 1000000000, 1));
+	private final SliderSetting days = add(new SliderSetting("Days Played Count", 0, 0, 1000000, 1).hide());
+	private final SliderSetting lastDay = add(new SliderSetting("Last Counted Day", 0, 0, 1000000000, 1).hide());
 	private int shown = -1;
 
 	public DaysPlayed() {

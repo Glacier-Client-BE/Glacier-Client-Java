@@ -33,7 +33,7 @@ public class MixinAbstractClientPlayer {
 		if (cosmetics == null) return;
 		Capes.Cape cape = cosmetics.activeCape();
 		PlayerSkin skin = cir.getReturnValue();
-		if (cape == null || skin == null) return;
+		if (cape == null || skin == null || cape.pack()) return;
 
 		Identifier texture = cape.texture();
 		if (skin.equals(glacier$lastSource) && texture.equals(glacier$lastCape)) {

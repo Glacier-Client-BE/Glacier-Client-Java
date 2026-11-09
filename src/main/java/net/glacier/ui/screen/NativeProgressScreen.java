@@ -181,6 +181,8 @@ public final class NativeProgressScreen extends Screen {
 			float w = RenderUtil.textWidth("Exit", false, 14, null);
 			RenderUtil.drawText(g, "Exit", exitBox.x() + (exitBox.w() - w) / 2f, exitBox.y() + 18 - 7, 14, false, null, TEXT);
 		}
+		String tip = net.glacier.module.impl.LoadingTips.current();
+		if (!tip.isEmpty()) RenderUtil.drawTextCentered(g, RenderUtil.ellipsize(tip, cardW, false, 13, null), cardX + cardW / 2f, cardY + cardH + 22f, 13, null, 0xFFB8C0CC);
 		pose.popMatrix();
 	}
 

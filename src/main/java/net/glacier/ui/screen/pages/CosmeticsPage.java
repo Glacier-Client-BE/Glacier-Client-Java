@@ -11,7 +11,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.PlayerSkin;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.Pose;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
@@ -187,7 +193,7 @@ public final class CosmeticsPage {
 		if (p != null && mc.level != null) {
 			drawPlayer(k, mc, p, x + 1, y + 1, w - 2, h - 2);
 		} else {
-			if (cape != null) region(k, cape.texture(), x, y + 10, w, h - 40, 8);
+			if (cape != null) region(k, cape, x, y + 10, w, h - 40, 8);
 			else k.icon(ICON_NONE, x + w / 2f, y + h / 2f - 10, 22, MUTED);
 			k.textCenter("Join a world for the 3D preview", x + w / 2f, y + h - 16, 10, MUTED, false);
 		}
@@ -373,6 +379,7 @@ public final class CosmeticsPage {
 				st.outlineColor = 0;
 				st.nameTag = null;
 				st.displayFireAnimation = false;
+				hideBody(st);
 				if (st instanceof LivingEntityRenderState l) {
 					l.yRot = 0f;
 					l.xRot = 0f;
@@ -401,68 +408,24 @@ public final class CosmeticsPage {
 		if (x1 <= x0 || y1 <= y0) return false;
 
 		m.phase += tileDt * (hov ? 3.4f : 0.9f);
+		// Per-type framing, centred on the accessory (focus = height in blocks above the feet, ppb = pixels per block
+		// at a 96px art box). The player body is invisible, so only the accessory is on screen.
 		float base, amp, focus, ppb;
 		Accessories.Type ty = s.type == null ? Accessories.Type.WINGS : s.type;
-		if (s.type == null) {
-			base = 180f;
-			amp = 28f;
-			focus = 0.95f;
-			ppb = 58f;
-		} else switch (ty) {
-			case WINGS -> {
-				base = 180f;
-				amp = 30f;
-				focus = 1.1f;
-				ppb = 54f;
-			}
-			case BRACELET -> {
-				base = 35f;
-				amp = 28f;
-				focus = 0.82f;
-				ppb = 88f;
-			}
-			case BACKPACK -> { // from behind, a little to the side
-				base = 180f;
-				amp = 26f;
-				focus = 1.05f;
-				ppb = 72f;
-			}
-			case TAIL -> { // three-quarter from behind, low on the back
-				base = 150f;
-				amp = 30f;
-				focus = 0.85f;
-				ppb = 76f;
-			}
-			case PET -> { // three-quarter front, on the right shoulder
-				base = 28f;
-				amp = 26f;
-				focus = 1.5f;
-				ppb = 112f;
-			}
-			case SCARF -> { // front, neck and chest
-				base = 0f;
-				amp = 30f;
-				focus = 1.38f;
-				ppb = 92f;
-			}
-			case HAT -> { // front on the head, framed higher for the crown
-				base = 0f;
-				amp = 32f;
-				focus = 1.7f;
-				ppb = 104f;
-			}
-			case MASK -> { // face plate straight on
-				base = 0f;
-				amp = 26f;
-				focus = 1.55f;
-				ppb = 130f;
-			}
-			default -> { // head items: bandana, halo, ears, glasses
-				base = 0f;
-				amp = 34f;
-				focus = 1.55f;
-				ppb = 118f;
-			}
+		switch (ty) {
+			case WINGS -> { base = 180f; amp = 30f; focus = 1.08f; ppb = 58f; } // from behind
+			case BACKPACK -> { base = 180f; amp = 28f; focus = 1.02f; ppb = 100f; } // from behind
+			case TAIL -> { base = 160f; amp = 30f; focus = 0.78f; ppb = 90f; } // behind, slightly aside
+			case PET -> { base = 30f; amp = 28f; focus = 1.3f; ppb = 150f; } // three-quarter
+			case SCARF -> { base = 25f; amp = 30f; focus = 1.2f; ppb = 120f; } // three-quarter
+			case BRACELET -> { base = 35f; amp = 28f; focus = 0.62f; ppb = 150f; } // three-quarter
+			case HAT -> { base = 0f; amp = 32f; focus = 1.86f; ppb = 105f; }
+			case MASK -> { base = 0f; amp = 26f; focus = 1.68f; ppb = 150f; }
+			case GLASSES -> { base = 0f; amp = 28f; focus = 1.7f; ppb = 165f; }
+			case BANDANA -> { base = 0f; amp = 32f; focus = 1.78f; ppb = 125f; }
+			case EARS -> { base = 0f; amp = 32f; focus = 1.92f; ppb = 120f; }
+			case HALO -> { base = 0f; amp = 32f; focus = 1.98f; ppb = 150f; }
+			default -> { base = 0f; amp = 32f; focus = 1.7f; ppb = 120f; }
 		}
 		float ang = base + amp * (float) Math.sin(m.phase) + (hov ? 40f * (float) Math.sin(m.phase * 0.5f) : 0f);
 		float scale = ppb * (ih / 96f);
@@ -482,6 +445,79 @@ public final class CosmeticsPage {
 		return true;
 	}
 
+	private static final Identifier BLANK = Identifier.fromNamespaceAndPath("glacier", "textures/cosmetics/blank.png");
+
+	/**
+	 * Makes the player render nothing but the accessory layer: the skin is swapped for a fully transparent texture
+	 * (so body, outer layers and vanilla cape vanish while isInvisible stays false and AccessoryLayer still runs), and
+	 * armor, held items, head items, arrows, parrots, name and score text are cleared.
+	 */
+	private static void hideBody(EntityRenderState st) {
+		if (!(st instanceof AvatarRenderState a)) return;
+		if (a.skin != null) {
+			a.skin = new PlayerSkin(new ClientAsset.ResourceTexture(BLANK, BLANK), null, null, a.skin.model(), true);
+		}
+		a.showCape = false;
+		a.showExtraEars = false;
+		a.arrowCount = 0;
+		a.stingerCount = 0;
+		a.scoreText = null;
+		a.parrotOnLeftShoulder = null;
+		a.parrotOnRightShoulder = null;
+		a.isFallFlying = false;
+		a.isCrouching = false;
+		a.isPassenger = false;
+		a.isUsingItem = false;
+		a.headEquipment = ItemStack.EMPTY;
+		a.chestEquipment = ItemStack.EMPTY;
+		a.legsEquipment = ItemStack.EMPTY;
+		a.feetEquipment = ItemStack.EMPTY;
+		a.rightHandItemStack = ItemStack.EMPTY;
+		a.leftHandItemStack = ItemStack.EMPTY;
+		a.rightHandItemState.clear();
+		a.leftHandItemState.clear();
+		a.headItem.clear();
+		a.heldOnHead.clear();
+		a.rightArmPose = HumanoidModel.ArmPose.EMPTY;
+		a.leftArmPose = HumanoidModel.ArmPose.EMPTY;
+	}
+
+	/** Per-cape rotation phase, advanced only while the tile is drawn. */
+	private final java.util.HashMap<String, float[]> capePhase = new java.util.HashMap<>();
+
+	/**
+	 * A cape as a slowly turning flat 3D card: the outer face (u 1..11, v 1..17 of the 64x32 sheet) squeezed
+	 * horizontally by cos(angle), the inner face (u 12..22) shown past 90 degrees, with a little vertical shading and
+	 * a darkening towards edge-on. Faster while hovered.
+	 */
+	private void capeCard(MenuKit k, Capes.Cape cape, boolean hov, float x, float y, float w, float h) {
+		float[] ph = capePhase.computeIfAbsent(cape.name(), n -> new float[]{(n.hashCode() & 0xFF) / 40f});
+		ph[0] += tileDt * (hov ? 2.6f : 0.55f);
+		float c = (float) Math.cos(ph[0]);
+		float ac = Math.max(0.05f, Math.abs(c));
+		int u = c >= 0 ? 1 : 12;
+		boolean pack = cape.pack();
+		float s = pack ? (h - 12f) / 466f : Math.max(1f, (float) Math.floor((h - 10f) / 16f));
+		float cx = x + w / 2f, cy = y + h / 2f + (float) Math.sin(ph[0] * 1.7f) * 1.5f;
+		int shade = 0xFF000000 | ((int) (150 + 105 * ac) * 0x010101);
+		var m = k.g.pose();
+		k.scissor(x, y, w, h);
+		m.pushMatrix();
+		m.translate(cx, cy);
+		m.scale(ac * s, s);
+		if (pack) {
+			// Pack cape (640x670 sheet, faces from cape_glacier.mesh.json): outer 29..320 x 29..495, inner 349..640 x 37..494.
+			if (c >= 0) k.g.blit(RenderPipelines.GUI_TEXTURED, cape.texture(), -145, -233, 29f, 29f, 291, 466, 291, 466, 640, 670, shade);
+			else k.g.blit(RenderPipelines.GUI_TEXTURED, cape.texture(), -145, -233, 349f, 37f, 291, 466, 291, 457, 640, 670, shade);
+			k.g.fillGradient(-145, -233, 146, 233, 0x22FFFFFF, 0x55000000);
+		} else {
+			k.g.blit(RenderPipelines.GUI_TEXTURED, cape.texture(), -5, -8, (float) u, 1f, 10, 16, 10, 16, 64, 32, shade);
+			k.g.fillGradient(-5, -8, 5, 8, 0x22FFFFFF, 0x55000000);
+		}
+		m.popMatrix();
+		k.endScissor();
+	}
+
 	private boolean canModel(MenuKit k, float ty) {
 		Minecraft mc = Minecraft.getInstance();
 		return mc.player != null && mc.level != null && k.visibleY(ty, tileH());
@@ -495,7 +531,12 @@ public final class CosmeticsPage {
 		k.shadow(x, ty + (hov ? 8 : 0), w, tileH(), 16, hov ? 0x61000000 : 0x40000000, hov ? 5 : 2);
 		k.box(x, ty, w, tileH(), 16, on || hov ? 0xFF303237 : 0xFF2A2B2F, on ? acc : Draw.alpha(acc, 0.45f));
 		float aw = w - 18;
-		if (spec != null && spec.value != null && !NONE.equals(spec.value) && canModel(k, ty)) {
+		if (spec != null && spec.type == null && spec.value != null && !NONE.equals(spec.value) && k.visibleY(ty, tileH())
+				&& Capes.byName(spec.value) != null) {
+			k.round(x + 9, ty + 9, aw, 96, 12, INSET);
+			k.gradient(x + 9, ty + 9, aw, 96, 12, Draw.alpha(acc, 0.30f), Draw.alpha(acc, 0.04f));
+			capeCard(k, Capes.byName(spec.value), hov, x + 9, ty + 9, aw, 96);
+		} else if (spec != null && spec.value != null && !NONE.equals(spec.value) && spec.type != null && canModel(k, ty)) {
 			k.round(x + 9, ty + 9, aw, 96, 12, INSET);
 			k.gradient(x + 9, ty + 9, aw, 96, 12, Draw.alpha(acc, 0.30f), Draw.alpha(acc, 0.04f));
 			if (!model3d(k, spec, hov, x + 9, ty + 9, aw, 96, y)) art.paint(x + 9, ty + 9, aw, 96);
@@ -543,7 +584,7 @@ public final class CosmeticsPage {
 		for (Capes.Cape cape : Capes.ALL) {
 			specs.add(new TileSpec(cape.name(), "Cape", cape.accent(), cape.name().equals(sel), (ax, ay, aw, ah) -> {
 				k.gradient(ax, ay, aw, ah, 12, cape.base(), cape.accent());
-				region(k, cape.texture(), ax, ay, aw, ah, 5);
+				region(k, cape, ax, ay, aw, ah, 5);
 			}, () -> setCape(cape.name()), null, cape.name()));
 		}
 		return grid(k, x, y, w, null, specs.toArray(new TileSpec[0]));
@@ -583,7 +624,7 @@ public final class CosmeticsPage {
 		Capes.Cape cape = Capes.byName(selectedCape());
 		row(k, ix, ry, iw, "Cape", cape == null ? NONE : cape.name(),
 				cape == null ? (ax, ay, aw, ah) -> k.icon(ICON_NONE, ax + aw / 2f, ay + ah / 2f, 22, MUTED)
-						: (ax, ay, aw, ah) -> region(k, cape.texture(), ax, ay, aw, ah, 1.64f),
+						: (ax, ay, aw, ah) -> region(k, cape, ax, ay, aw, ah, 1.64f),
 				"capes", cape == null ? null : () -> setCape(NONE));
 		ry += 60;
 		for (Accessories.Type t : Accessories.Type.values()) {
@@ -615,7 +656,14 @@ public final class CosmeticsPage {
 	private MenuKit kitRef;
 
 	/** Draws only the top-left 22x17 part of a 64x32 cape sheet (front and back faces), integer scaled up to maxScale. */
-	private static void region(MenuKit k, Identifier id, float x, float y, float w, float h, float maxScale) {
+	private static void region(MenuKit k, Capes.Cape cape, float x, float y, float w, float h, float maxScale) {
+		Identifier id = cape.texture();
+		if (cape.pack()) { // native 640x670 sheet: outer face 291x466 at (29,29), drawn at its real texture size
+			float ps = Math.min(w / 291f, h / 466f);
+			float dw = 291 * ps, dh = 466 * ps;
+			k.image(id, x + (w - dw) / 2f, y + (h - dh) / 2f, dw, dh, 29, 29, 291, 466, 640, 670);
+			return;
+		}
 		float s = Math.min(Math.min(w / 22f, h / 17f), maxScale);
 		if (s >= 1f) s = maxScale >= 2 ? (float) Math.floor(s) : s;
 		float dw = 22 * s, dh = 17 * s;

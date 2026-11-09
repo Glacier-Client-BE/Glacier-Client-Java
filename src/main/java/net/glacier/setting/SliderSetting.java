@@ -45,6 +45,12 @@ public class SliderSetting extends Setting<Double> {
 		return step;
 	}
 
+	@Override
+	public SliderSetting hide() {
+		super.hide();
+		return this;
+	}
+
 	public float f() {
 		return value.floatValue();
 	}

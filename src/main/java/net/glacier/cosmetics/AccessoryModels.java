@@ -24,16 +24,6 @@ final class AccessoryModels {
 		return Parts.GLASSES;
 	}
 
-	/** Right wing, extends towards -X from its pivot. Pivot is on the body's back at the shoulder line. */
-	static ModelPart wingRight() {
-		return Parts.WING_RIGHT;
-	}
-
-	/** Left wing, mirrored UVs so the design reads the same way round on both sides. */
-	static ModelPart wingLeft() {
-		return Parts.WING_LEFT;
-	}
-
 	static ModelPart braceletRight() {
 		return Parts.BRACELET_RIGHT;
 	}
@@ -44,6 +34,40 @@ final class AccessoryModels {
 
 	static ModelPart halo() {
 		return Parts.HALO;
+	}
+
+	private static BedrockModel glacierHalo;
+	private static boolean glacierHaloLoaded;
+	private static PolyMesh glacierMask;
+	private static boolean glacierMaskLoaded;
+	private static PolyMesh glacierCape;
+	private static boolean glacierCapeLoaded;
+
+	/** The pack halo (square ring bone "halo" under "glacier_halo_base"), or null if its file is missing. */
+	static BedrockModel glacierHalo() {
+		if (!glacierHaloLoaded) {
+			glacierHaloLoaded = true;
+			glacierHalo = BedrockModel.load("/assets/glacier/models/cosmetics/halo_glacier.geo.json");
+		}
+		return glacierHalo;
+	}
+
+	/** The pack mask poly mesh in head coordinates, or null if its file is missing. */
+	static PolyMesh glacierMask() {
+		if (!glacierMaskLoaded) {
+			glacierMaskLoaded = true;
+			glacierMask = PolyMesh.load("/assets/glacier/models/cosmetics/mask_glacier.mesh.json");
+		}
+		return glacierMask;
+	}
+
+	/** The pack cape (16 stacked segments, per-face UVs on the 640x670 sheet) in body coordinates, hanging from y = 0, z = 2. */
+	static PolyMesh glacierCape() {
+		if (!glacierCapeLoaded) {
+			glacierCapeLoaded = true;
+			glacierCape = PolyMesh.load("/assets/glacier/models/cosmetics/cape_glacier.mesh.json");
+		}
+		return glacierCape;
 	}
 
 	static ModelPart ears() {
@@ -121,10 +145,6 @@ final class AccessoryModels {
 			root.addOrReplaceChild("templeL", CubeListBuilder.create().texOffs(0, 5).addBox(4.0F, -4.5F, -4.0F, 1, 1, 4), PartPose.ZERO);
 		});
 
-		static final ModelPart WING_RIGHT = wing(1);
-
-		static final ModelPart WING_LEFT = wing(-1);
-
 		static final ModelPart BRACELET_RIGHT = bake(20, 7,
 				CubeListBuilder.create().texOffs(0, 0).addBox(-3.5F, 8.0F, -2.5F, 5, 2, 5));
 
@@ -200,23 +220,6 @@ final class AccessoryModels {
 			root.addOrReplaceChild("strap", CubeListBuilder.create().texOffs(0, 7).addBox(-4.0F, -6.0F, -4.0F, 8, 2, 8,
 					new net.minecraft.client.model.geom.builders.CubeDeformation(0.6F)), PartPose.ZERO);
 		});
-
-		/** Five-feather fan on a bone, with shorter coverts behind. dir is 1 for the right wing, -1 for the left. */
-		private static ModelPart wing(int dir) {
-			final int[] len = {11, 14, 15, 13, 9};
-			return bake(64, 32, root -> {
-				root.addOrReplaceChild("bone", CubeListBuilder.create().texOffs(0, 0)
-						.addBox(dir > 0 ? -15.0F : 0.0F, -2.0F, -0.5F, 15, 2, 2), PartPose.ZERO);
-				for (int i = 0; i < 5; i++) {
-					float x = dir * -(1.5F + 3.0F * i);
-					float rot = dir * (0.03F + 0.06F * i);
-					PartPose pose = PartPose.offsetAndRotation(x, -1.0F, 0.0F, 0.0F, 0.0F, rot);
-					root.addOrReplaceChild("f" + i, CubeListBuilder.create().texOffs(i * 8, 5).addBox(-1.5F, 0.0F, 0.0F, 3, len[i], 1), pose);
-					root.addOrReplaceChild("c" + i, CubeListBuilder.create().texOffs(i * 8, 22).addBox(-1.5F, 0.0F, 1.0F, 3, 6, 1),
-							PartPose.offsetAndRotation(x, -0.5F, 0.0F, 0.0F, 0.0F, rot));
-				}
-			});
-		}
 
 		private static ModelPart bake(int texW, int texH, CubeListBuilder cubes) {
 			return bake(texW, texH, root -> root.addOrReplaceChild("accessory", cubes, PartPose.ZERO));

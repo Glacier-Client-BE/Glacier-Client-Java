@@ -64,13 +64,17 @@ import java.util.Map;
 public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final int FULL_BRIGHT = 0xF000F0;
 	private static final float PX = 1.0F / 16.0F;
-	private static final float WING_YAW = 0.5236F;
 	private static final float CROUCH_TILT = -0.25F;
 	private static final Quaternionf ROT = new Quaternionf();
 	/** Per-segment pitch of the tail; poses accumulate, so it droops from the back and curls up at the tip. */
 	private static final float[] TAIL_PITCH = {-0.55F, -0.15F, 0.35F, 0.3F};
 
 	private final Map<Identifier, RenderType> renderTypes = new HashMap<>();
+	private final Map<Identifier, RenderType> meshTypes = new HashMap<>();
+	private float wingPhase;
+	private float lastAge;
+	private float fall;
+	private float glide;
 
 	public AccessoryLayer(RenderLayerParent<AvatarRenderState, PlayerModel> parent) {
 		super(parent);
@@ -124,12 +128,21 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 
 		design = Accessories.selected(Type.HALO);
 		if (design != null) {
+			BedrockModel packHalo = "glacier".equals(Accessories.model(Type.HALO, design)) ? AccessoryModels.glacierHalo() : null;
 			pose.pushPose();
 			model.head.translateAndRotate(pose);
-			pose.translate(0.0F, Mth.sin(age * 0.1D) * 0.5F * PX, 0.0F);
-			ROT.rotationY(age * 0.03F);
-			pose.mulPose(ROT);
-			draw(collector, pose, FULL_BRIGHT, AccessoryModels.halo(), Accessories.texture(Type.HALO, design));
+			if (packHalo != null) {
+				// animation.glacier.halo: bob 0..1, pitch -4 * bob, spin 40 deg/s of animation time
+				float bob = (Mth.sin(age * 0.1F) + 1.0F) * 0.5F;
+				packHalo.rotate("halo", -4.0F * bob, age * 2.0F, 0.0F);
+				packHalo.offset("halo", 0.0F, bob, 0.0F);
+				draw(collector, pose, FULL_BRIGHT, packHalo.root, Accessories.texture(Type.HALO, design));
+			} else {
+				pose.translate(0.0F, Mth.sin(age * 0.1D) * 0.5F * PX, 0.0F);
+				ROT.rotationY(age * 0.03F);
+				pose.mulPose(ROT);
+				draw(collector, pose, FULL_BRIGHT, AccessoryModels.halo(), Accessories.texture(Type.HALO, design));
+			}
 			pose.popPose();
 		}
 
@@ -148,30 +161,46 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 
 		design = Accessories.selected(Type.WINGS);
 		if (design != null) {
-			Identifier texture = Accessories.texture(Type.WINGS, design);
-			boolean crouching = state.pose == Pose.CROUCHING;
+			Wings kind = Wings.of(Accessories.model(Type.WINGS, design));
+			float dt = Mth.clamp(age - lastAge, 0.0F, 5.0F);
+			lastAge = age;
 			float speed = Mth.clamp(limbAmount, 0.0F, 1.0F);
-			float flap = Mth.sin(age * (0.12D + 0.2D * speed)) * (0.12F + 0.18F * speed);
-			flap += Mth.sin(age * 0.05D) * 0.04F;
-			pose.pushPose();
-			model.body.translateAndRotate(pose);
-			pose.translate(0.0F, 2.0F * PX, 2.5F * PX);
+			Minecraft mc = Minecraft.getInstance();
+			float fallTarget = 0.0F;
+			if (mc.player != null && !mc.player.onGround() && !mc.player.isInWater() && !state.isFallFlying) {
+				fallTarget = Mth.clamp((float) (-mc.player.getDeltaMovement().y - 0.45D) * 2.0F, 0.0F, 1.0F);
+			}
+			fall += (fallTarget - fall) * Math.min(1.0F, dt * 0.2F);
+			glide += ((state.isFallFlying ? 1.0F : 0.0F) - glide) * Math.min(1.0F, dt * 0.15F);
+			wingPhase += dt * (0.12F + 0.2F * speed + 0.35F * fall);
+			ModelPart wings = kind.pose(wingPhase, fall, glide, !state.chestEquipment.isEmpty());
+			if (wings != null) {
+				pose.pushPose();
+				model.body.translateAndRotate(pose);
+				applyTilt(pose, state.pose == Pose.CROUCHING);
+				draw(collector, pose, light, wings, Accessories.texture(Type.WINGS, design));
+				pose.popPose();
+			}
+		}
 
-			pose.pushPose();
-			applyTilt(pose, crouching);
-			ROT.rotationY(WING_YAW + flap);
-			pose.mulPose(ROT);
-			draw(collector, pose, light, AccessoryModels.wingRight(), texture);
-			pose.popPose();
-
-			pose.pushPose();
-			applyTilt(pose, crouching);
-			ROT.rotationY(-WING_YAW - flap);
-			pose.mulPose(ROT);
-			draw(collector, pose, light, AccessoryModels.wingLeft(), texture);
-			pose.popPose();
-
-			pose.popPose();
+		net.glacier.cosmetics.Capes.Cape packCape = capeToDraw();
+		if (packCape != null) {
+			PolyMesh mesh = AccessoryModels.glacierCape();
+			if (mesh != null) {
+				float speed = Mth.clamp(limbAmount, 0.0F, 1.0F);
+				boolean phys = capePhysics();
+				float deg = 6.0F + (phys ? state.capeLean / 2.0F + state.capeFlap : 0.0F) + (state.pose == Pose.CROUCHING ? 25.0F : 0.0F);
+				float lean = Mth.clamp(deg, 0.0F, 120.0F) * Mth.DEG_TO_RAD + 0.03F * Mth.sin(age * 0.08F) * (1.0F - speed);
+				float roll = !phys ? 0.0F : state.capeLean2 / 2.0F * Mth.DEG_TO_RAD;
+				pose.pushPose();
+				model.body.translateAndRotate(pose);
+				pose.translate(0.0F, 0.0F, 2.0F * PX);
+				ROT.rotationX(lean).rotateZ(-roll);
+				pose.mulPose(ROT);
+				pose.translate(0.0F, 0.0F, -2.0F * PX);
+				drawMesh(collector, pose, light, mesh, packCape.texture());
+				pose.popPose();
+			}
 		}
 
 		design = Accessories.selected(Type.HAT);
@@ -186,7 +215,9 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 		if (design != null) {
 			pose.pushPose();
 			model.head.translateAndRotate(pose);
-			draw(collector, pose, light, AccessoryModels.mask(), Accessories.texture(Type.MASK, design));
+			PolyMesh packMask = "glacier".equals(Accessories.model(Type.MASK, design)) ? AccessoryModels.glacierMask() : null;
+			if (packMask != null) drawMesh(collector, pose, light, packMask, Accessories.texture(Type.MASK, design));
+			else draw(collector, pose, light, AccessoryModels.mask(), Accessories.texture(Type.MASK, design));
 			pose.popPose();
 		}
 
@@ -275,6 +306,24 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 
 	private void draw(SubmitNodeCollector collector, PoseStack pose, int light, ModelPart part, Identifier texture) {
 		collector.submitModelPart(part, pose, renderType(texture), light, OverlayTexture.NO_OVERLAY, null, false, false);
+	}
+
+	private void drawMesh(SubmitNodeCollector collector, PoseStack pose, int light, PolyMesh mesh, Identifier texture) {
+		RenderType type = meshTypes.computeIfAbsent(texture, RenderTypes::entityCutoutNoCull);
+		collector.submitCustomGeometry(pose, type, (p, vc) -> mesh.render(p, vc, light, OverlayTexture.NO_OVERLAY));
+	}
+
+	private static boolean capePhysics() {
+		net.glacier.module.impl.CosmeticsModule c = net.glacier.module.ModuleManager.get(net.glacier.module.impl.CosmeticsModule.class);
+		return c == null || c.capePhysics.on();
+	}
+
+	/** The selected cape when it is a pack cape (drawn here with its own mesh), else null. */
+	private static net.glacier.cosmetics.Capes.Cape capeToDraw() {
+		net.glacier.module.impl.CosmeticsModule cosmetics = net.glacier.module.ModuleManager.get(net.glacier.module.impl.CosmeticsModule.class);
+		if (cosmetics == null) return null;
+		net.glacier.cosmetics.Capes.Cape cape = cosmetics.activeCape();
+		return cape != null && cape.pack() ? cape : null;
 	}
 
 	private RenderType renderType(Identifier texture) {

@@ -36,7 +36,13 @@ public class HudEditorScreen extends Screen {
 		private static final int AXIS_LINE = 0x30FFFFFF;
 		private static final int IDLE_BORDER = 0x55FFFFFF;
 
+		private static final int HANDLE = 5;
+
 		private HudModule dragging;
+		private HudModule resizing;
+		private float resizeScale0;
+		private int resizeW0;
+		private int resizeX, resizeY;
 		private int dragDx;
 		private int dragDy;
 		/** Set by drags and scales; the config is written once on release or close, not on every wheel notch. */
@@ -61,6 +67,18 @@ public class HudEditorScreen extends Screen {
 
 		/** Starts dragging the module under the point; false when there is none. */
 		public boolean begin(double mx, double my, int sw, int sh) {
+			HudModule hov = moduleAt(mx, my, sw, sh);
+			for (HudModule h : ModuleManager.hud()) {
+				if (!h.isEnabled() || (hov != null && h != hov && !overHandle(h, mx, my, sw, sh))) continue;
+				if (overHandle(h, mx, my, sw, sh)) {
+					resizing = h;
+					resizeScale0 = h.scale();
+					resizeW0 = Math.max(1, h.pixelW());
+					resizeX = h.screenX(sw);
+					resizeY = h.screenY(sh);
+					return true;
+				}
+			}
 			HudModule h = moduleAt(mx, my, sw, sh);
 			if (h == null) return false;
 			dragging = h;
@@ -69,7 +87,21 @@ public class HudEditorScreen extends Screen {
 			return true;
 		}
 
+		/** True over the bottom-right resize handle of the module. */
+		private static boolean overHandle(HudModule h, double mx, double my, int sw, int sh) {
+			int x2 = h.screenX(sw) + h.pixelW();
+			int y2 = h.screenY(sh) + h.pixelH();
+			return mx >= x2 - HANDLE - 1 && mx <= x2 + HANDLE && my >= y2 - HANDLE - 1 && my <= y2 + HANDLE;
+		}
+
 		public boolean drag(double mx, double my, int sw, int sh, boolean snap) {
+			if (resizing != null) {
+				float w = Math.max(8f, (float) mx - resizeX);
+				resizing.setScale(Math.round(Math.max(0.5f, Math.min(4f, resizeScale0 * w / resizeW0)) * 20f) / 20f);
+				resizing.setScreenPos(resizeX, resizeY, sw, sh);
+				dirty = true;
+				return true;
+			}
 			if (dragging == null) return false;
 			int nx = (int) mx - dragDx;
 			int ny = (int) my - dragDy;
@@ -84,6 +116,11 @@ public class HudEditorScreen extends Screen {
 
 		/** Ends a drag and saves; false when nothing was being dragged. */
 		public boolean release() {
+			if (resizing != null) {
+				resizing = null;
+				saveIfDirty();
+				return true;
+			}
 			if (dragging == null) return false;
 			dragging = null;
 			saveIfDirty();
@@ -107,7 +144,7 @@ public class HudEditorScreen extends Screen {
 
 		/** Draws every enabled module with an outline; the hovered one gets the accent. Returns the hovered one. */
 		public HudModule renderModules(GuiGraphics g, int sw, int sh, int mouseX, int mouseY, boolean idleOutline) {
-			HudModule hover = dragging != null ? dragging : moduleAt(mouseX, mouseY, sw, sh);
+			HudModule hover = resizing != null ? resizing : dragging != null ? dragging : moduleAt(mouseX, mouseY, sw, sh);
 			List<HudModule> list = ModuleManager.hud();
 			for (int i = 0, n = list.size(); i < n; i++) {
 				HudModule h = list.get(i);
@@ -119,12 +156,22 @@ public class HudEditorScreen extends Screen {
 				} catch (RuntimeException ignored) {
 				}
 				if (h == hover) {
-					Draw.outline(g, px - 2, py - 2, h.pixelW() + 4, h.pixelH() + 4, Theme.R_SM, Theme.ACCENT, 1);
+					box(g, px, py, h.pixelW(), h.pixelH(), Theme.ACCENT, true);
 				} else if (idleOutline) {
-					Draw.outline(g, px - 2, py - 2, h.pixelW() + 4, h.pixelH() + 4, Theme.R_SM, IDLE_BORDER, 1);
+					box(g, px, py, h.pixelW(), h.pixelH(), IDLE_BORDER, false);
 				}
 			}
 			return hover;
+		}
+
+		/** Crisp whole-pixel 1px frame (no sprites, so it never blurs); the active one gets corner handles. */
+		private static void box(GuiGraphics g, int x, int y, int w, int h, int color, boolean handles) {
+			g.fill(x, y, x + w, y + 1, color);
+			g.fill(x, y + h - 1, x + w, y + h, color);
+			g.fill(x, y + 1, x + 1, y + h - 1, color);
+			g.fill(x + w - 1, y + 1, x + w, y + h - 1, color);
+			if (!handles) return;
+			g.fill(x + w - HANDLE, y + h - HANDLE, x + w + 1, y + h + 1, color);
 		}
 
 		public static void drawGrid(GuiGraphics g, int sw, int sh) {
@@ -146,7 +193,7 @@ public class HudEditorScreen extends Screen {
 		HudModule hover = dragger.renderModules(g, width, height, mouseX, mouseY, true);
 
 		Draw.centered(g, "HUD Editor", width / 2, 8, 1f, Theme.TEXT);
-		Draw.centered(g, "Drag to move   |   Scroll to scale   |   Esc to finish", width / 2, 20, 1f, Theme.DIM);
+		Draw.centered(g, "Drag to move   |   Drag corner or scroll to scale   |   Esc to finish", width / 2, 20, 1f, Theme.DIM);
 
 		if (hover != null) {
 			String label = hover.name() + "  " + String.format("%.2fx", hover.scale());

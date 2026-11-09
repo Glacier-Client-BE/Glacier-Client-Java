@@ -22,7 +22,6 @@ import net.glacier.hud.impl.AirSupplyHud;
 import net.glacier.hud.impl.AttackCooldownHud;
 import net.glacier.hud.impl.BlockInfoHud;
 import net.glacier.hud.impl.BowIndicator;
-import net.glacier.hud.impl.ChunkHud;
 import net.glacier.hud.impl.ClockHud;
 import net.glacier.hud.impl.CpsHud;
 import net.glacier.hud.impl.CrosshairCount;
@@ -48,7 +47,6 @@ import net.glacier.hud.impl.OffhandHud;
 import net.glacier.hud.impl.PlayersOnlineHud;
 import net.glacier.hud.impl.PotionTimersHud;
 import net.glacier.hud.impl.ReachDisplay;
-import net.glacier.hud.impl.RotationHud;
 import net.glacier.hud.impl.ServerDisplay;
 import net.glacier.hud.impl.SessionTimeHud;
 import net.glacier.hud.impl.SlotCounter;
@@ -146,8 +144,6 @@ public final class ModuleManager {
 		register(new WeatherChanger());
 		register(new CpsHud());
 		register(new SessionTimeHud());
-		register(new RotationHud());
-		register(new ChunkHud());
 		register(new TntTimerHud());
 
 		register(new net.glacier.module.impl.FreeLook());
@@ -159,6 +155,9 @@ public final class ModuleManager {
 
 		net.glacier.module.registry.HudRegistry.registerAll(ModuleManager::register);
 		net.glacier.module.registry.UtilityRegistry.registerAll(ModuleManager::register);
+		net.glacier.module.registry.ExtraARegistry.registerAll(ModuleManager::register);
+		net.glacier.module.registry.ExtraBRegistry.registerAll(ModuleManager::register);
+		net.glacier.module.registry.ExtraCRegistry.registerAll(ModuleManager::register);
 
 		get(ElementsModule.class).setEnabled(true);
 		get(EditorsModule.class).setEnabled(true);

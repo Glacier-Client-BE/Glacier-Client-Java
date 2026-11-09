@@ -31,12 +31,10 @@ public class ArmorHud extends SlotHudModule {
 	private static final int SILHOUETTE = 0x59FFFFFF;
 
 	private final ChoiceSetting orientation = add(new ChoiceSetting("Orientation", "Vertical", "Vertical", "Horizontal"));
-	private final ToggleSetting showHeld = add(new ToggleSetting("Show Held Item", false));
 	private final ToggleSetting hideEmpty = add(new ToggleSetting("Hide Empty", true));
 	private final ToggleSetting showNumber = add(new ToggleSetting("Show Durability Number", false));
 	private final ChoiceSetting numberFormat = add(new ChoiceSetting("Number Format", "Remaining", "Remaining", "Percent"));
 	private final ToggleSetting reversed = add(new ToggleSetting("Reversed Order", false));
-	private final ToggleSetting showOffhand = add(new ToggleSetting("Include Offhand", false));
 	/** Durability percentage under which the warning colour is used; 0 turns the warning off. */
 	private final SliderSetting warnBelow = add(new SliderSetting("Warning Below %", 0, 0, 100, 5));
 	private final ColorSetting warnColor = add(new ColorSetting("Warning Color", Theme.HUD_BAD));
@@ -57,8 +55,8 @@ public class ArmorHud extends SlotHudModule {
 	/** Rebuilds the cached slot list at most once per game tick (or immediately when settings change the shape). */
 	private void refresh() {
 		int tick = mc.player == null ? -1 : mc.player.tickCount;
-		int key = tick * 64 + (hideEmpty.on() ? 1 : 0) + (showHeld.on() ? 2 : 0) + (showNumber.on() ? 4 : 0)
-				+ (reversed.on() ? 8 : 0) + (showOffhand.on() ? 16 : 0) + (numberFormat.is("Percent") ? 32 : 0);
+		int key = tick * 64 + (hideEmpty.on() ? 1 : 0) + (showNumber.on() ? 4 : 0)
+				+ (reversed.on() ? 8 : 0) + (numberFormat.is("Percent") ? 32 : 0);
 		if (key == lastTick) return;
 		lastTick = key;
 		count = 0;
@@ -70,13 +68,6 @@ public class ArmorHud extends SlotHudModule {
 			if (st.isEmpty() && hideEmpty.on()) continue;
 			put(st, i);
 		}
-		if (showHeld.on()) putExtra(mc.player.getMainHandItem());
-		if (showOffhand.on()) putExtra(mc.player.getOffhandItem());
-	}
-
-	/** Adds a held item after the armour pieces, without an empty-slot silhouette. */
-	private void putExtra(ItemStack st) {
-		if (!st.isEmpty() || !hideEmpty.on()) put(st, -1);
 	}
 
 	private void put(ItemStack st, int spriteIdx) {

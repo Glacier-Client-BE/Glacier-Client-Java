@@ -37,19 +37,25 @@ public class NativeMenuScreen extends Screen {
 	private static final int DIM = 0x99000000;
 
 	private static int lastTab;
+	private static final long ANIM_MS = 170;
+
+	private long animStart = System.currentTimeMillis();
+	private long closeStart;
+	private boolean closing;
 
 	private int tab;
-	private final float[] scrolls = new float[TABS.length];
-	private final float[] contents = new float[TABS.length];
+	// static so the menu reopens exactly where it was left (tab, scroll, search, selected group, cosmetics tab)
+	private static final float[] scrolls = new float[TABS.length];
+	private static final float[] contents = new float[TABS.length];
 	private float hostH = 540;
 	private final List<MenuKit.Hit> hits = new ArrayList<>();
 	private MenuKit.Hit active;
-	private final ModulesPage modules = new ModulesPage();
-	private final ElementsPage elements = new ElementsPage();
-	private final EditorsPage editors = new EditorsPage(() -> Minecraft.getInstance().setScreen(new HudEditorScreen(this)));
-	private final MusicPage music = new MusicPage();
-	private final CosmeticsPage cosmetics = new CosmeticsPage();
-	private final PerformancePage performance = new PerformancePage();
+	private static final ModulesPage modules = new ModulesPage();
+	private static final ElementsPage elements = new ElementsPage();
+	private static final EditorsPage editors = new EditorsPage(() -> Minecraft.getInstance().setScreen(new HudEditorScreen(Minecraft.getInstance().screen)));
+	private static final MusicPage music = new MusicPage();
+	private static final CosmeticsPage cosmetics = new CosmeticsPage();
+	private static final PerformancePage performance = new PerformancePage();
 
 	/** Page placement of the current screen size: scale, origin and logical viewport (WebScreen.Fit). */
 	private float scale = 1f;
@@ -80,6 +86,14 @@ public class NativeMenuScreen extends Screen {
 
 	@Override
 	public void onClose() {
+		lastTab = tab;
+		if (!closing) {
+			closing = true;
+			closeStart = System.currentTimeMillis();
+		}
+	}
+
+	private void finishClose() {
 		lastTab = tab;
 		Config.save();
 		net.glacier.module.impl.CosmeticsModule.clearPreview();
@@ -136,9 +150,21 @@ public class NativeMenuScreen extends Screen {
 	public void render(GuiGraphics g, int mxs, int mys, float partial) {
 		fit();
 		hits.clear();
-		g.fill(0, 0, width, height, DIM);
+		long now = System.currentTimeMillis();
+		float t = closing ? 1f - (now - closeStart) / (float) ANIM_MS : (now - animStart) / (float) ANIM_MS;
+		if (closing && t <= 0f) {
+			finishClose();
+			return;
+		}
+		t = Math.max(0f, Math.min(1f, t));
+		float ease = 1f - (1f - t) * (1f - t) * (1f - t);
+		g.fill(0, 0, width, height, ((int) (0x99 * ease) << 24));
 		var pose = g.pose();
 		pose.pushMatrix();
+		float a = 0.94f + 0.06f * ease;
+		pose.translate(width / 2f, height / 2f + (1f - ease) * 10f);
+		pose.scale(a, a);
+		pose.translate(-width / 2f, -height / 2f);
 		pose.translate(ox, oy);
 		pose.scale(scale, scale);
 		MenuKit k = new MenuKit(g, lx(mxs), ly(mys), hits);

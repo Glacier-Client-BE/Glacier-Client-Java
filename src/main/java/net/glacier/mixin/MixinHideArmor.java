@@ -18,6 +18,6 @@ public class MixinHideArmor {
 	@Inject(method = "renderArmorPiece", at = @At("HEAD"), cancellable = true)
 	private void glacier$hideArmor(PoseStack pose, SubmitNodeCollector collector, ItemStack stack, EquipmentSlot slot,
 								   int light, HumanoidRenderState state, CallbackInfo ci) {
-		if (HideArmor.hides(slot)) ci.cancel();
+		if (HideArmor.hides(slot, state)) ci.cancel();
 	}
 }

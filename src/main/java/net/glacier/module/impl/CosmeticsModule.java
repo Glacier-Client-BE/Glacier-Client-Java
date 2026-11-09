@@ -14,6 +14,8 @@ import net.glacier.setting.ToggleSetting;
 public class CosmeticsModule extends Module {
 	public final ChoiceSetting cape = add(new ChoiceSetting("Cape", Capes.NONE, Capes.OPTIONS));
 	public final ToggleSetting showCape = add(new ToggleSetting("Show Cape", true));
+	/** Velocity lean, sideways sway and flap on pack capes; off gives a fixed, calm cape. */
+	public final ToggleSetting capePhysics = add(new ToggleSetting("Cape Physics", true));
 
 	public final ChoiceSetting bandana = accessory(Accessories.Type.BANDANA);
 	public final ChoiceSetting glasses = accessory(Accessories.Type.GLASSES);

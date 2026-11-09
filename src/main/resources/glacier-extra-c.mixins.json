@@ -1,0 +1,14 @@
+{
+	"required": false,
+	"package": "net.glacier.mixin.extrac",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"ExtraCChat",
+		"ExtraCChatScreen",
+		"ExtraCGui",
+		"ExtraCTabList"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

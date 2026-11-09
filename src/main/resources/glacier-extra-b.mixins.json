@@ -1,0 +1,17 @@
+{
+	"required": false,
+	"package": "net.glacier.mixin.extrab",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"MixinOldItemInHand",
+		"MixinOldMinecraft",
+		"MixinOldCamera",
+		"MixinOldGameRenderer",
+		"MixinOldEquipmentLayer",
+		"MixinBetterArmorBar",
+		"MixinHideShield"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

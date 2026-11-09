@@ -1357,8 +1357,6 @@ def make_scarf(spec):
 # ---------------------------------------------------------------- mask (64x32)
 # plate 8x6x1 (0,0) | strap 8x2x8 (0,7)
 MASKS = {  # name -> (palette, 6 rows of 8 chars, strap palette index or None); '.' transparent
- "Glacier Visor": ("122539 24477e 5b87ea 8fb4ff e8f4ff c8e0ff60 ffffff",
-                   ["........", ".122221.", "15655551", "15555561", ".133331.", "........"], 1),
  "Oni": ("5a0a10 a01820 d8303c ff6a5a f8e8c8 1c1c24 e8b830",
          ["62222226", "20322302", "2..22..2", "2..22..2", "22222222", "24455442"], 0),
  "Kitsune": ("8a1a1a d83a3a f4f0e8 d8d0c4 ffffff 2a2a34 e8a8a8",
@@ -1407,7 +1405,6 @@ def w_gaurora(w):
     if w.r >= w.L - 2: return GAU[7] if w.x != 1 else GAU[6]                      # frosted tips
     t = .12 + .62 * w.g + (.1 if w.x == 1 else 0) - (.12 if sc(w) else 0) + .08 * (nz(w, 3, 2) - .5)
     return rp(GAU, t, w.c, w.r)
-WINGS.insert(0, ("Glacier Aurora", w_gaurora, ol_soft, (GAU[7], GAU[5], GAU[1])))
 
 GBN = P("122539 24477e 5b87ea 8fb4ff e8f4ff")
 def b_gfrost(U, y):
@@ -1421,7 +1418,6 @@ def br_gcuff(U, y):
     if y == 1: return GBN[1] if x in (0, 4) else GBN[2]
     return GBN[4] if x == 2 else GBN[3] if x != 4 else GBN[2]
 BRACELETS.insert(0, ("Glacier Cuff", (br_gcuff, GBN[3], GBN[1])))
-HALOS = {"Glacier Ring": ("24477e 5b87ea 8fb4ff e8f4ff ffffff 122539", "13431", "01210", "23532"), **HALOS}
 GLS = {"Glacier Lens": ("122539 24477e 5b87ea 8fb4ff c8e0ff ffffff", ["1221", "2354", "1221"], "2222", "120", 2, "2110"), **GLS}
 EARS = {"Glacier Bear": ("5a6c8c 8c9eba c8d6ea f0f6ff 5b87ea 3a5cb8 122539", ["232", "242"], "22", "."), **EARS}
 
@@ -1447,6 +1443,9 @@ DESIGNS = {  # folder -> [(display name, builder)] ; sizes in SIZES
 SIZES = {"bandana": (36, 11), "glasses": (24, 10), "wings": (64, 32), "bracelet": (20, 7), "halo": (16, 8), "ears": (16, 8),
          "backpack": (64, 32), "hat": (64, 32), "tail": (64, 32), "pet": (64, 32), "scarf": (64, 32), "mask": (64, 32)}
 TYPE_ORDER = ["bandana", "glasses", "wings", "bracelet", "halo", "ears", "backpack", "hat", "tail", "pet", "scarf", "mask"]   # enum order in Accessories.java
+# Designs ported from the pack: PNG lives in textures/cosmetics/pack (byte-identical copy, never regenerated, any size/colours).
+EXTERNAL = {"wings": [("Glacier Wings", "wings_glacier.png")], "halo": [("Glacier Halo", "halo_glacier.png")],
+            "mask": [("Glacier Mask", "mask_glacier.png")]}
 def slug(name): return name.lower().replace(" ", "_")
 
 # ---------------------------------------------------------------- previews
@@ -1556,7 +1555,8 @@ def build():
 def check():
     errs = []; java = parse_java(); total = 0
     for folder in TYPE_ORDER:
-        mine = [n for n, _ in DESIGNS[folder]]
+        ext = EXTERNAL.get(folder, [])
+        mine = [n for n, _ in ext] + [n for n, _ in DESIGNS[folder]]
         if folder not in java: errs.append(f"{folder}: missing in Accessories.java"); continue
         jn = java[folder]
         if jn != mine: errs.append(f"{folder}: Java list != generator list (java-only {sorted(set(jn) - set(mine))}, gen-only {sorted(set(mine) - set(jn))})")
@@ -1565,7 +1565,12 @@ def check():
         if len(set(slugs)) != len(slugs): errs.append(f"{folder}: duplicate slugs")
         d = os.path.join(OUT, folder)
         files = sorted(f for f in os.listdir(d) if f.endswith(".png")) if os.path.isdir(d) else []
+        for n, f in ext:
+            p = os.path.join(OUT, "pack", f)
+            if not os.path.exists(p): errs.append(f"{folder}/{n}: missing pack/{f}"); continue
+            total += 1
         for n in jn:
+            if n in [e[0] for e in ext]: continue
             if not n.isascii() or len(n) > 18: errs.append(f"{folder}/{n}: name must be ASCII and <= 18 chars")
             p = os.path.join(d, slug(n) + ".png")
             if not os.path.exists(p): errs.append(f"{folder}/{n}: missing {slug(n)}.png"); continue
@@ -1593,7 +1598,6 @@ def main():
     if "--check" in sys.argv: sys.exit(0 if check() else 1)
     if "--capes" in sys.argv:
         for n, fn in CAPES.items(): save(make_cape(fn), n + ".png")
-    make_cape(c_glacier_set).im.save(os.path.join(OUT, "glacier_set.png"), optimize=True, compress_level=9)
     n = build()
     print(n, "accessory textures written;", {f: len(DESIGNS[f]) for f in TYPE_ORDER})
     if "--no-check" not in sys.argv: sys.exit(0 if check() else 1)

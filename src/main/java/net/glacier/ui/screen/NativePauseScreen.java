@@ -80,100 +80,115 @@ public final class NativePauseScreen extends PauseScreen {
 		return css / 9f;
 	}
 
-	private static void mid(GuiGraphics g, String s, float x, float cy, float css, int argb) {
-		float f = fs(css);
-		Draw.text(g, s, x, cy - 4f * f, f, argb);
-	}
-
-	private static void center(GuiGraphics g, String s, float cx, float cy, float css, int argb) {
-		float f = fs(css);
-		Draw.text(g, s, cx - Draw.textWidth(s, f) / 2f, cy - 4f * f, f, argb);
-	}
-
 	// ------------------------------------------------------------------ render
+
+	/** Current css-to-GUI scale; every rectangle is rounded to whole GUI pixels (no pose scale) so edges stay crisp. */
+	private float sc = 1f;
+
+	private int p(float css) {
+		return Math.round(css * sc);
+	}
+
+	/** Text centred on a css y, positioned on whole GUI pixels, sized by the css font size times the scale. */
+	private void mid(GuiGraphics g, String s, float x, float cy, float css, int argb) {
+		float f = fs(css) * sc;
+		Draw.text(g, s, p(x), Math.round(p(cy) - 4f * f), f, argb);
+	}
+
+	private void center(GuiGraphics g, String s, float cx, float cy, float css, int argb) {
+		float f = fs(css) * sc;
+		Draw.text(g, s, Math.round(p(cx) - Draw.textWidth(s, f) / 2f), Math.round(p(cy) - 4f * f), f, argb);
+	}
 
 	@Override
 	public void render(GuiGraphics g, int rawX, int rawY, float partial) {
 		hits.clear();
 		g.fill(0, 0, width, height, DIM);
-		float s = scale();
-		int lw = (int) Math.ceil(width / s), lh = (int) Math.ceil(height / s);
-		int mx = Math.round(rawX / s), my = Math.round(rawY / s);
+		sc = scale();
+		float lw = width / sc, lh = height / sc;
+		int mx = rawX, my = rawY;
 
-		var pose = g.pose();
-		pose.pushMatrix();
-		pose.scale(s, s);
-
-		int px = Math.round((lw - PANEL_W) / 2f), py = PANEL_Y;
-		g.blit(RenderPipelines.GUI_TEXTURED, ART, px + 100, py + 35, 0f, 0f, 200, 200, ART_W, ART_H, ART_W, ART_H,
-				Draw.alpha(0xFFFFFFFF, 0.85f));
+		float px = (lw - PANEL_W) / 2f, py = PANEL_Y;
+		g.blit(RenderPipelines.GUI_TEXTURED, ART, p(px + 100), p(py + 35), 0f, 0f, p(200), p(200), ART_W, ART_H, ART_W,
+				ART_H, Draw.alpha(0xFFFFFFFF, 0.85f));
 
 		boolean live = !confirming;
-		button(g, mx, my, px + 29, py + 4, 168, 40, 10, 14, "Return to Game", Kind.ACCENT, live, this::resume);
-		button(g, mx, my, px + 203, py + 4, 168, 40, 10, 14, "Disconnect", Kind.CARD, live, () -> confirming = true);
-		button(g, mx, my, px + 29, py + 50, 168, 40, 10, 14, "Achievements", Kind.CARD, live, this::achievements);
-		button(g, mx, my, px + 203, py + 50, 168, 40, 10, 14, "Wardrobe", Kind.CARD, live,
+		button(g, mx, my, px + 29, py + 4, 168, 40, 14, "Return to Game", Kind.ACCENT, live, this::resume);
+		button(g, mx, my, px + 203, py + 4, 168, 40, 14, "Disconnect", Kind.CARD, live, () -> confirming = true);
+		button(g, mx, my, px + 29, py + 50, 168, 40, 14, "Achievements", Kind.CARD, live, this::achievements);
+		button(g, mx, my, px + 203, py + 50, 168, 40, 14, "Wardrobe", Kind.CARD, live,
 				() -> show(() -> NativeMenuScreen.open("cosmetics")));
-		button(g, mx, my, px + 29, py + 96, 342, 40, 10, 14, "Take Screenshot", Kind.CARD, live, this::screenshot);
-		button(g, mx, my, px + 29, py + 142, 168, 40, 10, 14, "Options", Kind.CARD, live, this::options);
-		button(g, mx, my, px + 203, py + 142, 168, 40, 10, 14, "Information", Kind.CARD, live,
+		button(g, mx, my, px + 29, py + 96, 342, 40, 14, "Take Screenshot", Kind.CARD, live, this::screenshot);
+		button(g, mx, my, px + 29, py + 142, 168, 40, 14, "Options", Kind.CARD, live, this::options);
+		button(g, mx, my, px + 203, py + 142, 168, 40, 14, "Information", Kind.CARD, live,
 				() -> showInfo = !showInfo);
-		button(g, mx, my, px + 29, py + 186, 168, 40, 10, 14, "Mods", Kind.PILL, live,
+		button(g, mx, my, px + 29, py + 186, 168, 40, 14, "Mods", Kind.PILL, live,
 				() -> show(() -> NativeMenuScreen.open(null)));
 		if (canShareToLan()) {
-			button(g, mx, my, px + 203, py + 186, 168, 40, 10, 14, "Open to LAN", Kind.PILL, live,
+			button(g, mx, my, px + 203, py + 186, 168, 40, 14, "Open to LAN", Kind.PILL, live,
 					() -> show(() -> new ShareToLanScreen(this)));
 		}
 		if (showInfo) center(g, INFO, lw / 2f, py + 232 + 7, 12, MUTED);
 
 		drawStatus(g);
 		if (confirming) drawConfirm(g, mx, my, lw, lh);
-		pose.popMatrix();
 	}
 
-	/** .pz-status: 8,8, 176 wide, 2px border, padding 8/10, label 11px bold, row 14px icon + text with 8px gap. */
+	/** One nine-slice rect from css coordinates, both edges rounded so it lands on whole GUI pixels. */
+	private void box(GuiGraphics g, String tex, float x, float y, float w, float h, int argb) {
+		int x0 = p(x), y0 = p(y);
+		Draw.sprite(g, tex, x0, y0, Math.max(1, p(x + w) - x0), Math.max(1, p(y + h) - y0), argb);
+	}
+
+	/** .pz-status: 8,8, 176 wide, label 11px bold, row 14px icon + text with 8px gap. */
 	private void drawStatus(GuiGraphics g) {
 		int x = 8, y = 8, w = 176, h = 53;
-		Draw.round(g, x, y, w, h, 10, CARD);
-		Draw.outline(g, x, y, w, h, 10, CARD_EDGE, 2);
+		box(g, "mm_card", x, y, w, h, WHITE);
 		mid(g, "Game Status:", x + 12, y + 16.5f, 11, MUTED);
-		float f = fs(14), cy = y + 35f;
+		float f = fs(14) * sc, cy = y + 35f;
 		int iw = Draw.iconWidth(ICON_PAUSE, f);
-		Draw.icon(g, ICON_PAUSE, x + 12, cy - 4f * f, f, ACCENT);
-		mid(g, "Paused", x + 12 + iw + 8, cy, 14, WHITE);
+		Draw.icon(g, ICON_PAUSE, p(x + 12), Math.round(p(cy) - 4f * f), f, ACCENT);
+		Draw.text(g, "Paused", p(x + 12) + iw + p(8), Math.round(p(cy) - 4f * f), f, WHITE);
 	}
 
 	/** .pz-cbox: 352x124 centred over a second 50% dim, with its soft drop shadow. */
-	private void drawConfirm(GuiGraphics g, int mx, int my, int lw, int lh) {
-		g.fill(-4096, -4096, 8192, 8192, DIM);
+	private void drawConfirm(GuiGraphics g, int mx, int my, float lw, float lh) {
+		g.fill(0, 0, width, height, DIM);
 		int bw = 352, bh = 124;
-		int bx = Math.round((lw - bw) / 2f), by = Math.round((lh - bh) / 2f);
+		float bx = (lw - bw) / 2f, by = (lh - bh) / 2f;
 		for (int i = 4; i >= 1; i--) {
 			int e = i * 4;
-			Draw.round(g, bx - e, by + 8 - e, bw + 2 * e, bh + 2 * e, Math.min(16, 12 + e), 0x0D000000);
+			Draw.round(g, p(bx - e), p(by + 8 - e), p(bw + 2 * e), p(bh + 2 * e), Math.min(16, p(12 + e)), 0x0D000000);
 		}
-		Draw.round(g, bx, by, bw, bh, 12, CARD);
-		Draw.outline(g, bx, by, bw, bh, 12, CARD_EDGE, 2);
+		box(g, "mm_card", bx, by, bw, bh, WHITE);
 		mid(g, "Leave this world?", bx + 18, by + 16 + 9.5f, 16, WHITE);
 		mid(g, "Your progress is saved.", bx + 18, by + 48, 12, MUTED);
-		int rowY = by + bh - 2 - 14 - 34;
-		button(g, mx, my, bx + 18, rowY, 156, 34, 9, 13, "Cancel", Kind.PILL, true, () -> confirming = false);
-		button(g, mx, my, bx + 18 + 318 - 156, rowY, 156, 34, 9, 13, "Disconnect", Kind.ACCENT, true, this::disconnect);
+		float rowY = by + bh - 2 - 14 - 34;
+		button(g, mx, my, bx + 18, rowY, 156, 34, 13, "Cancel", Kind.PILL, true, () -> confirming = false);
+		button(g, mx, my, bx + 18 + 318 - 156, rowY, 156, 34, 13, "Disconnect", Kind.ACCENT, true, this::disconnect);
 	}
 
 	/**
-	 * One css button: background fill over the whole box, then the 2px border ring (pause.css). Accent keeps its
-	 * border colour on hover; cards change border on hover; pills only the background.
+	 * One css button drawn as a single nine-slice texture (the pack's mm_card / mm_pill / mm_pill_active) on whole GUI
+	 * pixels. Accent keeps its look on hover (slightly brighter tint); cards and pills swap to their hover texture.
 	 */
-	private void button(GuiGraphics g, int mx, int my, int x, int y, int w, int h, int radius, float font, String label,
+	private void button(GuiGraphics g, int mx, int my, float x, float y, float w, float h, float font, String label,
 						Kind kind, boolean active, Runnable action) {
-		boolean hover = active && mx >= x && my >= y && mx < x + w && my < y + h;
-		int fill = kind == Kind.ACCENT ? (hover ? ACCENT_HOVER : ACCENT) : (hover ? CARD_HOVER : CARD);
-		int edge = kind == Kind.ACCENT ? ACCENT : (hover && kind == Kind.CARD ? CARD_HOVER_EDGE : CARD_EDGE);
-		Draw.round(g, x, y, w, h, radius, fill);
-		Draw.outline(g, x, y, w, h, radius, edge, 2);
+		int x0 = p(x), y0 = p(y), w0 = Math.max(1, p(x + w) - x0), h0 = Math.max(1, p(y + h) - y0);
+		boolean hover = active && mx >= x0 && my >= y0 && mx < x0 + w0 && my < y0 + h0;
+		String tex;
+		int tint = WHITE;
+		switch (kind) {
+			case ACCENT -> {
+				tex = "mm_pill_active";
+				if (hover) tint = 0xFFE6EAFF;
+			}
+			case CARD -> tex = hover ? "mm_card_hover" : "mm_card";
+			default -> tex = hover ? "mm_pill_hover" : "mm_pill";
+		}
+		Draw.sprite(g, tex, x0, y0, w0, h0, tint);
 		center(g, label, x + w / 2f, y + h / 2f, font, WHITE);
-		if (active) hits.add(new Hit(x, y, w, h, action));
+		if (active) hits.add(new Hit(x0, y0, w0, h0, action));
 	}
 
 	// ----------------------------------------------------------------- actions
@@ -235,10 +250,9 @@ public final class NativePauseScreen extends PauseScreen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent e, boolean dbl) {
-		float s = scale();
 		for (int i = hits.size() - 1; i >= 0; i--) {
 			Hit h = hits.get(i);
-			if (!h.in(Math.round(e.x() / s), Math.round(e.y() / s))) continue;
+			if (!h.in(e.x(), e.y())) continue;
 			h.click().run();
 			return true;
 		}

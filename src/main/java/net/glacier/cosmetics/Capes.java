@@ -33,13 +33,21 @@ public final class Capes {
 			return file != null ? file : name.toLowerCase(Locale.ROOT) + ".png";
 		}
 
+		/**
+		 * True for capes ported from the pack: their texture keeps its native size (640x670) and is drawn by AccessoryLayer with
+		 * the pack's own cape mesh, not by the vanilla cape layer, which would sample a 64x32 layout.
+		 */
+		public boolean pack() {
+			return file != null && file.startsWith("pack/");
+		}
+
 		public Identifier texture() {
 			return Identifier.fromNamespaceAndPath(NAMESPACE, "textures/cosmetics/" + fileName());
 		}
 	}
 
 	public static final List<Cape> ALL = List.of(
-			new Cape("Glacier Set", 0xFF122539, 0xFF5B87EA, "glacier_set.png"),
+			new Cape("Glacier Set", 0xFF7289DA, 0xFF000000, "pack/glacier_set.png"),
 			new Cape("Glacier", 0xFF7289DA, 0xFFB9C6F2),
 			new Cape("Midnight", 0xFF1B2140, 0xFFC9D3FF),
 			new Cape("Ember", 0xFF7A1F10, 0xFFFF8A2A),

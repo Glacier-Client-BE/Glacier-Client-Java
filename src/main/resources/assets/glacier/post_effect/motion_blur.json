@@ -1,0 +1,48 @@
+{
+    "targets": {
+        "swap": {},
+        "prev": { "persistent": true }
+    },
+    "passes": [
+        {
+            "vertex_shader": "minecraft:core/screenquad",
+            "fragment_shader": "glacier:post/motion_blur",
+            "inputs": [
+                { "sampler_name": "In", "target": "minecraft:main" },
+                { "sampler_name": "Prev", "target": "prev" }
+            ],
+            "output": "swap",
+            "uniforms": {
+                "BlurConfig": [
+                    { "name": "Params", "type": "vec4", "value": [ 0.5, 0.0, 0.0, 0.0 ] }
+                ]
+            }
+        },
+        {
+            "vertex_shader": "minecraft:core/screenquad",
+            "fragment_shader": "minecraft:post/blit",
+            "inputs": [
+                { "sampler_name": "In", "target": "swap" }
+            ],
+            "output": "prev",
+            "uniforms": {
+                "BlitConfig": [
+                    { "name": "ColorModulate", "type": "vec4", "value": [ 1.0, 1.0, 1.0, 1.0 ] }
+                ]
+            }
+        },
+        {
+            "vertex_shader": "minecraft:core/screenquad",
+            "fragment_shader": "minecraft:post/blit",
+            "inputs": [
+                { "sampler_name": "In", "target": "prev" }
+            ],
+            "output": "minecraft:main",
+            "uniforms": {
+                "BlitConfig": [
+                    { "name": "ColorModulate", "type": "vec4", "value": [ 1.0, 1.0, 1.0, 1.0 ] }
+                ]
+            }
+        }
+    ]
+}
