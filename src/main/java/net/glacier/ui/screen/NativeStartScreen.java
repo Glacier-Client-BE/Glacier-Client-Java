@@ -10,7 +10,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -200,7 +199,7 @@ public class NativeStartScreen extends Screen {
 		txtCenter(g, "Play Game", sx + 176, sy + 126, 18, fa(TEXT));
 		hit(sx, sy + 100, 352, 52, false, () -> NativePlayScreen.open(this));
 
-		button(g, "Options", sx, sy + 160, () -> open(new OptionsScreen(this, Minecraft.getInstance().options)));
+		button(g, "Options", sx, sy + 160, () -> open(ScreenFactory.options(this)));
 		button(g, "Marketplace", sx, sy + 212, () -> open(NativeMenuScreen.open(null)));
 		button(g, "Dressing Room", sx, sy + 264, () -> open(NativeMenuScreen.open("cosmetics")));
 

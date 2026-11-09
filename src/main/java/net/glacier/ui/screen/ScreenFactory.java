@@ -28,6 +28,10 @@ public final class ScreenFactory {
 		return NATIVE ? new NativePauseScreen(showPauseMenu) : new PauseWebScreen(showPauseMenu);
 	}
 
+	public static Screen options(Screen parent) {
+		return NATIVE ? new NativeOptionsScreen(parent) : new net.minecraft.client.gui.screens.options.OptionsScreen(parent, net.minecraft.client.Minecraft.getInstance().options);
+	}
+
 	public static Screen progress(Screen source) {
 		return NATIVE ? NativeProgressScreen.wrap(source) : new ProgressWebScreen(source);
 	}
