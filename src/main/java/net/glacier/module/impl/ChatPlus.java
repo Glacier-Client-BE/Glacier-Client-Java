@@ -251,8 +251,8 @@ public class ChatPlus extends Module {
 	public static boolean tryCopy(MouseButtonEvent e) {
 		ChatPlus p = active();
 		if (p == null || mc.gui.hud == null) return false;
-		boolean hit = (p.copy.is("Ctrl+Click") && e.button() == 0 && e.hasControlDown())
-				|| (p.copy.is("Right Click") && e.button() == 1);
+		boolean hit = (p.copy.is("Ctrl+Click") && net.glacier.compat.Mouse.button(e) == 0 && e.hasControlDown())
+				|| (p.copy.is("Right Click") && net.glacier.compat.Mouse.button(e) == 1);
 		if (!hit || !(mc.gui.hud.getChat() instanceof ChatTextLookup lookup)) return false;
 		String text = lookup.glacier$textAt(e.x(), e.y());
 		if (text == null || text.isBlank()) return false;

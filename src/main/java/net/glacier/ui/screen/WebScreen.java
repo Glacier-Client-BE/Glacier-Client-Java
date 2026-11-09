@@ -180,19 +180,19 @@ public class WebScreen extends Screen {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		Fit f = fit();
-		return view.mouseClicked(logicalX(f, event.x()), logicalY(f, event.y()), event.button());
+		return view.mouseClicked(logicalX(f, event.x()), logicalY(f, event.y()), net.glacier.compat.Mouse.button(event));
 	}
 
 	@Override
 	public boolean mouseReleased(MouseButtonEvent event) {
 		Fit f = fit();
-		return view.mouseReleased(logicalX(f, event.x()), logicalY(f, event.y()), event.button());
+		return view.mouseReleased(logicalX(f, event.x()), logicalY(f, event.y()), net.glacier.compat.Mouse.button(event));
 	}
 
 	@Override
 	public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
 		Fit f = fit();
-		return view.mouseDragged(logicalX(f, event.x()), logicalY(f, event.y()), event.button());
+		return view.mouseDragged(logicalX(f, event.x()), logicalY(f, event.y()), net.glacier.compat.Mouse.button(event));
 	}
 
 	@Override

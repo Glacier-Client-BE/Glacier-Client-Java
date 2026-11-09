@@ -120,9 +120,9 @@ public class HudQuickScreen extends Screen {
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		if (overButton(event.x(), event.y())) {
 			webPressed = true;
-			return view.mouseClicked(lx(event.x()), ly(event.y()), event.button());
+			return view.mouseClicked(lx(event.x()), ly(event.y()), net.glacier.compat.Mouse.button(event));
 		}
-		return event.button() == 0 && dragger.begin(event.x(), event.y(), width, height);
+		return net.glacier.compat.Mouse.button(event) == 0 && dragger.begin(event.x(), event.y(), width, height);
 	}
 
 	@Override
@@ -136,7 +136,7 @@ public class HudQuickScreen extends Screen {
 		if (!webPressed) return false;
 		webPressed = false;
 		fit();
-		return view.mouseReleased(lx(event.x()), ly(event.y()), event.button());
+		return view.mouseReleased(lx(event.x()), ly(event.y()), net.glacier.compat.Mouse.button(event));
 	}
 
 	@Override

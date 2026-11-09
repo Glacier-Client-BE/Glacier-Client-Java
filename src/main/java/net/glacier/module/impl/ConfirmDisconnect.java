@@ -35,7 +35,7 @@ public class ConfirmDisconnect extends Module {
 			final Component original = target.getMessage();
 			final long[] armedAt = {0L};
 			ScreenMouseEvents.allowMouseClick(screen).register((s, click) -> {
-				if (!isEnabled() || click.button() != 0 || !target.isMouseOver(click.x(), click.y())) return true;
+				if (!isEnabled() || net.glacier.compat.Mouse.button(click) != 0 || !target.isMouseOver(click.x(), click.y())) return true;
 				long now = System.currentTimeMillis();
 				if (armedAt[0] != 0L && now - armedAt[0] < ARM_MS) return true;
 				armedAt[0] = now;

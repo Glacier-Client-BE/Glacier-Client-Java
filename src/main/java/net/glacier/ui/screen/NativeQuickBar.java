@@ -71,7 +71,7 @@ public final class NativeQuickBar extends Screen {
 		originY = Math.round((height - lh * s) / 2f);
 
 		int total = LOGO_SIZE + GAP + WORD_H + GAP + ROW_MARGIN + BTN_H;
-		int top = Math.round((lh - total) / 2f);
+		int top = Math.round((lh - BTN_H) / 2f) - (total - BTN_H);
 		int rowTop = top + LOGO_SIZE + GAP + WORD_H + GAP + ROW_MARGIN;
 		// Back, MODS, Settings, Grid: one centred row; the logo and word sit on the same centre line.
 		int rowW = BTN_SMALL + BTN_GAP + BTN_WIDE + BTN_GAP + BTN_SMALL + BTN_GAP + BTN_SMALL;
@@ -176,10 +176,10 @@ public final class NativeQuickBar extends Screen {
 		double mx = event.x();
 		double my = event.y();
 		if (overButton(mx, my)) {
-			if (event.button() == 0) press(lx(mx), ly(my));
+			if (net.glacier.compat.Mouse.button(event) == 0) press(lx(mx), ly(my));
 			return true;
 		}
-		return event.button() == 0 && dragger.begin(mx, my, width, height);
+		return net.glacier.compat.Mouse.button(event) == 0 && dragger.begin(mx, my, width, height);
 	}
 
 	private void press(double x, double y) {

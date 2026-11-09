@@ -122,19 +122,19 @@ public class StartScreen extends Screen {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent e, boolean doubleClick) {
 		fit();
-		return view.mouseClicked(e.x() / scale, e.y() / scale, e.button());
+		return view.mouseClicked(e.x() / scale, e.y() / scale, net.glacier.compat.Mouse.button(e));
 	}
 
 	@Override
 	public boolean mouseReleased(MouseButtonEvent e) {
 		fit();
-		return view.mouseReleased(e.x() / scale, e.y() / scale, e.button());
+		return view.mouseReleased(e.x() / scale, e.y() / scale, net.glacier.compat.Mouse.button(e));
 	}
 
 	@Override
 	public boolean mouseDragged(MouseButtonEvent e, double dx, double dy) {
 		fit();
-		return view.mouseDragged(e.x() / scale, e.y() / scale, e.button());
+		return view.mouseDragged(e.x() / scale, e.y() / scale, net.glacier.compat.Mouse.button(e));
 	}
 
 	@Override

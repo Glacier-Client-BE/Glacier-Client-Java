@@ -203,7 +203,7 @@ public class HudEditorScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		if (event.button() == 0 && dragger.begin(event.x(), event.y(), width, height)) return true;
+		if (net.glacier.compat.Mouse.button(event) == 0 && dragger.begin(event.x(), event.y(), width, height)) return true;
 		return super.mouseClicked(event, doubleClick);
 	}
 

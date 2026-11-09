@@ -272,7 +272,7 @@ public final class NativeProgressScreen extends Screen {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		layout();
-		if (event.button() == 0 && exitBox != null && exitBox.contains(event.x() / s, event.y() / s)) {
+		if (net.glacier.compat.Mouse.button(event) == 0 && exitBox != null && exitBox.contains(event.x() / s, event.y() / s)) {
 			closeSource();
 			return true;
 		}

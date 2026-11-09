@@ -90,15 +90,15 @@ public final class WebPage {
 	}
 
 	public boolean click(MouseButtonEvent e) {
-		return view.mouseClicked(e.x() / scale, e.y() / scale, e.button());
+		return view.mouseClicked(e.x() / scale, e.y() / scale, net.glacier.compat.Mouse.button(e));
 	}
 
 	public boolean release(MouseButtonEvent e) {
-		return view.mouseReleased(e.x() / scale, e.y() / scale, e.button());
+		return view.mouseReleased(e.x() / scale, e.y() / scale, net.glacier.compat.Mouse.button(e));
 	}
 
 	public boolean drag(MouseButtonEvent e) {
-		return view.mouseDragged(e.x() / scale, e.y() / scale, e.button());
+		return view.mouseDragged(e.x() / scale, e.y() / scale, net.glacier.compat.Mouse.button(e));
 	}
 
 	public boolean scroll(double x, double y, double dy) {
