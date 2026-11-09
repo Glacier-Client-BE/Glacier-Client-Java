@@ -17,7 +17,6 @@ public final class GLFW {
 	public static final int GLFW_KEY_KP_0 = InputConstants.KEY_NUMPAD0;
 	public static final int GLFW_KEY_KP_9 = InputConstants.KEY_NUMPAD9;
 	public static final int GLFW_KEY_F1 = InputConstants.KEY_F1;
-	public static final int GLFW_KEY_F25 = InputConstants.KEY_F24; public static final int GLFW_KEY_KP_0X = 0;
 	public static final int GLFW_KEY_ENTER = InputConstants.KEY_RETURN;
 	public static final int GLFW_KEY_DELETE = InputConstants.KEY_DELETE;
 	public static final int GLFW_KEY_UP = InputConstants.KEY_UP;
