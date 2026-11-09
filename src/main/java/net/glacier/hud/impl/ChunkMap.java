@@ -43,6 +43,7 @@ public class ChunkMap extends HudModule {
 	private long builtSeed;
 	private boolean seedKnown;
 	private String posText = "0, 0";
+	private final WidthCache posWidth = new WidthCache();
 
 	public ChunkMap() {
 		super("Chunk Map", "Locate slime chunks and view grid boundaries.");
@@ -139,7 +140,7 @@ public class ChunkMap extends HudModule {
 		}
 		if (showPosition.on()) {
 			int ty = gy + size + (letters ? LETTER_H : 0) + 1;
-			drawText(g, posText, gx + size / 2 - textWidth(posText) / 2, ty, Theme.HUD_MUTED);
+			drawText(g, posText, gx + size / 2 - cachedWidth(posWidth, posText) / 2, ty, Theme.HUD_MUTED);
 		}
 	}
 }

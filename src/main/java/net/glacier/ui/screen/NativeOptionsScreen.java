@@ -127,6 +127,9 @@ public final class NativeOptionsScreen extends Screen {
 	private int section;
 	private float scroll, content, viewH = 400;
 	private String query = "";
+	/** Search results for the query they were built from; rebuilt only when the query text changes. */
+	private String searchQuery;
+	private List<Row> searchRows = List.of();
 	private boolean searchFocus;
 	private boolean textOn;
 	private KeyMapping listening;
@@ -364,6 +367,15 @@ public final class NativeOptionsScreen extends Screen {
 
 	private List<Row> visibleRows() {
 		if (query.isBlank()) return sections.get(section).rows();
+		if (!query.equals(searchQuery)) {
+			searchQuery = query;
+			searchRows = filterRows();
+		}
+		return searchRows;
+	}
+
+	/** Rows of every section whose label matches the search, each group under its section head. */
+	private List<Row> filterRows() {
 		String q = query.trim().toLowerCase(Locale.ROOT);
 		List<Row> out = new ArrayList<>();
 		for (Section s : sections) {

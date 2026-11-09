@@ -34,6 +34,12 @@ public final class ModulesPage {
 	private static final int GROUP_MIN = 6;
 	private static final int DEFAULT_ICON = 0xF085;
 	private static final Map<String, Integer> ICONS = new HashMap<>();
+	/** Collapsed sections, kept for the session: "grid/GROUP" for grid categories, "moduleid/Section" in a settings sheet. */
+	private static final java.util.Set<String> COLLAPSED = new java.util.HashSet<>();
+
+	private static void flip(String key) {
+		if (!COLLAPSED.remove(key)) COLLAPSED.add(key);
+	}
 
 	static {
 		Object[] t = {"fpscounter", 0xf625, "pingcounter", 0xf012, "coordinates", 0xf3c5, "coordinateshud", 0xf3c5,
@@ -63,6 +69,8 @@ public final class ModulesPage {
 	private String selKey;
 	private boolean capturing;
 	private float sheetScroll;
+	private String descFor;
+	private List<String> descLines = List.of();
 	private float lastGridContent, lastGridH, lastBodyContent, lastBodyH;
 
 	public boolean sheetOpen() {
@@ -96,6 +104,13 @@ public final class ModulesPage {
 	}
 
 	private static final Comparator<Module> BY_NAME = Comparator.comparing(m -> m.name().toLowerCase(Locale.ROOT));
+
+	private static boolean matches(Module m, ModuleGroup g, String q) {
+		if (m.name().toLowerCase(Locale.ROOT).contains(q)) return true;
+		if (g.display().toLowerCase(Locale.ROOT).contains(q)) return true;
+		String d = m.description();
+		return q.length() >= 3 && d != null && d.toLowerCase(Locale.ROOT).contains(q);
+	}
 
 	private static int glyph(Module m) {
 		Integer cp = ICONS.get(m.name().toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", ""));
@@ -198,7 +213,7 @@ public final class ModulesPage {
 			if (src == null) continue;
 			List<Module> list = new ArrayList<>();
 			for (Module m : src) {
-				if (q.isEmpty() || m.name().toLowerCase(Locale.ROOT).contains(q)) list.add(m);
+				if (q.isEmpty() || matches(m, g, q)) list.add(m);
 			}
 			if (list.isEmpty()) continue;
 			list.sort(BY_NAME);
@@ -219,14 +234,24 @@ public final class ModulesPage {
 			List<Module> list = lists.get(si);
 			if (headers) {
 				if (si > 0) cur += 10;
+				String ck = "grid/" + sections.get(si).name();
+				boolean shut = q.isEmpty() && COLLAPSED.contains(ck);
 				if (cur + 16 >= gy && cur <= gy + gh) {
+					boolean hh = k.hover(x, cur, gw, 16);
 					String title = sections.get(si).display().toUpperCase(Locale.ROOT);
-					k.text(title, x, cur + 8, 10, 0xFF8B9097, true);
-					k.text(String.valueOf(list.size()), x + MenuKit.width(title, 10, true) + 8, cur + 8, 10, 0xFF5E636A, false);
-					k.fill(x + MenuKit.width(title, 10, true) + 8 + MenuKit.width(String.valueOf(list.size()), 10, false) + 10,
-							cur + 8, gw - (MenuKit.width(title, 10, true) + 8 + MenuKit.width(String.valueOf(list.size()), 10, false) + 10), 1, 0x12FFFFFF);
+					String count = String.valueOf(list.size());
+					float hw = MenuKit.width(title, 10, true), nw = MenuKit.width(count, 10, false);
+					k.text(title, x, cur + 8, 10, hh ? 0xFFD6DAE0 : 0xFF8B9097, true);
+					k.text(count, x + hw + 8, cur + 8, 10, 0xFF5E636A, false);
+					k.fill(x + hw + 8 + nw + 10, cur + 8, gw - (hw + 8 + nw + 10) - 18, 1, 0x12FFFFFF);
+					k.icon(shut ? 0xF054 : 0xF078, x + gw - 6, cur + 8, 8, hh ? 0xFFD6DAE0 : 0xFF8B9097);
+					if (q.isEmpty()) k.hit(x, cur, gw, 16, () -> flip(ck));
 				}
 				cur += 16 + 8;
+				if (shut) {
+					cur -= 4;
+					continue;
+				}
 			}
 			for (int i = 0; i < list.size(); i++) {
 				float cx = x + (i % 3) * (colW + 12);
@@ -352,6 +377,19 @@ public final class ModulesPage {
 		float y = by + 8 - sheetScroll;
 		List<Setting<?>> list = visible(m);
 		float start = y;
+		String desc = m.description();
+		if (desc != null && !desc.isBlank()) {
+			if (!desc.equals(descFor)) {
+				descFor = desc;
+				descLines = MenuKit.wrap(desc, cw, 11, false);
+			}
+			y += 6;
+			for (String line : descLines) {
+				k.text(line, cx, y + 7, 11, 0xFF8B9097);
+				y += 15;
+			}
+			y += 4;
+		}
 		if (list.isEmpty()) {
 			k.textCenter("This module has no settings.", cx + cw / 2f, y + 24 + 7.5f, 12, 0xFF99AAB5, false);
 			y += 24 + 15 + 24;
@@ -359,15 +397,25 @@ public final class ModulesPage {
 			for (Setting<?> s : list) y = row(k, m, s, cx, y, cw);
 		} else {
 			for (String gname : GROUP_ORDER) {
-				boolean any = false;
+				int n = 0;
+				for (Setting<?> s : list) if (groupOf(s).equals(gname)) n++;
+				if (n == 0) continue;
+				String ck = m.id() + "/" + gname;
+				boolean shut = COLLAPSED.contains(ck);
+				boolean hh = k.hover(cx, y + 10, cw, 21);
+				String title = gname.toUpperCase(Locale.ROOT);
+				float hy = y + 14 + 6.25f;
+				k.text(title, cx, hy, 10, hh ? 0xFFD6DAE0 : 0xFF8B9097, true);
+				k.text(String.valueOf(n), cx + MenuKit.width(title, 10, true) + 6, hy, 10, 0xFF5E636A, false);
+				k.icon(shut ? 0xF054 : 0xF078, cx + cw - 6, hy, 8, hh ? 0xFFD6DAE0 : 0xFF8B9097);
+				k.hit(cx, y + 10, cw, 21, () -> {
+					flip(ck);
+					selKey = null;
+				});
+				y += 14 + 12.5f + 2;
+				if (shut) continue;
 				for (Setting<?> s : list) {
-					if (!groupOf(s).equals(gname)) continue;
-					if (!any) {
-						k.text(gname.toUpperCase(Locale.ROOT), cx, y + 14 + 6.25f, 10, 0xFF8B9097, true);
-						y += 14 + 12.5f + 2;
-						any = true;
-					}
-					y = row(k, m, s, cx, y, cw);
+					if (groupOf(s).equals(gname)) y = row(k, m, s, cx, y, cw);
 				}
 			}
 		}

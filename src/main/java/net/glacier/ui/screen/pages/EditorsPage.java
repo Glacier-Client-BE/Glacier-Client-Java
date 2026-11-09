@@ -34,6 +34,8 @@ public final class EditorsPage {
 	/** name, background, radius, gap */
 	private static final Object[][] HOTBAR = {{"Vanilla", 0x59000000, 2, 2}, {"Default", 0x8C000000, 4, 2},
 			{"Connected", 0x8C000000, 0, 0}, {"Glacier", 0xE62C2F33, 8, 3}, {"Chroma", 0x737289DA, 4, 2}};
+	private static final String[][] HOTBAR_PAIRS = hotbarPairs();
+
 	static {
 		for (int i = 0; i < 4; i++) {
 			BIOME_ID[i] = Identifier.fromNamespaceAndPath("glacier", "textures/editors/biome_" + BIOME_TEX[i] + ".png");
@@ -394,7 +396,7 @@ public final class EditorsPage {
 		float h1 = 2 + 24 + 21 + 2 + 30;
 		float cy = cardTop(k, x, y, w, h1);
 		k.text("Style", ix, cy + 7.5f, 12, 0xFFFFFFFF);
-		pickGrid(k, m.hotbarStyle, hotbarPairs(), false, ix, cy + 15 + 6 + 2, iw);
+		pickGrid(k, m.hotbarStyle, HOTBAR_PAIRS, false, ix, cy + 15 + 6 + 2, iw);
 		y += h1 + 10;
 		float h2 = 2 + 24 + 46.75f + 2 + 47.75f;
 		cy = cardTop(k, x, y, w, h2);

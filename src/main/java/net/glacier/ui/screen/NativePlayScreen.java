@@ -81,6 +81,17 @@ public final class NativePlayScreen extends Screen {
 	private float realmScroll;
 	private int createMode;
 
+	/* Search results per tab, rebuilt only when the query or the source list changes (not every frame). */
+	private List<LevelSummary> worldsShownSrc;
+	private String worldsShownQuery;
+	private List<Integer> worldsShown = List.of();
+	private List<RealmsServer> realmsShownSrc;
+	private String realmsShownQuery;
+	private List<Integer> realmsShown = List.of();
+	private boolean serversShownValid;
+	private String serversShownQuery;
+	private List<Integer> serversShown = List.of();
+
 	/** Glacier dialog state: title, optional note, text fields and buttons, drawn over the page. */
 	private static final class Field {
 		final String label;
@@ -258,12 +269,19 @@ public final class NativePlayScreen extends Screen {
 		button(g, mx, my, bx, by, half, 34, 10, 14, "Create New World", true, this::openCreateWorld);
 		button(g, mx, my, bx + half + 10, by, bw - half - 10, 34, 10, 14, "Quick Play", false, this::quickPlay);
 
-		List<LevelSummary> all = worlds == null ? List.of() : worlds;
-		String q = query.toLowerCase();
-		List<Integer> shown = new ArrayList<>();
-		for (int i = 0; i < all.size(); i++) {
-			if (q.isEmpty() || all.get(i).getLevelName().toLowerCase().contains(q)) shown.add(i);
+		List<LevelSummary> src = worlds;
+		List<LevelSummary> all = src == null ? List.of() : src;
+		if (src != worldsShownSrc || !query.equals(worldsShownQuery)) {
+			worldsShownSrc = src;
+			worldsShownQuery = query;
+			String q = query.toLowerCase();
+			List<Integer> found = new ArrayList<>();
+			for (int i = 0; i < all.size(); i++) {
+				if (q.isEmpty() || all.get(i).getLevelName().toLowerCase().contains(q)) found.add(i);
+			}
+			worldsShown = found;
 		}
+		List<Integer> shown = worldsShown;
 		boolean empty = shown.isEmpty();
 		int listTop = by + 34 + 10;
 		int listHeight = bh - 44 - (empty ? (int) Math.ceil(NOTE_H) + 10 : 0);
@@ -285,7 +303,7 @@ public final class NativePlayScreen extends Screen {
 		g.disableScissor();
 
 		if (empty) {
-			String note = worlds != null ? (q.isEmpty() ? "No worlds yet. Create one to get started." : "No worlds match your search.")
+			String note = worlds != null ? (query.isEmpty() ? "No worlds yet. Create one to get started." : "No worlds match your search.")
 					: System.nanoTime() - worldsRequestedAt > WORLD_WAIT_NS ? "Could not load worlds" : "Loading worlds...";
 			text(g, note, bx, listTop + listHeight + 10 + NOTE_H / 2f, 13, false, MUTED);
 		}
@@ -496,13 +514,20 @@ public final class NativePlayScreen extends Screen {
 			if (realmsState != 1) realmsState = 0;
 		});
 
-		String q = query.toLowerCase();
-		List<RealmsServer> all = realmsState == 2 && realms != null ? realms : List.of();
-		List<Integer> shown = new ArrayList<>();
-		for (int i = 0; i < all.size(); i++) {
-			String n = all.get(i).getName();
-			if (q.isEmpty() || (n != null && n.toLowerCase().contains(q))) shown.add(i);
+		List<RealmsServer> src = realmsState == 2 ? realms : null;
+		List<RealmsServer> all = src == null ? List.of() : src;
+		if (src != realmsShownSrc || !query.equals(realmsShownQuery)) {
+			realmsShownSrc = src;
+			realmsShownQuery = query;
+			String q = query.toLowerCase();
+			List<Integer> found = new ArrayList<>();
+			for (int i = 0; i < all.size(); i++) {
+				String n = all.get(i).getName();
+				if (q.isEmpty() || (n != null && n.toLowerCase().contains(q))) found.add(i);
+			}
+			realmsShown = found;
 		}
+		List<Integer> shown = realmsShown;
 		boolean empty = shown.isEmpty();
 		int listTop = by + 34 + 10;
 		int listHeight = bh - 44 - (empty ? (int) Math.ceil(NOTE_H) + 10 : 0);
@@ -529,7 +554,7 @@ public final class NativePlayScreen extends Screen {
 		if (empty) {
 			String note = switch (realmsState) {
 				case 3 -> realmsError;
-				case 2 -> q.isEmpty() ? "You have no Realms yet." : "No Realms match your search.";
+				case 2 -> query.isEmpty() ? "You have no Realms yet." : "No Realms match your search.";
 				default -> "Loading Realms...";
 			};
 			text(g, RenderUtil.ellipsize(note, bw, false, 13, null), bx, listTop + listHeight + 10 + NOTE_H / 2f, 13, false, MUTED);
@@ -546,12 +571,18 @@ public final class NativePlayScreen extends Screen {
 		text(g, "Servers", bx, by + 17, 15, true, TEXT);
 		button(g, mx, my, bx + bw - 150, by + 3, 150, 28, 10, 13, "Add Server", false, this::openAddServer);
 
-		String q = query.toLowerCase();
-		List<Integer> shown = new ArrayList<>();
-		for (int i = 0; i < servers.size(); i++) {
-			ServerData d = servers.get(i);
-			if (q.isEmpty() || nameOf(d).toLowerCase().contains(q) || ipOf(d).toLowerCase().contains(q)) shown.add(i);
+		if (!serversShownValid || !query.equals(serversShownQuery)) {
+			serversShownValid = true;
+			serversShownQuery = query;
+			String q = query.toLowerCase();
+			List<Integer> found = new ArrayList<>();
+			for (int i = 0; i < servers.size(); i++) {
+				ServerData d = servers.get(i);
+				if (q.isEmpty() || nameOf(d).toLowerCase().contains(q) || ipOf(d).toLowerCase().contains(q)) found.add(i);
+			}
+			serversShown = found;
 		}
+		List<Integer> shown = serversShown;
 		boolean empty = shown.isEmpty();
 		int listTop = by + 34 + 10;
 		int listHeight = bh - 44 - (empty ? (int) Math.ceil(NOTE_H) + 10 : 0);
@@ -605,6 +636,7 @@ public final class NativePlayScreen extends Screen {
 
 	/** Reads the saved server list, as ScreenApi.servers() did. */
 	private void reloadServers() {
+		serversShownValid = false;
 		try {
 			ServerList list = new ServerList(Minecraft.getInstance());
 			list.load();
@@ -781,6 +813,7 @@ public final class NativePlayScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent e, boolean dbl) {
+		if (net.glacier.compat.Mouse.button(e) != 0) return modalOpen;
 		double cx = e.x() / scale, cy = e.y() / scale;
 		if (modalOpen) {
 			for (int i = modalHits.size() - 1; i >= 0; i--) {

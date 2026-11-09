@@ -268,7 +268,7 @@ public class NativeMenuScreen extends Screen {
 			if (!h.in(lx, ly)) continue;
 			if (net.glacier.compat.Mouse.button(e) == 1 && h.right() != null) {
 				h.right().run();
-			} else {
+			} else if (net.glacier.compat.Mouse.button(e) == 0) {
 				if (h.drag()) active = h;
 				h.press().accept(lx);
 			}

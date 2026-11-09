@@ -69,6 +69,8 @@ public final class NativeProgressScreen extends Screen {
 
 	/** Font Awesome spinner (fa-spinner) and the text scales: css px divided by about ten. */
 	private static final int SPIN_ICON = 0xF1CE;
+	private static final String SPIN = new String(Character.toChars(SPIN_ICON));
+	private static final java.util.regex.Pattern CONTROL = java.util.regex.Pattern.compile("\\p{Cntrl}");
 	private static final float SPIN_K = 1.4f;
 	private static final float TITLE_K = 1.6f;
 	private static final float PCT_K = 1.3f;
@@ -141,9 +143,8 @@ public final class NativeProgressScreen extends Screen {
 		int rowMid = rowY + 14;
 		Draw.round(g, ix, rowY, 28, 28, 8, CARD);
 		Draw.outline(g, ix, rowY, 28, 28, 8, CARD_EDGE, 2);
-		String spin = new String(Character.toChars(SPIN_ICON));
-		float spinW = RenderUtil.textWidth(spin, false, 14, RenderUtil.FA_SOLID);
-		RenderUtil.drawText(g, spin, ix + (28 - spinW) / 2f, rowMid - 7, 14, false, RenderUtil.FA_SOLID,
+		float spinW = RenderUtil.textWidth(SPIN, false, 14, RenderUtil.FA_SOLID);
+		RenderUtil.drawText(g, SPIN,ix + (28 - spinW) / 2f, rowMid - 7, 14, false, RenderUtil.FA_SOLID,
 				Draw.alpha(ACCENT, spinOpacity()));
 
 		boolean unknown = pct < 0;
@@ -252,7 +253,7 @@ public final class NativeProgressScreen extends Screen {
 				else t = "Saving world";
 			}
 			pct = p;
-			title = t.replaceAll("\\p{Cntrl}", " ");
+			title = CONTROL.matcher(t).replaceAll(" ");
 		} catch (RuntimeException e) {
 			// keep the previous values
 		}

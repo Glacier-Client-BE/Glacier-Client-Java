@@ -19,7 +19,7 @@ public class LoadingTips extends Module {
 			"Hold Shift while clicking an item to move the whole stack at once.",
 			"Sleeping in a bed sets your respawn point.",
 			"Sneaking at the edge of a block keeps you from falling off.",
-			"Landing in a bucket of water cancels fall damage.",
+			"Falling into water cancels fall damage.",
 			"Torches stop hostile mobs from spawning on the blocks they light.",
 			"F3 + B shows the hitboxes of every entity around you.",
 			"A smoker cooks food twice as fast as a furnace.",

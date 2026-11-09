@@ -8,11 +8,11 @@ import net.glacier.setting.SliderSetting;
 
 /**
  * Recolors the red damage flash on hurt entities, like the Bedrock HitColor pack. The hurt tint lives in the top
- * half of the 16x16 overlay texture (see MixinOverlayTexture); this module repaints those rows when its settings
+ * half of the 16x16 overlay texture (see PkOverlayTexture); this module repaints those rows when its settings
  * change and restores vanilla red on disable. Chroma re-uploads the tiny texture every other tick.
  */
 public class HitColor extends Module {
-	/** Implemented by MixinOverlayTexture so the module can repaint the overlay without touching private fields. */
+	/** Implemented by PkOverlayTexture so the module can repaint the overlay without touching private fields. */
 	public interface Recolorable {
 		void glacier$paintHurt(int argb);
 	}

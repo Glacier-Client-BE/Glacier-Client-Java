@@ -35,15 +35,52 @@ public final class PerformancePage {
 	private static final int CARD_SOFT = 0xFF2A2B2F, CARD_SOFT_BORDER = 0x0FFFFFFF;
 	private static final int MUTED = 0xFF99AAB5;
 
+	private static final String NOTE = "Launcher: Installations, then Edit, then More options, then the JVM Arguments field. "
+			+ "Paste this line and pick a Java 21 runtime.";
+
 	private final List<Integer> hist = new ArrayList<>();
+	/** 1% low and worst frame rate of hist, recomputed when a sample is added (not sorted every frame). */
+	private int lowFps, minFps;
 	private long nextSample;
 	private int ticks;
 	private long copiedUntil;
 
+	/* Word-wrapped text, rebuilt only when the column width changes. */
+	private float layoutW = Float.NaN;
+	private int bundledMaxLines = 1;
+	private List<List<String>> bundledLines = List.of();
+	private List<String> noteWrapped = List.of();
+	private List<String> jvmWrapped = List.of();
+
 	public void enter() {
 		hist.clear();
+		lowFps = 0;
+		minFps = 0;
 		ticks = 0;
 		nextSample = 0;
+	}
+
+	private void layout(float w) {
+		if (w == layoutW) return;
+		layoutW = w;
+		float iw = (w - 2 - 28 - 30) / 4f;
+		int maxLines = 1;
+		List<List<String>> lines = new ArrayList<>();
+		for (String[] b : BUNDLED) {
+			List<String> l = MenuKit.wrap(b[1], iw - 26, 11, false);
+			lines.add(l);
+			maxLines = Math.max(maxLines, l.size());
+		}
+		bundledMaxLines = maxLines;
+		bundledLines = lines;
+		noteWrapped = MenuKit.wrap(NOTE, w - 30, 11, false);
+		jvmWrapped = MenuKit.wrap(JvmArgs.TEXT, w - 30 - 18, 11, false);
+	}
+
+	private void refreshStats() {
+		int[] sorted = hist.stream().mapToInt(Integer::intValue).sorted().toArray();
+		lowFps = sorted.length == 0 ? 0 : sorted[(int) Math.floor(sorted.length * 0.01)];
+		minFps = sorted.length == 0 ? 0 : sorted[0];
 	}
 
 	private static int fpsColor(int f) {
@@ -58,14 +95,14 @@ public final class PerformancePage {
 		ticks++;
 		hist.add(Minecraft.getInstance().getFps());
 		if (hist.size() > HISTORY_MAX) hist.remove(0);
+		refreshStats();
 	}
 
 	public float draw(MenuKit k, float x, float y, float w) {
 		sample();
+		layout(w);
 		int fps = hist.isEmpty() ? 0 : hist.get(hist.size() - 1);
-		int[] sorted = hist.stream().mapToInt(Integer::intValue).sorted().toArray();
-		int low = sorted.length == 0 ? 0 : sorted[(int) Math.floor(sorted.length * 0.01)];
-		int minFps = sorted.length == 0 ? 0 : sorted[0];
+		int low = lowFps;
 		float ft = fps > 0 ? 1000f / fps : 0;
 		float worst = minFps > 0 ? 1000f / minFps : 0;
 		int modsTotal = 0, modsOn = 0;
@@ -106,9 +143,7 @@ public final class PerformancePage {
 
 		// bundled mods
 		float iw = (w - 2 - 28 - 30) / 4f;
-		int maxLines = 1;
-		for (String[] b : BUNDLED) maxLines = Math.max(maxLines, MenuKit.wrap(b[1], iw - 26, 11, false).size());
-		float itemH = 2 + 20 + 16.25f + 4 + 13.75f * maxLines;
+		float itemH = 2 + 20 + 16.25f + 4 + 13.75f * bundledMaxLines;
 		float bundledH = 2 + 28 + 12.5f + 10 + itemH;
 		k.box(x, y, w, bundledH, 18, CARD_SOFT, CARD_SOFT_BORDER);
 		k.text("BUNDLED MODS", x + 15, y + 15 + 6.25f, 10, MUTED);
@@ -117,7 +152,7 @@ public final class PerformancePage {
 			float by = y + 15 + 12.5f + 10;
 			k.box(bx, by, iw, itemH, 14, CARD_SOFT, CARD_SOFT_BORDER);
 			k.text(MenuKit.fit(BUNDLED[i][0], iw - 26, 13, false), bx + 13, by + 11 + 8.125f, 13, 0xFFFFFFFF);
-			List<String> lines = MenuKit.wrap(BUNDLED[i][1], iw - 26, 11, false);
+			List<String> lines = bundledLines.get(i);
 			for (int l = 0; l < lines.size(); l++) {
 				k.text(lines.get(l), bx + 13, by + 11 + 16.25f + 4 + l * 13.75f + 6.875f, 11, MUTED);
 			}
@@ -125,9 +160,7 @@ public final class PerformancePage {
 		y += bundledH + 10;
 
 		// JVM arguments
-		String note = "Launcher: Installations, then Edit, then More options, then the JVM Arguments field. "
-				+ "Paste this line and pick a Java 21 runtime.";
-		List<String> noteLines = MenuKit.wrap(note, w - 30, 11, false);
+		List<String> noteLines = noteWrapped;
 		float jvmH = 2 + 28 + 28 + 10 + noteLines.size() * 13.75f + 10 + 59.25f;
 		k.box(x, y, w, jvmH, 18, CARD_SOFT, CARD_SOFT_BORDER);
 		float ix = x + 15, jw = w - 30;
@@ -150,7 +183,7 @@ public final class PerformancePage {
 		for (int i = 0; i < noteLines.size(); i++) k.text(noteLines.get(i), ix, ny + i * 13.75f + 6.875f, 11, MUTED);
 		float ty = ny + noteLines.size() * 13.75f + 10;
 		k.box(ix, ty, jw, 59.25f, 9, 0x40000000, 0x1AFFFFFF);
-		List<String> jl = MenuKit.wrap(JvmArgs.TEXT, jw - 18, 11, false);
+		List<String> jl = jvmWrapped;
 		for (int i = 0; i < Math.min(3, jl.size()); i++) k.text(jl.get(i), ix + 9, ty + 9 + i * 13.75f + 6.875f, 11, 0xFFFFFFFF);
 		return y + jvmH;
 	}

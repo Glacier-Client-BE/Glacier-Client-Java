@@ -10,6 +10,7 @@ import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
 import net.glacier.ui.Draw;
 import net.glacier.ui.Theme;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
@@ -232,19 +233,27 @@ public abstract class HudModule extends Module {
 	}
 
 	/** Enabled auto-placed elements in stack order, with their pixel sizes. Rebuilt once per tick by {@link #refreshStack()}. */
-	private static List<HudModule> stack = List.of();
+	private static final List<HudModule> stack = new ArrayList<>();
+	private static final Comparator<HudModule> BY_STACK_ORDER = Comparator.comparingInt(m -> m.stackOrder);
 
 	/** Caches the stack order and pixel sizes of the auto-placed elements. Called once per tick after modules tick. */
 	public static void refreshStack() {
-		List<HudModule> list = new ArrayList<>();
+		stack.clear();
 		for (HudModule m : ModuleManager.hud()) {
 			if (m.stackOrder < 0 || !m.isEnabled() || !m.autoPlace.on()) continue;
 			m.stackH = m.pixelH();
 			m.stackW = m.pixelW();
-			list.add(m);
+			stack.add(m);
 		}
-		list.sort(Comparator.comparingInt(m -> m.stackOrder));
-		stack = list;
+		if (stack.size() > 1) stack.sort(BY_STACK_ORDER);
+	}
+
+	/** One remembered text width. The width is measured again only when the text or the font design changes. */
+	public static final class WidthCache {
+		private String text;
+		private Font font;
+		private boolean glacier;
+		private int width;
 	}
 
 	/**
@@ -256,7 +265,8 @@ public abstract class HudModule extends Module {
 		int x = STACK_MARGIN;
 		int y = STACK_MARGIN;
 		int colW = 0;
-		for (HudModule m : stack) {
+		for (int i = 0, n = stack.size(); i < n; i++) {
+			HudModule m = stack.get(i);
 			if (y + m.stackH > sh - STACK_MARGIN && y > STACK_MARGIN) {
 				x += colW + STACK_MARGIN;
 				y = STACK_MARGIN;
@@ -372,6 +382,19 @@ public abstract class HudModule extends Module {
 
 	protected final int textWidth(String s) {
 		return glacier() ? mc.font.width(fontText(s)) : mc.font.width(s);
+	}
+
+	/** Same as {@link #textWidth(String)}, but measured again only when the text, the font or the design changed. */
+	protected final int cachedWidth(WidthCache c, String s) {
+		boolean gl = glacier();
+		Font font = mc.font;
+		if (font != c.font || gl != c.glacier || !s.equals(c.text)) {
+			c.text = s;
+			c.font = font;
+			c.glacier = gl;
+			c.width = textWidth(s);
+		}
+		return c.width;
 	}
 
 	protected final int lineHeight() {

@@ -65,23 +65,30 @@ public class InventoryHud extends SlotHudModule {
 		boolean hotbarOnly = mode.is("Hotbar");
 		boolean both = mode.is("Both");
 		int sel = inv.getSelectedSlot();
+		// Settings are read once per frame here, not once per slot.
+		int s = slot();
+		int step = s + GAP;
+		boolean vert = vertical();
+		boolean hl = highlight.on();
+		boolean numbers = slotNumbers.on();
+		boolean withCounts = counts.on();
+		int ox = (s - 16) / 2;
+		int oy = (s - 16) / 2 - (showBar.on() ? 1 : 0);
 		for (int r = 0; r < n; r++) {
 			// Rows 0..2 are inventory slots 9..35; the hotbar row comes last in Both and alone in Hotbar.
 			boolean hotbarRow = hotbarOnly || (both && r == 3);
 			int base = hotbarRow ? 0 : 9 + r * COLS;
 			for (int c = 0; c < COLS; c++) {
 				int slot = base + c;
-				int step = slot() + GAP;
-				int sx = x + (vertical() ? r : c) * step;
-				int sy = y + (vertical() ? c : r) * step;
+				int sx = x + (vert ? r : c) * step;
+				int sy = y + (vert ? c : r) * step;
 				ItemStack st = inv.getItem(slot);
 				drawSlot(g, st, sx, sy);
-				if (highlight.on() && hotbarRow && slot == sel) Draw.outline(g, sx, sy, slot(), slot(), 0, SELECTED, 1);
-				if (slotNumbers.on()) {
+				if (hl && hotbarRow && slot == sel) Draw.outline(g, sx, sy, s, s, 0, SELECTED, 1);
+				if (numbers) {
 					g.text(mc.font, NUMBERS[slot], sx + 2, sy + 2, Theme.HUD_MUTED, true);
 				}
-				if (!st.isEmpty() && counts.on() && st.getCount() > 1) {
-					int ox = (slot() - 16) / 2, oy = (slot() - 16) / 2 - (showBar.on() ? 1 : 0);
+				if (!st.isEmpty() && withCounts && st.getCount() > 1) {
 					g.itemDecorations(mc.font, st, sx + ox, sy + oy);
 				}
 			}

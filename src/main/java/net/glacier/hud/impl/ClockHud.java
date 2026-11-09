@@ -27,6 +27,7 @@ public class ClockHud extends HudModule {
 	private String text = "00:00";
 	private ItemStack compass;
 	private ItemStack recovery;
+	private final WidthCache textWidthCache = new WidthCache();
 
 	public ClockHud() {
 		super("Clock & Compass", "Shows the real-world time with compass items.");
@@ -72,7 +73,7 @@ public class ClockHud extends HudModule {
 
 	@Override
 	public int contentWidth() {
-		int w = showClock.on() ? textWidth(text) : 0;
+		int w = showClock.on() ? cachedWidth(textWidthCache, text) : 0;
 		int n = itemCount();
 		if (n > 0) w += (w > 0 ? GAP : 0) + n * SLOT + (n - 1) * GAP;
 		return w;
@@ -89,7 +90,7 @@ public class ClockHud extends HudModule {
 		int ty = y + (contentHeight() - lineHeight()) / 2;
 		if (showClock.on()) {
 			drawText(g, text, cx, ty, TEXT);
-			cx += textWidth(text) + (itemCount() > 0 ? GAP : 0);
+			cx += cachedWidth(textWidthCache, text) + (itemCount() > 0 ? GAP : 0);
 		}
 		if (showCompass.on()) {
 			if (compass == null) compass = new ItemStack(Items.COMPASS);

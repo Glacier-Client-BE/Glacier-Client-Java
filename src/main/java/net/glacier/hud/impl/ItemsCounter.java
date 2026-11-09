@@ -19,7 +19,13 @@ public class ItemsCounter extends CachedRowsHud {
 	private final ToggleSetting showCustom = add(new ToggleSetting("Show Custom Counter", false));
 	private final SliderSetting customId = add(new SliderSetting("Custom Item ID", 0, 0, 999, 1));
 	private final ToggleSetting precise = add(new ToggleSetting("Precise Stack Counts", true));
-	private String last = "";
+	/** Counts and settings the rows were last built from; the rows are rebuilt only when one of them changes. */
+	private int lastPotions = -1;
+	private int lastTotems = -1;
+	private int lastArrows = -1;
+	private int lastCustom = -1;
+	private int lastId = -1;
+	private int lastFlags = -1;
 
 	public ItemsCounter() {
 		super("Items Counter", "Counts potions, totems, arrows and a custom item in your inventory.", "Items: 0");
@@ -55,10 +61,16 @@ public class ItemsCounter extends CachedRowsHud {
 			}
 			if (counting && Item.getId(item) == id) custom += st.getCount();
 		}
-		String key = potions + "," + totems + "," + arrows + "," + custom + "," + id
-				+ showPotion.on() + showTotem.on() + showArrow.on() + counting + precise.on();
-		if (key.equals(last)) return;
-		last = key;
+		int flags = (showPotion.on() ? 1 : 0) | (showTotem.on() ? 2 : 0) | (showArrow.on() ? 4 : 0)
+				| (counting ? 8 : 0) | (precise.on() ? 16 : 0);
+		if (potions == lastPotions && totems == lastTotems && arrows == lastArrows && custom == lastCustom
+				&& id == lastId && flags == lastFlags) return;
+		lastPotions = potions;
+		lastTotems = totems;
+		lastArrows = arrows;
+		lastCustom = custom;
+		lastId = id;
+		lastFlags = flags;
 
 		List<Part[]> rows = new ArrayList<>();
 		if (showPotion.on()) rows.add(new Part[]{part("Potions: " + fmt(potions), TEXT)});

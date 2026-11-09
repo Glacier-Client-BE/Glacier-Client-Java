@@ -239,7 +239,7 @@ public final class NativePauseScreen extends PauseScreen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent e, boolean dbl) {
-		if (net.glacier.compat.Mouse.button(e) != 0) return true;
+		if (net.glacier.compat.Mouse.button(e) != 0) return super.mouseClicked(e, dbl);
 		for (int i = hits.size() - 1; i >= 0; i--) {
 			Hit h = hits.get(i);
 			if (!h.in(e.x(), e.y())) continue;

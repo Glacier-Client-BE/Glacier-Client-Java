@@ -22,11 +22,22 @@ public final class Draw {
 	private Draw() {
 	}
 
+	/** Nine-slice names by radius ("r0".."r16") and ring names by radius and thickness ("ring4_1"), built once. */
+	private static final String[] ROUND_NAMES = new String[17];
+	private static final String[][] RING_NAMES = new String[17][3];
+
+	static {
+		for (int r = 0; r <= 16; r++) {
+			ROUND_NAMES[r] = "r" + r;
+			for (int t = 1; t <= 2; t++) RING_NAMES[r][t] = "ring" + r + "_" + t;
+		}
+	}
+
 	/** Filled rectangle with anti-aliased rounded corners. */
 	public static void round(GuiGraphicsExtractor g, int x, int y, int w, int h, int radius, int argb) {
 		int r = Math.min(Math.min(radius, 16), Math.min(w, h) / 2);
 		if (r >= 1 && w >= 2 * r + 1 && h >= 2 * r + 1) {
-			sprite(g, "r" + r, x, y, w, h, argb);
+			sprite(g, ROUND_NAMES[r], x, y, w, h, argb);
 			return;
 		}
 		shape(g, x, y, w, h, radius, 0, false, argb);
@@ -96,7 +107,7 @@ public final class Draw {
 		if (thickness <= 0) return;
 		int r = Math.min(Math.min(radius, 16), Math.min(w, h) / 2);
 		if (thickness <= 2 && r > thickness && w >= 2 * r + 1 && h >= 2 * r + 1) {
-			sprite(g, "ring" + r + "_" + thickness, x, y, w, h, argb);
+			sprite(g, RING_NAMES[r][thickness], x, y, w, h, argb);
 			return;
 		}
 		shape(g, x, y, w, h, radius, thickness, true, argb);

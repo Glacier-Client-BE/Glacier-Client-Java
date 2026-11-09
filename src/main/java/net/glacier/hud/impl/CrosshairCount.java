@@ -11,6 +11,9 @@ public class CrosshairCount extends HudModule {
 	private static final int GAP = 3;
 	private ItemStack held = ItemStack.EMPTY;
 	private int total;
+	/** "x" + total, rebuilt only when the total changes. */
+	private String countText = "x0";
+	private final WidthCache countWidth = new WidthCache();
 
 	public CrosshairCount() {
 		super("Crosshair Count", "Shows how many of your held item you carry in total.");
@@ -31,6 +34,7 @@ public class CrosshairCount extends HudModule {
 		if (st == held && n == total) return;
 		held = st;
 		total = n;
+		countText = "x" + n;
 	}
 
 	@Override
@@ -40,7 +44,7 @@ public class CrosshairCount extends HudModule {
 
 	@Override
 	public int contentWidth() {
-		return SLOT + GAP + textWidth("x" + total);
+		return SLOT + GAP + cachedWidth(countWidth, countText);
 	}
 
 	@Override
@@ -52,6 +56,6 @@ public class CrosshairCount extends HudModule {
 	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		if (held.isEmpty()) return;
 		g.item(held, x, y);
-		drawText(g, "x" + total, x + SLOT + GAP, y + (SLOT - lineHeight()) / 2 + 1, TEXT);
+		drawText(g, countText, x + SLOT + GAP, y + (SLOT - lineHeight()) / 2 + 1, TEXT);
 	}
 }

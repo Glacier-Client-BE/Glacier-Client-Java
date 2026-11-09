@@ -16,6 +16,9 @@ public class HitComboHud extends CachedRowsHud {
 	private int combo;
 	private int best;
 	private long lastHitMs;
+	private int lastCombo = -1;
+	private int lastBest = -1;
+	private boolean lastShowBest;
 
 	/** Fabric callbacks cannot be unregistered, so the listener is added once for the whole process. */
 	private static boolean hitListenerRegistered;
@@ -51,9 +54,14 @@ public class HitComboHud extends CachedRowsHud {
 	@Override
 	public void onTick() {
 		if (combo > 0 && System.currentTimeMillis() - lastHitMs > (long) (timeout.f() * 1000f)) combo = 0;
+		boolean showB = showBest.on();
+		if (combo == lastCombo && best == lastBest && showB == lastShowBest) return;
+		lastCombo = combo;
+		lastBest = best;
+		lastShowBest = showB;
 		Part name = part("Combo: ", TEXT);
 		Part value = part(String.valueOf(combo), goodHigh(combo, 10, 3));
-		if (showBest.on()) setRows(single(name, value, part("  Best " + best, TEXT)));
+		if (showB) setRows(single(name, value, part("  Best " + best, TEXT)));
 		else setRows(single(name, value));
 	}
 }

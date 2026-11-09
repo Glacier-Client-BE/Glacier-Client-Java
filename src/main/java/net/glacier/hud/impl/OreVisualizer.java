@@ -56,6 +56,7 @@ public class OreVisualizer extends HudModule {
 
 	private int shownY = Integer.MIN_VALUE;
 	private String yText = "";
+	private final WidthCache yWidth = new WidthCache();
 
 	public OreVisualizer() {
 		super("Ore Visualizer", "Visualizes optimal ore generation heights.");
@@ -91,7 +92,7 @@ public class OreVisualizer extends HudModule {
 				shownY = py;
 				yText = "Y " + py;
 			}
-			drawText(g, yText, x + WIDTH - textWidth(yText), y, Theme.HUD_WARN);
+			drawText(g, yText, x + WIDTH - cachedWidth(yWidth, yText), y, Theme.HUD_WARN);
 		}
 		int top = y + HEADER_H;
 		if (!hideGrid.on()) {
