@@ -55,6 +55,7 @@ dependencies {
 	include implementation("maven.modrinth:sodium:mc26.3-0.9.3-beta.4-fabric")
 	include implementation("maven.modrinth:lithium:mc26.3-0.26.3-fabric")
 	include implementation("maven.modrinth:ferrite-core:9.0.0-fabric")
+	include implementation("maven.modrinth:immediatelyfast:1.17.1+26.3-fabric")
 
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
