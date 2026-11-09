@@ -11,6 +11,9 @@ public class TntTimerHud extends LabelValueHud {
 	private static final double RANGE_SQ = 64 * 64;
 	private final ToggleSetting coloredLabel = add(new ToggleSetting("Colored Label", false));
 	private int fuse = -1;
+	private int idle;
+	private int textFuse = -1;
+	private String text = "-";
 
 	public TntTimerHud() {
 		super("TNT Timer", "Shows the fuse of the nearest lit TNT.", "TNT", 29);
@@ -19,6 +22,9 @@ public class TntTimerHud extends LabelValueHud {
 	@Override
 	protected String value() {
 		if (mc.level == null || mc.player == null) return null;
+		// With no TNT around, look for some only every fifth tick; a lit one is followed every tick.
+		if (fuse < 0 && idle-- > 0) return null;
+		idle = 4;
 		double best = RANGE_SQ;
 		fuse = -1;
 		for (Entity e : mc.level.entitiesForRendering()) {
@@ -29,7 +35,11 @@ public class TntTimerHud extends LabelValueHud {
 				fuse = t.getFuse();
 			}
 		}
-		return fuse < 0 ? "-" : String.format(Locale.ROOT, "%.1fs", fuse / 20.0);
+		if (fuse != textFuse) {
+			textFuse = fuse;
+			text = fuse < 0 ? "-" : String.format(Locale.ROOT, "%.1fs", fuse / 20.0);
+		}
+		return text;
 	}
 
 	@Override

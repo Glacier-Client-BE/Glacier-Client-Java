@@ -57,12 +57,44 @@ public final class ElementsPage {
 	public float draw(MenuKit k, float x, float y, float w) {
 		Module m = ModuleManager.get(ElementsModule.class);
 		if (m == null) return y;
+		long sig = signature(m);
+		if (titles == null || sig != cardsSig) {
+			cardsSig = sig;
+			rebuild(m);
+		}
+		List<String> titles = this.titles;
+		List<List<Setting<?>>> cards = this.cards;
+
+		float colW = (w - 12) / 2f;
+		float rowY = y;
+		for (int i = 0; i < cards.size(); i += 2) {
+			float h0 = cardH(cards.get(i).size());
+			float h1 = i + 1 < cards.size() ? cardH(cards.get(i + 1).size()) : 0;
+			card(k, m, titles.get(i), cards.get(i), x, rowY, colW);
+			if (i + 1 < cards.size()) card(k, m, titles.get(i + 1), cards.get(i + 1), x + colW + 12, rowY, colW);
+			rowY += Math.max(h0, h1) + 12;
+		}
+		return rowY - 12;
+	}
+
+	/** Card layout, rebuilt only when the set of visible settings changes. */
+	private List<String> titles;
+	private List<List<Setting<?>>> cards;
+	private long cardsSig;
+
+	/** Changes whenever a setting is added, shown or hidden; allocation free. */
+	private static long signature(Module m) {
+		long sig = 1;
+		for (Setting<?> s : m.settings()) sig = sig * 31 + (s.isHidden() ? 1 : 2);
+		return sig;
+	}
+
+	private void rebuild(Module m) {
 		List<Setting<?>> list = ModulesPage.visible(m);
 		Map<String, Setting<?>> byLabel = new HashMap<>();
 		for (Setting<?> s : list) byLabel.put(s.getName(), s);
-
-		List<String> titles = new ArrayList<>();
-		List<List<Setting<?>>> cards = new ArrayList<>();
+		titles = new ArrayList<>();
+		cards = new ArrayList<>();
 		Set<String> used = new HashSet<>();
 		for (Group g : GROUPS) {
 			List<Setting<?>> rows = new ArrayList<>();
@@ -83,17 +115,6 @@ public final class ElementsPage {
 			titles.add("Other");
 			cards.add(other);
 		}
-
-		float colW = (w - 12) / 2f;
-		float rowY = y;
-		for (int i = 0; i < cards.size(); i += 2) {
-			float h0 = cardH(cards.get(i).size());
-			float h1 = i + 1 < cards.size() ? cardH(cards.get(i + 1).size()) : 0;
-			card(k, m, titles.get(i), cards.get(i), x, rowY, colW);
-			if (i + 1 < cards.size()) card(k, m, titles.get(i + 1), cards.get(i + 1), x + colW + 12, rowY, colW);
-			rowY += Math.max(h0, h1) + 12;
-		}
-		return rowY - 12;
 	}
 
 	private static float cardH(int n) {

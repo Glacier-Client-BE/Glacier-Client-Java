@@ -74,7 +74,11 @@ public final class CosmeticsPage {
 			boolean hov = k.hover(tx, my, tw, 32);
 			k.box(tx, my, tw, 32, 16, on ? ACCENT_UI : hov ? 0xFF33373C : 0xFF2C2F33, on ? ACCENT_UI : 0xFF393C41);
 			int n = count(TABS[i]);
-			String label = TABS[i].label() + (n > 0 ? " · " + n : "");
+			if (tabLabels[i] == null || tabCounts[i] != n) {
+				tabCounts[i] = n;
+				tabLabels[i] = TABS[i].label() + (n > 0 ? " · " + n : "");
+			}
+			String label = tabLabels[i];
 			k.textCenter(MenuKit.fit(label, tw - 14, 12, false), tx + tw / 2f, my + 16, 12,
 					on || hov ? 0xFFFFFFFF : MUTED, false);
 			final String id = TABS[i].id();
@@ -360,7 +364,7 @@ public final class CosmeticsPage {
 		Minecraft mc = Minecraft.getInstance();
 		LocalPlayer p = mc.player;
 		if (p == null || mc.level == null || !k.visibleY(y, h)) return false;
-		String key = (s.type == null ? "cape:" : s.type.name() + ":") + s.value;
+		String key = s.key;
 		TileModel m = tileModels.get(key);
 		boolean fast = m != null && !Float.isNaN(m.lastY) && Math.abs(baseY - m.lastY) > 14f;
 		if (m != null) m.lastY = baseY;
@@ -575,42 +579,68 @@ public final class CosmeticsPage {
 	}
 
 	private record TileSpec(String name, String sub, int acc, boolean on, Art art, Runnable pick,
-							Accessories.Type type, String value) {
+							Accessories.Type type, String value, String key) {
+		TileSpec(String name, String sub, int acc, boolean on, Art art, Runnable pick, Accessories.Type type, String value) {
+			this(name, sub, acc, on, art, pick, type, value, (type == null ? "cape:" : type.name() + ":") + value);
+		}
+	}
+
+	/** Tile lists are rebuilt only when the selection they highlight changes; the art lambdas draw through kitRef. */
+	private TileSpec[] capeSpecs;
+	private String capeSpecsSel;
+	private final java.util.EnumMap<Accessories.Type, TileSpec[]> accSpecs = new java.util.EnumMap<>(Accessories.Type.class);
+	private final java.util.EnumMap<Accessories.Type, String> accSpecsSel = new java.util.EnumMap<>(Accessories.Type.class);
+	private final String[] tabLabels = new String[TABS.length];
+	private final int[] tabCounts = new int[TABS.length];
+
+	private TileSpec[] capeSpecs(String sel) {
+		if (capeSpecs != null && sel.equals(capeSpecsSel)) return capeSpecs;
+		List<TileSpec> specs = new ArrayList<>();
+		specs.add(new TileSpec(NONE, "No cape", DEFAULT_ACCENT, NONE.equals(sel),
+				(ax, ay, aw, ah) -> noneArt(kitRef, ax, ay, aw, ah), () -> setCape(NONE), null, NONE));
+		for (Capes.Cape cape : Capes.ALL) {
+			specs.add(new TileSpec(cape.name(), "Cape", cape.accent(), cape.name().equals(sel), (ax, ay, aw, ah) -> {
+				kitRef.gradient(ax, ay, aw, ah, 12, cape.base(), cape.accent());
+				region(kitRef, cape, ax, ay, aw, ah, 5);
+			}, () -> setCape(cape.name()), null, cape.name()));
+		}
+		capeSpecsSel = sel;
+		return capeSpecs = specs.toArray(new TileSpec[0]);
+	}
+
+	private TileSpec[] accSpecs(Accessories.Type t, String sel) {
+		TileSpec[] cached = accSpecs.get(t);
+		if (cached != null && sel.equals(accSpecsSel.get(t))) return cached;
+		int acc = accent(t);
+		List<TileSpec> specs = new ArrayList<>();
+		specs.add(new TileSpec(NONE, "Nothing", acc, NONE.equals(sel), (ax, ay, aw, ah) -> noneArt(kitRef, ax, ay, aw, ah),
+				() -> setAccessory(t, NONE), t, NONE));
+		for (String design : t.DESIGNS) {
+			specs.add(new TileSpec(design, t.displayName, acc, design.equals(sel), (ax, ay, aw, ah) -> {
+				kitRef.gradient(ax, ay, aw, ah, 12, Draw.alpha(acc, 0.24f), Draw.alpha(acc, 0.03f));
+				sheet(kitRef, Accessories.texture(t, design), sheetSize(t), ax, ay, aw, ah, 120, 56, 4);
+			}, () -> setAccessory(t, design), t, design));
+		}
+		TileSpec[] out = specs.toArray(new TileSpec[0]);
+		accSpecs.put(t, out);
+		accSpecsSel.put(t, sel);
+		return out;
 	}
 
 	private float capesGrid(MenuKit k, float x, float y, float w) {
-		String sel = selectedCape();
-		List<TileSpec> specs = new ArrayList<>();
-		specs.add(new TileSpec(NONE, "No cape", DEFAULT_ACCENT, NONE.equals(sel), (ax, ay, aw, ah) -> noneArt(k, ax, ay, aw, ah),
-				() -> setCape(NONE), null, NONE));
-		for (Capes.Cape cape : Capes.ALL) {
-			specs.add(new TileSpec(cape.name(), "Cape", cape.accent(), cape.name().equals(sel), (ax, ay, aw, ah) -> {
-				k.gradient(ax, ay, aw, ah, 12, cape.base(), cape.accent());
-				region(k, cape, ax, ay, aw, ah, 5);
-			}, () -> setCape(cape.name()), null, cape.name()));
-		}
-		return grid(k, x, y, w, null, specs.toArray(new TileSpec[0]));
+		return grid(k, x, y, w, null, capeSpecs(selectedCape()));
 	}
 
 	private float group(MenuKit k, Accessories.Type t, float x, float y, float w) {
 		String sel = selectedAccessory(t);
-		int acc = accent(t);
-		List<TileSpec> specs = new ArrayList<>();
-		specs.add(new TileSpec(NONE, "Nothing", acc, NONE.equals(sel), (ax, ay, aw, ah) -> noneArt(k, ax, ay, aw, ah),
-				() -> setAccessory(t, NONE), t, NONE));
-		for (String design : t.DESIGNS) {
-			specs.add(new TileSpec(design, t.displayName, acc, design.equals(sel), (ax, ay, aw, ah) -> {
-				k.gradient(ax, ay, aw, ah, 12, Draw.alpha(acc, 0.24f), Draw.alpha(acc, 0.03f));
-				sheet(k, Accessories.texture(t, design), sheetSize(t), ax, ay, aw, ah, 120, 56, 4);
-			}, () -> setAccessory(t, design), t, design));
-		}
-		int rows = (specs.size() + 2) / 3;
+		TileSpec[] specs = accSpecs(t, sel);
+		int rows = (specs.length + 2) / 3;
 		float h = 2 + 24 + 16.25f + 10 + rows * tileH() + (rows - 1) * 10;
 		k.box(x, y, w, h, 18, 0xFF2C2F33, 0xFF393C41);
 		float ix = x + 15, iw = w - 30;
 		k.text(t.displayName, ix, y + 13 + 8.125f, 13, 0xFFFFFFFF, true);
 		k.textRight(NONE.equals(sel) ? "Nothing equipped" : sel, ix + iw, y + 13 + 8.125f, 10, MUTED, false);
-		grid(k, ix, y + 13 + 16.25f + 10, iw, null, specs.toArray(new TileSpec[0]));
+		grid(k, ix, y + 13 + 16.25f + 10, iw, null, specs);
 		return y + h;
 	}
 

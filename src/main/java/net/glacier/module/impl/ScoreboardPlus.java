@@ -2,7 +2,6 @@ package net.glacier.module.impl;
 
 import net.glacier.module.Category;
 import net.glacier.module.Module;
-import net.glacier.module.ModuleManager;
 import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
@@ -11,8 +10,8 @@ import net.minecraft.client.gui.GuiGraphics;
 /**
  * Sidebar scoreboard tweaks (NRC scoreboard module and the Bedrock scoreboard options): hide the red numbers, text
  * shadow, background style and opacity, scale and position offsets. The hooks are in {@code mixin.extrac.ExtraCGui}
- * around Gui.displayScoreboardSidebar. The numbers are hidden through the existing Elements "Hide Scores" setting
- * (MixinGuiElements owns that draw call), which this module mirrors while it is enabled.
+ * around Gui.displayScoreboardSidebar. MixinGuiElements owns the draw call for the numbers and asks
+ * {@link #hidesNumbers()} next to the Elements "Hide Scores" setting, so nothing is written into that setting.
  */
 public class ScoreboardPlus extends Module {
 	private static ScoreboardPlus instance;
@@ -27,9 +26,6 @@ public class ScoreboardPlus extends Module {
 	/** Pixels; negative moves the sidebar up. */
 	public final SliderSetting offsetY = add(new SliderSetting("Y Offset", 0, -300, 300, 2));
 
-	/** True while this module has switched the Elements "Hide Scores" setting on. */
-	private boolean lastHide;
-
 	public ScoreboardPlus() {
 		super("Scoreboard", "Hide numbers, shadow, background, scale and position of the sidebar scoreboard.", Category.RENDER);
 		instance = this;
@@ -41,21 +37,10 @@ public class ScoreboardPlus extends Module {
 		return s != null && s.isEnabled() ? s : null;
 	}
 
-	@Override
-	public void onTick() {
-		if (lastHide == hideNumbers.on()) return;
-		ElementsModule e = ModuleManager.get(ElementsModule.class);
-		if (e == null) return;
-		lastHide = hideNumbers.on();
-		e.hideScores.set(lastHide);
-	}
-
-	@Override
-	protected void onDisable() {
-		if (!lastHide) return;
-		lastHide = false;
-		ElementsModule e = ModuleManager.get(ElementsModule.class);
-		if (e != null) e.hideScores.set(false);
+	/** True when the enabled module hides the red score numbers. */
+	public static boolean hidesNumbers() {
+		ScoreboardPlus s = active();
+		return s != null && s.hideNumbers.on();
 	}
 
 	/** Pushes the scale and offset transform around the sidebar. Returns true when a matrix was pushed. */
