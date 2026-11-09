@@ -254,7 +254,7 @@ public class NativeMenuScreen extends Screen {
 			if (!h.in(lx, ly)) continue;
 			if (e.button() == 1 && h.right() != null) {
 				h.right().run();
-			} else {
+			} else if (e.button() == 0) {
 				if (h.drag()) active = h;
 				h.press().accept(lx);
 			}

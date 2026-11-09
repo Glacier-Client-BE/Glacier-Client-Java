@@ -25,8 +25,12 @@ public final class HotbarSkin {
 		return Identifier.fromNamespaceAndPath("glacier", "textures/" + name + ".png");
 	}
 
+	/** The Editors module, looked up once; ModuleManager.get scans the whole module list and this runs every frame. */
+	private static EditorsModule editors;
+
 	private static EditorsModule ed() {
-		return ModuleManager.get(EditorsModule.class);
+		if (editors == null) editors = ModuleManager.get(EditorsModule.class);
+		return editors;
 	}
 
 	/** Rainbow colour that cycles over time. */

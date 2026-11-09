@@ -6,8 +6,9 @@ import net.glacier.setting.ToggleSetting;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 
 /**
- * 1.7/1.8 style animations. Every sub-option is read by a mixin in net.glacier.mixin.extrab (see MixinOldAnimations
- * and friends); the static accessors are null-safe so mixins degrade to vanilla when the module is off.
+ * 1.7/1.8 style animations. Every sub-option is read by a mixin in net.glacier.mixin.extrab (MixinOldItemInHand,
+ * MixinOldMinecraft, MixinOldCamera, MixinOldGameRenderer, MixinOldEquipmentLayer); the static accessors are null-safe
+ * so mixins degrade to vanilla when the module is off.
  */
 public class OldAnimations extends Module {
 	private static OldAnimations instance;

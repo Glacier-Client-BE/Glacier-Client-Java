@@ -249,6 +249,7 @@ public final class NativePauseScreen extends PauseScreen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent e, boolean dbl) {
+		if (e.button() != 0) return super.mouseClicked(e, dbl);
 		for (int i = hits.size() - 1; i >= 0; i--) {
 			Hit h = hits.get(i);
 			if (!h.in(e.x(), e.y())) continue;

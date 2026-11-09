@@ -100,7 +100,7 @@ public final class MusicPage {
 		float rw = ix + iw - 36 - 12 - rx;
 		float vol = recordsVolume();
 		k.range(rx, cy - 7, rw, 14, vol, ACCENT);
-		k.drag(rx, cy - 11, rw, 22, lx2 -> setVolume(MenuKit.fracAt(lx2, rx, rw)), null);
+		k.drag(rx, cy - 11, rw, 22, lx2 -> setVolume(MenuKit.fracAt(lx2, rx, rw)), MusicPage::saveOptions);
 		k.textCenter(Math.round(vol * 100) + "%", ix + iw - 18, cy, 12, 0xFF8EA0E0, false);
 		return y + h;
 	}
@@ -115,6 +115,12 @@ public final class MusicPage {
 		if (o == null) return;
 		double v = Math.max(0.0, Math.min(1.0, Math.round(fraction * 100) / 100.0));
 		o.getSoundSourceOptionInstance(SoundSource.RECORDS).set(v);
+	}
+
+	/** Writes options.txt once a volume drag ends, so the Records volume survives a restart. */
+	private static void saveOptions() {
+		Options o = Minecraft.getInstance().options;
+		if (o != null) o.save();
 	}
 
 	// ----------------------------------------------------------------- tracks

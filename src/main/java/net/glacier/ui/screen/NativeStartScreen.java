@@ -88,6 +88,10 @@ public class NativeStartScreen extends Screen {
 	private static boolean legacy = loadLegacy();
 	private int infoTab;
 	private float infoScroll, infoMax;
+	/** Wrapped text of the info window, rebuilt only when the entry list or the column width changes. */
+	private String[][] lineSrc;
+	private int lineW = -1;
+	private final List<List<String>> lineCache = new ArrayList<>();
 
 	private record Hit(int x, int y, int w, int h, boolean overlay, Runnable click) {
 		boolean in(double mx, double my) {
@@ -455,13 +459,29 @@ public class NativeStartScreen extends Screen {
 				}
 			}
 			yy += mt;
-			for (String line : wrap(es[i][1], f, Math.round(w) - indent)) {
+			for (String line : wrapped(es, i, f, Math.round(w), indent)) {
 				if (draw) Draw.text(g, line, x + indent, yy + (lineH - 8 * f) / 2f, f, color);
 				yy += lineH;
 			}
 			yy += mb;
 		}
 		return yy - y;
+	}
+
+	/** Word-wrapped lines of entry i, cached per entry list and column width: the text is fixed while the window is open. */
+	private List<String> wrapped(String[][] es, int i, float f, int colW, int indent) {
+		if (es != lineSrc || colW != lineW) {
+			lineSrc = es;
+			lineW = colW;
+			lineCache.clear();
+			for (int k = 0; k < es.length; k++) lineCache.add(null);
+		}
+		List<String> lines = lineCache.get(i);
+		if (lines == null) {
+			lines = wrap(es[i][1], f, colW - indent);
+			lineCache.set(i, lines);
+		}
+		return lines;
 	}
 
 	private static List<String> wrap(String s, float f, int maxW) {
@@ -664,6 +684,7 @@ public class NativeStartScreen extends Screen {
 			}
 			return true;
 		}
+		if (e.button() != 0) return infoOpen;
 		double x = e.x() / scale, y = e.y() / scale;
 		for (int i = hits.size() - 1; i >= 0; i--) {
 			Hit h = hits.get(i);

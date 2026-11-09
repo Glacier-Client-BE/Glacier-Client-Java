@@ -15,12 +15,14 @@ public final class HudExtras {
 	private static final String[] DIGITS = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
 	private static int lastPct = -1;
 	private static String pctText = "";
+	/** The Editors module, looked up once; ModuleManager.get scans the whole module list. */
+	private static EditorsModule editors;
 
 	private HudExtras() {
 	}
 
 	public static void draw(GuiGraphics g) {
-		EditorsModule editors = ModuleManager.get(EditorsModule.class);
+		if (editors == null) editors = ModuleManager.get(EditorsModule.class);
 		if (editors == null) return;
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null) return;

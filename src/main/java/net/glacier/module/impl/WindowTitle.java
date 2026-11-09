@@ -24,6 +24,7 @@ public class WindowTitle extends Module {
 	@Override
 	protected void onDisable() {
 		applied = null;
-		if (mc.getWindow() != null) mc.getWindow().setTitle("Minecraft");
+		// Back to the title vanilla would show right now (version, world, server).
+		if (mc.getWindow() != null) mc.updateTitle();
 	}
 }

@@ -20,6 +20,7 @@ public class MainhandHud extends SlotHudModule {
 	private ItemStack stack = ItemStack.EMPTY;
 	private String text = "";
 	private int color = TEXT;
+	private final WidthCache textW = new WidthCache();
 
 	public MainhandHud() {
 		super("Mainhand HUD", "Shows your held item with its count or durability.", 22);
@@ -64,7 +65,7 @@ public class MainhandHud extends SlotHudModule {
 	public int contentWidth() {
 		if (stack.isEmpty()) return slot();
 		int w = showIcon.on() ? slot() : 0;
-		if (!text.isEmpty()) w += (w > 0 ? GAP : 0) + textWidth(text);
+		if (!text.isEmpty()) w += (w > 0 ? GAP : 0) + cachedWidth(textW, text);
 		return w;
 	}
 

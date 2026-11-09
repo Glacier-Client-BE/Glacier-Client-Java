@@ -10,6 +10,7 @@ public class OffhandHud extends SlotHudModule {
 	private static final int GAP = 4;
 	private ItemStack stack = ItemStack.EMPTY;
 	private String text = "";
+	private final WidthCache textW = new WidthCache();
 
 	public OffhandHud() {
 		super("Offhand HUD", "Shows the item in your off hand with its count or durability.", 22);
@@ -38,7 +39,7 @@ public class OffhandHud extends SlotHudModule {
 
 	@Override
 	public int contentWidth() {
-		return slot() + (text.isEmpty() ? 0 : GAP + textWidth(text));
+		return slot() + (text.isEmpty() ? 0 : GAP + cachedWidth(textW, text));
 	}
 
 	@Override

@@ -35,6 +35,11 @@ public class Keystrokes extends HudModule {
 	private final ArrayDeque<Long> rightClicks = new ArrayDeque<>();
 	private boolean prevLeft;
 	private boolean prevRight;
+	/** "N CPS" text per mouse button, rebuilt only when the click count changes. */
+	private int lCpsN = -1;
+	private String lCpsText = "";
+	private int rCpsN = -1;
+	private String rCpsText = "";
 
 	public Keystrokes() {
 		super("Keystrokes", "Shows your movement and click inputs.");
@@ -127,7 +132,7 @@ public class Keystrokes extends HudModule {
 	}
 
 	/** Mouse cap: the button label with the CPS line below, the pair centred vertically in the cap. */
-	private void mouseCap(GuiGraphics g, int x, int y, String label, int cps, boolean pressed) {
+	private void mouseCap(GuiGraphics g, int x, int y, String label, String c, boolean pressed) {
 		int wide = wide();
 		int mh = mouseH();
 		Draw.round(g, x, y, wide, mh, radius(), pressed ? pressedFill() : idleFill());
@@ -142,7 +147,6 @@ public class Keystrokes extends HudModule {
 		int lx = x + (wide - textWidth(label)) / 2;
 		drawText(g, label, lx, top, pressed ? Theme.HUD_INK : TEXT);
 
-		String c = cps + " CPS";
 		float cx = x + (wide - textWidth(c) * CPS_SCALE) / 2f;
 		var p = g.pose();
 		p.pushMatrix();
@@ -176,8 +180,18 @@ public class Keystrokes extends HudModule {
 		if (showMouse.on()) {
 			boolean lmb = mc.mouseHandler.isLeftPressed();
 			boolean rmb = mc.mouseHandler.isRightPressed();
-			mouseCap(g, x, cy, "LMB", leftClicks.size(), lmb);
-			mouseCap(g, x + wide() + gp, cy, "RMB", rightClicks.size(), rmb);
+			int lc = leftClicks.size();
+			if (lc != lCpsN) {
+				lCpsN = lc;
+				lCpsText = lc + " CPS";
+			}
+			int rc = rightClicks.size();
+			if (rc != rCpsN) {
+				rCpsN = rc;
+				rCpsText = rc + " CPS";
+			}
+			mouseCap(g, x, cy, "LMB", lCpsText, lmb);
+			mouseCap(g, x + wide() + gp, cy, "RMB", rCpsText, rmb);
 			cy += mouseH() + gp;
 		}
 

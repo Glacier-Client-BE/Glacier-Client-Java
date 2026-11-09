@@ -19,6 +19,8 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 public class GlacierClient implements ClientModInitializer {
 	public static final String MOD_ID = "glacier";
 	public static final Logger LOGGER = LoggerFactory.getLogger("Glacier");
@@ -68,7 +70,10 @@ public class GlacierClient implements ClientModInitializer {
 		} catch (RuntimeException e) {
 			LOGGER.error("HUD extras failed", e);
 		}
-		for (HudModule hud : ModuleManager.hud()) {
+		// Indexed loop: the HUD list is a fixed view, and this runs every frame without an iterator allocation.
+		List<HudModule> huds = ModuleManager.hud();
+		for (int i = 0, n = huds.size(); i < n; i++) {
+			HudModule hud = huds.get(i);
 			if (!hud.isEnabled()) continue;
 			try {
 				hud.render(g, w, h);
