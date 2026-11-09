@@ -10,7 +10,6 @@ import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.ShareToLanScreen;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
-import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.multiplayer.ClientAdvancements;
@@ -60,7 +59,7 @@ public final class ScreenApi {
 			ClientAdvancements adv = conn == null ? null : conn.getAdvancements();
 			if (adv != null) mc.setScreen(new AdvancementsScreen(adv, self));
 		}));
-		put(js, o, "options", a -> run(() -> mc.setScreen(new OptionsScreen(self, mc.options))));
+		put(js, o, "options", a -> run(() -> mc.setScreen(net.glacier.ui.screen.ScreenFactory.options(self))));
 		put(js, o, "canShareToLan", a -> canShareToLan());
 		put(js, o, "shareToLan", a -> run(() -> {
 			if (canShareToLan()) mc.setScreen(new ShareToLanScreen(self));

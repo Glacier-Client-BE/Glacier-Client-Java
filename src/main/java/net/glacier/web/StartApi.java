@@ -7,7 +7,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
-import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
@@ -38,7 +37,7 @@ public final class StartApi {
 		put(bridge, o, "singleplayer", () -> open(new SelectWorldScreen(screen)));
 		put(bridge, o, "multiplayer", () -> open(new JoinMultiplayerScreen(screen)));
 		put(bridge, o, "realms", () -> open(new RealmsMainScreen(screen)));
-		put(bridge, o, "options", () -> open(new OptionsScreen(screen, mc.options)));
+		put(bridge, o, "options", () -> open(net.glacier.ui.screen.ScreenFactory.options(screen)));
 		put(bridge, o, "modMenu", () -> open(net.glacier.ui.screen.ScreenFactory.menu(null)));
 		put(bridge, o, "cosmetics", () -> open(net.glacier.ui.screen.ScreenFactory.menu("cosmetics")));
 		put(bridge, o, "quit", () -> {
