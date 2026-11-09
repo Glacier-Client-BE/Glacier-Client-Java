@@ -9,7 +9,8 @@
 		"MixinRenderSetup",
 		"MixinTextureTransform",
 		"MixinItemEntityRenderer",
-		"MixinItemStack"
+		"MixinItemStack",
+		"MixinClockInstance"
 	],
 	"injectors": {
 		"defaultRequire": 0

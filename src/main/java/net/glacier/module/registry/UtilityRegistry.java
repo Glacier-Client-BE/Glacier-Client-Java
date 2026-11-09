@@ -24,5 +24,6 @@ public final class UtilityRegistry {
 		register.accept(new net.glacier.module.impl.HitColor());
 		register.accept(new net.glacier.module.impl.ProjectileTrails());
 		register.accept(new net.glacier.module.impl.SpinningProjectiles());
+		register.accept(new net.glacier.module.impl.BorderlessFullscreen());
 	}
 }

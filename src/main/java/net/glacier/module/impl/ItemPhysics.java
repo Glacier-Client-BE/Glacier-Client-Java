@@ -62,20 +62,23 @@ public class ItemPhysics extends Module {
 		pose.translate(x, y, z);
 	}
 
-	/** Replacement for the yaw rotation of ItemEntityRenderer#submit (applied right after {@link #translate}). */
-	public static void rotate(PoseStack pose, ItemEntityRenderState s, AABB box, org.joml.Quaternionfc vanilla) {
+	/**
+	 * Replacement for the yaw rotation of ItemEntityRenderer#submit (applied right after {@link #translate}). 26.x
+	 * rotates with {@code PoseStack#rotate(Axis, float)}, so the vanilla spin arrives as a plain angle in radians.
+	 */
+	public static void rotate(PoseStack pose, ItemEntityRenderState s, AABB box, float vanillaSpin) {
 		ItemPhysics p = instance;
 		if (p == null || !p.isEnabled()) {
-			pose.rotate(vanilla);
+			pose.rotate(Axis.YP, vanillaSpin);
 			return;
 		}
 		switch (p.rotation.get()) {
-			case "Static" -> pose.rotate(Axis.YP.rotation(s.bobOffset));
-			case "Slow Spin" -> pose.rotate(Axis.YP.rotation(ItemEntity.getSpin(s.ageInTicks * p.slow.f(), s.bobOffset)));
-			default -> pose.rotate(vanilla);
+			case "Static" -> pose.rotate(Axis.YP, s.bobOffset);
+			case "Slow Spin" -> pose.rotate(Axis.YP, ItemEntity.getSpin(s.ageInTicks * p.slow.f(), s.bobOffset));
+			default -> pose.rotate(Axis.YP, vanillaSpin);
 		}
 		if (p.flat.on() && box != null && isFlatSprite(box)) {
-			pose.rotate(Axis.XP.rotationDegrees(-90f));
+			pose.rotate(Axis.XP, (float) Math.toRadians(-90.0));
 			pose.translate(-(float) ((box.minX + box.maxX) * 0.5), -(float) ((box.minY + box.maxY) * 0.5), 0f);
 		}
 	}

@@ -1,6 +1,7 @@
 package net.glacier.mixin.extraa;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.glacier.module.impl.ItemHighlighter;
 import net.glacier.module.impl.ItemPhysics;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -10,7 +11,6 @@ import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.AABB;
-import org.joml.Quaternionfc;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,10 +18,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Item Physics and Item Highlighter. Verified with javap against ItemEntityRenderer (1.21.11):
+ * Item Physics and Item Highlighter. Verified with javap against ItemEntityRenderer (26.3):
  * <ul>
  * <li>submit(ItemEntityRenderState, PoseStack, SubmitNodeCollector, CameraRenderState)V contains exactly one
- * PoseStack#translate(FFF)V, one Mth#sin(D)F (the bob), one PoseStack#mulPose(Quaternionfc)V (the spin) and the
+ * PoseStack#translate(FFF)V, one Mth#sin(D)F (the bob), one PoseStack#rotate(Axis, float)V (the spin) and the
  * balanced pushPose/popPose around them, so the redirects below replace single calls.</li>
  * <li>extractRenderState(ItemEntity, ItemEntityRenderState, float)V ends with a plain return; EntityRenderState#outlineColor
  * != 0 is what makes LevelRenderer draw the entity into the outline target.</li>

@@ -7,8 +7,9 @@ import net.glacier.setting.SliderSetting;
 
 /**
  * Forces the time of day you see, client side only. Re-applies the chosen time every tick through
- * ClientLevel#setTimeFromServer, which simply overrides the server sync packets. The real time is
- * tracked while active so it can be handed back when the module is switched off.
+ * the client side world clock of the current dimension (26.x: ClientClockManager, written through
+ * MixinClockInstance), which simply overrides the server sync packets. The real time is tracked while active so it can
+ * be handed back when the module is switched off.
  */
 public class TimeChanger extends Module {
 	private static final long DAY = 24000L;
@@ -27,7 +28,7 @@ public class TimeChanger extends Module {
 
 	@Override
 	protected void onEnable() {
-		realDayTime = mc.level != null ? mc.level.getOverworldClockTime() : -1;
+		realDayTime = mc.level != null ? mc.level.getDefaultClockTime() : -1;
 		cycled = 0;
 	}
 
@@ -37,11 +38,21 @@ public class TimeChanger extends Module {
 			realDayTime = -1;
 			return;
 		}
-		if (realDayTime < 0) realDayTime = mc.level.getOverworldClockTime();
+		if (realDayTime < 0) realDayTime = mc.level.getDefaultClockTime();
 		else realDayTime++;
 		cycled += cycle.get();
 		long t = Math.floorMod(base() + (long) cycled, DAY);
-		// 26.x: day time is a world clock now; override dropped
+		// keep the day count of the real clock so the moon phase stays sane, only the time of day is pinned
+		setClock(Math.floorDiv(mc.level.getDefaultClockTime(), DAY) * DAY + t);
+	}
+
+	/** Writes the total tick count of the current dimension's world clock (client side only). */
+	private void setClock(long totalTicks) {
+		var clock = mc.level.dimensionType().defaultClock();
+		if (clock.isEmpty()) return;
+		if (mc.level.clockManager().getInstance(clock.get()) instanceof net.glacier.mixin.extraa.MixinClockInstance w) {
+			w.glacier$setTotalTicks(totalTicks);
+		}
 	}
 
 	private long base() {
@@ -59,7 +70,7 @@ public class TimeChanger extends Module {
 	@Override
 	protected void onDisable() {
 		if (mc.level != null && realDayTime >= 0) {
-			// 26.x: day time is a world clock now; override dropped
+			setClock(realDayTime);
 		}
 		realDayTime = -1;
 		cycled = 0;

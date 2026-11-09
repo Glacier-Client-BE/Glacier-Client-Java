@@ -4,6 +4,8 @@
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"MixinOldItemInHand",
+		"MixinOldHands",
+		"MixinOldMinecraft",
 		"MixinOldCamera",
 		"MixinOldGameRenderer",
 		"MixinOldEquipmentLayer",
