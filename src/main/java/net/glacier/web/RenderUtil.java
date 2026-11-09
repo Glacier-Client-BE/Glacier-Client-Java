@@ -474,6 +474,11 @@ public final class RenderUtil {
 		}
 	}
 
+	/** Registers the size of a dynamically created texture so image() can draw it. */
+	public static void putImageSize(Identifier id, int w, int h) {
+		IMAGE_SIZES.put(id, new int[]{w, h});
+	}
+
 	/** Natural {width, height} of a PNG texture, cached; null when it is missing or not a PNG. */
 	public static int[] imageSize(Identifier id) {
 		if (id == null) return null;
