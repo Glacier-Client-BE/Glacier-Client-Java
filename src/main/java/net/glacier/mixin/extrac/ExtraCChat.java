@@ -29,12 +29,13 @@ import java.util.List;
  * <li>getScale()D, getWidth()I are private and used by render, hit testing and line wrapping, so overriding their
  * result keeps all of them consistent. getLineHeight() and the private render read the line spacing option through
  * OptionInstance.get(): ordinal 0 inside getLineHeight, ordinals 0 (chat opacity), 1 (background opacity) and 2
- * (line spacing) inside render(ChatGraphicsAccess, int, int, boolean).</li>
+ * (line spacing) inside extractRenderState(ChatGraphicsAccess, int, int, DisplayMode), verified with javap -c on 26.3.</li>
  * </ul>
  */
 @Mixin(ChatComponent.class)
 public abstract class ExtraCChat implements ChatTextLookup {
-	private static final String RENDER = "extractRenderState";
+	/* Full descriptor: ChatComponent has two extractRenderState overloads, and only the private one reads the options. */
+	private static final String RENDER = "extractRenderState(Lnet/minecraft/client/gui/components/ChatComponent$ChatGraphicsAccess;IILnet/minecraft/client/gui/components/ChatComponent$DisplayMode;)V";
 	private static final String OPTION_GET = "Lnet/minecraft/client/OptionInstance;get()Ljava/lang/Object;";
 
 	@Shadow

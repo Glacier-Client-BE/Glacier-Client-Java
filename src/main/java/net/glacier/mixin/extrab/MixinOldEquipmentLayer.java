@@ -46,7 +46,7 @@ public class MixinOldEquipmentLayer {
 	}
 
 	@ModifyArg(method = RENDER_LAYERS, require = 0, index = 5, at = @At(value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/OrderedSubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IIILnet/minecraft/client/renderer/texture/TextureAtlasSprite;ILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V"))
+			target = "Lnet/minecraft/client/renderer/OrderedSubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IIILnet/minecraft/client/renderer/texture/UvMapping;I)V"))
 	private int glacier$hurtTint(int overlay) {
 		LivingEntityRenderState s = OldAnimations.currentArmorState;
 		if (s != null && overlay == OverlayTexture.NO_OVERLAY && OldAnimations.armorTint()) {
