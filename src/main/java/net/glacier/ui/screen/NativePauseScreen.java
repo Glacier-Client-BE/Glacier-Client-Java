@@ -10,7 +10,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.ShareToLanScreen;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
-import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ClientAdvancements;
@@ -207,7 +206,7 @@ public final class NativePauseScreen extends PauseScreen {
 	}
 
 	private void options() {
-		show(() -> new OptionsScreen(this, Minecraft.getInstance().options));
+		show(() -> ScreenFactory.options(this));
 	}
 
 	private void screenshot() {
