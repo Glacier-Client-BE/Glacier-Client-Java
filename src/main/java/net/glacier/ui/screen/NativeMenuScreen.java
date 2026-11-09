@@ -146,6 +146,11 @@ public class NativeMenuScreen extends Screen {
 
 	// ----------------------------------------------------------------- render
 
+	/** The menu draws its own dim; skipping the vanilla blurred background saves a full-screen blur pass every frame. */
+	@Override
+	public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+	}
+
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor g, int mxs, int mys, float partial) {
 		fit();

@@ -14,7 +14,11 @@ public final class MenuFps {
 		if (cap <= 0 || cap >= vanilla) return vanilla;
 		Minecraft mc = Minecraft.getInstance();
 		if (mc == null) return vanilla;
-		boolean inMenu = mc.level == null || (mc.gui.screen() != null && !(mc.gui.screen() instanceof PauseScreen));
+		var screen = mc.gui.screen();
+		// Glacier's own interactive screens (mod menu, HUD editor, quick bar) stay at the full rate so scrolling and animations are smooth
+		if (screen instanceof net.glacier.ui.screen.NativeMenuScreen || screen instanceof net.glacier.ui.screen.HudEditorScreen
+				|| screen instanceof net.glacier.ui.screen.NativeQuickBar || screen instanceof net.glacier.ui.screen.HudQuickScreen) return vanilla;
+		boolean inMenu = mc.level == null || (screen != null && !(screen instanceof PauseScreen));
 		return inMenu ? cap : vanilla;
 	}
 }
