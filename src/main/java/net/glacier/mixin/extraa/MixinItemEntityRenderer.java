@@ -57,12 +57,12 @@ public abstract class MixinItemEntityRenderer {
 	}
 
 	@Redirect(method = SUBMIT, at = @At(value = "INVOKE",
-			target = "Lcom/mojang/blaze3d/vertex/PoseStack;rotate(Lorg/joml/Quaternionfc;)V"), require = 0)
-	private void glacier$spin(PoseStack pose, Quaternionfc vanilla) {
+			target = "Lcom/mojang/blaze3d/vertex/PoseStack;rotate(Lcom/mojang/math/Axis;F)V"), require = 0)
+	private void glacier$spin(PoseStack pose, Axis axis, float vanillaSpin) {
 		if (ItemPhysics.active() && this.glacier$state != null) {
-			ItemPhysics.rotate(pose, this.glacier$state, this.glacier$box, vanilla);
+			ItemPhysics.rotate(pose, this.glacier$state, this.glacier$box, vanillaSpin);
 		} else {
-			pose.rotate(vanilla);
+			pose.rotate(axis, vanillaSpin);
 		}
 	}
 

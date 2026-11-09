@@ -30,6 +30,6 @@ public abstract class MixinOldMinecraft {
 	private void glacier$rightClickFix(CallbackInfo ci) {
 		LocalPlayer p = this.player;
 		if (p == null || this.gui.screen() != null || !p.isUsingItem() || !OldAnimations.rightClickFix()) return;
-		while (this.options.keyAttack.consumeClick()) p.swing(InteractionHand.MAIN_HAND);
+		while (this.options.keyAttack.consumeClick()) p.swing(InteractionHand.MAIN_HAND, p.getItemInHand(InteractionHand.MAIN_HAND).getAttackAnimation(), false);
 	}
 }
