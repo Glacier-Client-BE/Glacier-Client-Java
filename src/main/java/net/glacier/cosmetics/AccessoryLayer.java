@@ -106,7 +106,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 			float twitch = phase < 6.0F ? Mth.sin(phase * 1.0472F) * 0.12F : 0.0F;
 			ROT.rotationZ(twitch);
 			pose.mulPose(ROT);
-			draw(collector, pose, light, AccessoryModels.ears(), Accessories.texture(Type.EARS, design));
+			draw(collector, pose, light, AccessoryModels.ears(design), Accessories.texture(Type.EARS, design));
 			pose.popPose();
 		}
 
@@ -122,7 +122,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 		if (design != null) {
 			pose.pushPose();
 			model.head.translateAndRotate(pose);
-			draw(collector, pose, light, AccessoryModels.glasses(), Accessories.texture(Type.GLASSES, design));
+			draw(collector, pose, light, AccessoryModels.glasses(design), Accessories.texture(Type.GLASSES, design));
 			pose.popPose();
 		}
 
@@ -141,7 +141,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 				pose.translate(0.0F, Mth.sin(age * 0.1D) * 0.5F * PX, 0.0F);
 				ROT.rotationY(age * 0.03F);
 				pose.mulPose(ROT);
-				draw(collector, pose, FULL_BRIGHT, AccessoryModels.halo(), Accessories.texture(Type.HALO, design));
+				draw(collector, pose, FULL_BRIGHT, AccessoryModels.halo(design), Accessories.texture(Type.HALO, design));
 			}
 			pose.popPose();
 		}
@@ -151,11 +151,11 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 			Identifier texture = Accessories.texture(Type.BRACELET, design);
 			pose.pushPose();
 			model.rightArm.translateAndRotate(pose);
-			draw(collector, pose, light, AccessoryModels.braceletRight(), texture);
+			draw(collector, pose, light, AccessoryModels.braceletRight(design), texture);
 			pose.popPose();
 			pose.pushPose();
 			model.leftArm.translateAndRotate(pose);
-			draw(collector, pose, light, AccessoryModels.braceletLeft(), texture);
+			draw(collector, pose, light, AccessoryModels.braceletLeft(design), texture);
 			pose.popPose();
 		}
 
@@ -207,7 +207,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 		if (design != null) {
 			pose.pushPose();
 			model.head.translateAndRotate(pose);
-			draw(collector, pose, light, AccessoryModels.hat(), Accessories.texture(Type.HAT, design));
+			draw(collector, pose, light, AccessoryModels.hat(design), Accessories.texture(Type.HAT, design));
 			pose.popPose();
 		}
 
@@ -217,7 +217,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 			model.head.translateAndRotate(pose);
 			PolyMesh packMask = "glacier".equals(Accessories.model(Type.MASK, design)) ? AccessoryModels.glacierMask() : null;
 			if (packMask != null) drawMesh(collector, pose, light, packMask, Accessories.texture(Type.MASK, design));
-			else draw(collector, pose, light, AccessoryModels.mask(), Accessories.texture(Type.MASK, design));
+			else draw(collector, pose, light, AccessoryModels.mask(design), Accessories.texture(Type.MASK, design));
 			pose.popPose();
 		}
 
@@ -225,7 +225,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 		if (design != null) {
 			pose.pushPose();
 			model.body.translateAndRotate(pose);
-			draw(collector, pose, light, AccessoryModels.backpack(), Accessories.texture(Type.BACKPACK, design));
+			draw(collector, pose, light, AccessoryModels.backpack(design), Accessories.texture(Type.BACKPACK, design));
 			pose.popPose();
 		}
 
@@ -236,9 +236,9 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 			float lean = -0.05F - 0.35F * speed + Mth.sin(age * 0.09F) * 0.05F;
 			pose.pushPose();
 			model.body.translateAndRotate(pose);
-			draw(collector, pose, light, AccessoryModels.scarfCollar(), texture);
-			hang(collector, pose, light, AccessoryModels.scarfFlapA(), texture, 2.0F, 2.0F, -3.0F, lean);
-			hang(collector, pose, light, AccessoryModels.scarfFlapB(), texture, -1.0F, 2.0F, -3.0F,
+			draw(collector, pose, light, AccessoryModels.scarfCollar(design), texture);
+			hang(collector, pose, light, AccessoryModels.scarfFlapA(design), texture, 2.0F, 2.0F, -3.0F, lean);
+			hang(collector, pose, light, AccessoryModels.scarfFlapB(design), texture, -1.0F, 2.0F, -3.0F,
 					lean * 0.8F + Mth.sin(age * 0.11F + 1.3F) * 0.04F);
 			pose.popPose();
 		}
@@ -255,8 +255,8 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 			for (int i = 0; i < TAIL_PITCH.length; i++) {
 				ROT.rotationX(TAIL_PITCH[i]).rotateY(Mth.sin(wagT - i * 0.7F) * wagAmp * (0.5F + 0.2F * i));
 				pose.mulPose(ROT);
-				draw(collector, pose, light, AccessoryModels.tailSegment(i), texture);
-				pose.translate(0.0F, 0.0F, AccessoryModels.tailLength(i) * PX);
+				draw(collector, pose, light, AccessoryModels.tailSegment(design, i), texture);
+				pose.translate(0.0F, 0.0F, AccessoryModels.tailLength(design, i) * PX);
 			}
 			pose.popPose();
 		}
@@ -267,20 +267,20 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 			pose.pushPose();
 			model.body.translateAndRotate(pose);
 			pose.translate(-6.0F * PX, Mth.sin(age * 0.1F) * 0.35F * PX, 0.0F);
-			draw(collector, pose, light, AccessoryModels.petBody(), texture);
+			draw(collector, pose, light, AccessoryModels.petBody(design), texture);
 
 			pose.pushPose();
 			pose.translate(0.0F, -3.0F * PX, -2.5F * PX);
 			ROT.rotationY(Mth.sin(age * 0.05F) * 0.45F).rotateX(Mth.sin(age * 0.07F + 1.0F) * 0.12F);
 			pose.mulPose(ROT);
-			draw(collector, pose, light, AccessoryModels.petHead(), texture);
+			draw(collector, pose, light, AccessoryModels.petHead(design), texture);
 			pose.popPose();
 
 			pose.pushPose();
 			pose.translate(0.0F, -1.5F * PX, 2.5F * PX);
 			ROT.rotationY(Mth.sin(age * 0.2F) * 0.5F);
 			pose.mulPose(ROT);
-			draw(collector, pose, light, AccessoryModels.petTail(), texture);
+			draw(collector, pose, light, AccessoryModels.petTail(design), texture);
 			pose.popPose();
 
 			pose.popPose();
