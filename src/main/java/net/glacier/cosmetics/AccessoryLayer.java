@@ -198,7 +198,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 				ROT.rotationX(lean).rotateZ(-roll);
 				pose.rotate(ROT);
 				pose.translate(0.0F, 0.0F, -2.0F * PX);
-				drawMesh(collector, pose, light, mesh, packCape.texture());
+				drawMesh(collector, pose, light, mesh, packCape.texture(), true);
 				pose.popPose();
 			}
 		}
@@ -309,8 +309,12 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 	}
 
 	private void drawMesh(SubmitNodeCollector collector, PoseStack pose, int light, PolyMesh mesh, Identifier texture) {
+		drawMesh(collector, pose, light, mesh, texture, false);
+	}
+
+	private void drawMesh(SubmitNodeCollector collector, PoseStack pose, int light, PolyMesh mesh, Identifier texture, boolean outerOnly) {
 		RenderType type = meshTypes.computeIfAbsent(texture, RenderTypes::entityCutout);
-		collector.submitCustomGeometry(pose, type, (p, vc) -> mesh.render(p, vc, light, OverlayTexture.NO_OVERLAY));
+		collector.submitCustomGeometry(pose, type, (p, vc) -> mesh.render(p, vc, light, OverlayTexture.NO_OVERLAY, outerOnly));
 	}
 
 	private static boolean capePhysics() {

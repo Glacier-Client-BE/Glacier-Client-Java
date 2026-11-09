@@ -53,18 +53,33 @@ final class PolyMesh {
 	}
 
 	/** Writes every quad with the current pose of the stack. */
+	/**
+	 * Vulkan draws these meshes mirrored left to right compared with OpenGL (the cape logo faced the wrong way), so the
+	 * x axis is flipped to match. Resolved once from the backend description.
+	 */
+	private static final boolean MIRROR = com.mojang.blaze3d.systems.RenderSystem.getDevice().getDeviceInfo().isZZeroToOne();
+
 	void render(PoseStack.Pose pose, VertexConsumer vc, int light, int overlay) {
+		render(pose, vc, light, overlay, false);
+	}
+
+	/**
+	 * Writes the quads. With outerOnly, quads whose normal points toward -Z (the plain inner copy of a double-sided mesh) are
+	 * skipped, so the decorated face never competes with it for the depth test.
+	 */
+	void render(PoseStack.Pose pose, VertexConsumer vc, int light, int overlay, boolean outerOnly) {
 		for (int i = 0; i + 11 < quads.length; i += 12) {
+			if (outerOnly && nrm[quads[i + 1] * 3 + 2] < -0.5f) continue;
 			for (int k = 0; k < 4; k++) {
 				int p = quads[i + k * 3] * 3;
 				int n = quads[i + k * 3 + 1] * 3;
 				int t = quads[i + k * 3 + 2] * 2;
-				vc.addVertex(pose, pos[p] * PX, pos[p + 1] * PX, pos[p + 2] * PX)
+				vc.addVertex(pose, (MIRROR ? -pos[p] : pos[p]) * PX, pos[p + 1] * PX, pos[p + 2] * PX)
 						.setColor(-1)
 						.setUv(uv[t], uv[t + 1])
 						.setOverlay(overlay)
 						.setLight(light)
-						.setNormal(pose, nrm[n], nrm[n + 1], nrm[n + 2]);
+						.setNormal(pose, MIRROR ? -nrm[n] : nrm[n], nrm[n + 1], nrm[n + 2]);
 			}
 		}
 	}
