@@ -18,7 +18,7 @@ public class MixinGuiElements {
 			ordinal = 2))
 	private void glacier$hideScores(GuiGraphicsExtractor g, Font font, Component text, int x, int y, int color, boolean shadow) {
 		ElementsModule e = ModuleManager.get(ElementsModule.class);
-		if (e != null && e.hideScores.on()) return;
+		if (e != null && e.hideScores.on() || net.glacier.module.impl.ScoreboardPlus.hidesNumbers()) return;
 		g.text(font, text, x, y, color, shadow);
 	}
 }

@@ -43,9 +43,11 @@ public class ArmorHud extends SlotHudModule {
 	private final int[] sprite = new int[MAX];
 	private final String[] durText = new String[MAX];
 	private final int[] durW = new int[MAX];
+	private final int[] durKey = new int[MAX];
 	private int count;
 	private int numW;
 	private int lastTick = Integer.MIN_VALUE;
+	private long lastFrame = -1;
 
 	public ArmorHud() {
 		super("Armor HUD", "Displays your equipped armor and its durability.", 22);
@@ -54,6 +56,9 @@ public class ArmorHud extends SlotHudModule {
 
 	/** Rebuilds the cached slot list at most once per game tick (or immediately when settings change the shape). */
 	private void refresh() {
+		long frame = System.nanoTime() >> 20;
+		if (frame == lastFrame) return;
+		lastFrame = frame;
 		int tick = mc.player == null ? -1 : mc.player.tickCount;
 		int key = tick * 64 + (hideEmpty.on() ? 1 : 0) + (showNumber.on() ? 4 : 0)
 				+ (reversed.on() ? 8 : 0) + (numberFormat.is("Percent") ? 32 : 0);
@@ -78,12 +83,14 @@ public class ArmorHud extends SlotHudModule {
 			durText[i] = null;
 			return;
 		}
-		String t = numberFormat.is("Percent")
-				? Math.round(frac(st) * 100f) + "%"
-				: String.valueOf(st.getMaxDamage() - st.getDamageValue());
-		if (!t.equals(durText[i])) {
-			durText[i] = t;
-			durW[i] = textWidth(t);
+		boolean pct = numberFormat.is("Percent");
+		int v = pct ? Math.round(frac(st) * 100f) : st.getMaxDamage() - st.getDamageValue();
+		// the text and its width are only rebuilt when the number shown in this slot changes
+		int k = pct ? ~v : v;
+		if (durText[i] == null || durKey[i] != k) {
+			durKey[i] = k;
+			durText[i] = pct ? v + "%" : String.valueOf(v);
+			durW[i] = textWidth(durText[i]);
 		}
 		numW = Math.max(numW, durW[i]);
 	}
