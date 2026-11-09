@@ -41,7 +41,7 @@ public final class NativePauseScreen extends PauseScreen {
 	private static final int CARD = 0xFF2C2F33, CARD_EDGE = 0xFF393C41;
 	private static final int CARD_HOVER = 0xFF33373C, CARD_HOVER_EDGE = 0xFF484C52;
 	private static final int WHITE = 0xFFFFFFFF;
-	private static final String INFO = "Glacier Client v7 on Minecraft 1.21.11";
+	private static final String INFO = "Glacier Client v7 on Minecraft " + net.minecraft.SharedConstants.getCurrentVersion().name();
 
 	private enum Kind { ACCENT, CARD, PILL }
 
@@ -121,12 +121,9 @@ public final class NativePauseScreen extends PauseScreen {
 		button(g, mx, my, px + 29, py + 142, 168, 40, 14, "Options", Kind.CARD, live, this::options);
 		button(g, mx, my, px + 203, py + 142, 168, 40, 14, "Information", Kind.CARD, live,
 				() -> showInfo = !showInfo);
-		button(g, mx, my, px + 29, py + 186, 168, 40, 14, "Mods", Kind.PILL, live,
+		// Open to LAN no longer exists in 26.x, so Mods takes the whole row instead of leaving a hole beside it.
+		button(g, mx, my, px + 29, py + 186, 342, 40, 14, "Mods", Kind.PILL, live,
 				() -> show(() -> NativeMenuScreen.open(null)));
-		if (canShareToLan()) {
-			button(g, mx, my, px + 203, py + 186, 168, 40, 14, "Open to LAN", Kind.PILL, live,
-					() -> {});
-		}
 		if (showInfo) center(g, INFO, lw / 2f, py + 232 + 7, 12, MUTED);
 
 		drawStatus(g);
@@ -225,12 +222,6 @@ public final class NativePauseScreen extends PauseScreen {
 		});
 	}
 
-	/** Only an integrated server that is not yet opened to LAN can be shared. */
-	private static boolean canShareToLan() {
-		IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
-		return false; // ShareToLanScreen removed in 26.x
-	}
-
 	/** Opens a screen built at click time; the screen returns to this one where vanilla does that. */
 	private static void show(Supplier<Screen> screen) {
 		run(() -> Minecraft.getInstance().gui.setScreen(screen.get()));
@@ -249,6 +240,7 @@ public final class NativePauseScreen extends PauseScreen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent e, boolean dbl) {
+		if (net.glacier.compat.Mouse.button(e) != 0) return true;
 		for (int i = hits.size() - 1; i >= 0; i--) {
 			Hit h = hits.get(i);
 			if (!h.in(e.x(), e.y())) continue;
