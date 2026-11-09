@@ -85,6 +85,8 @@ public class NativeStartScreen extends Screen {
 	private boolean introActive = true;
 	private float uiOff, cardDy, cf = 1f, logoA, logoY, logoSize;
 	private boolean ddOpen, infoOpen;
+	/** Start layout from the pack: false is the card, true is the legacy centred button stack. Saved between launches. */
+	private static boolean legacy = loadLegacy();
 	private int infoTab;
 	private float infoScroll, infoMax;
 
@@ -130,7 +132,8 @@ public class NativeStartScreen extends Screen {
 		pose.scale(scale, scale);
 		pose.pushMatrix();
 		pose.translate(0f, uiOff);
-		drawCard(g);
+		if (legacy) drawLegacy(g);
+		else drawCard(g);
 		drawPlayer(g);
 		drawTop(g);
 		drawNews(g);
@@ -207,6 +210,67 @@ public class NativeStartScreen extends Screen {
 		hit(sx, sy + 316, 352, 44, false, () -> infoOpen = true);
 	}
 
+	/**
+	 * Legacy layout from the pack (glacier_start_panel_legacy): the logo above a centred stack of Play, Options and
+	 * Dressing Room buttons, with Marketplace, Achievements and Information as square icon buttons along the bottom.
+	 * Pack units are doubled to css px.
+	 */
+	private void drawLegacy(GuiGraphicsExtractor g) {
+		int dy = Math.round(cardDy);
+		int cx = vw / 2;
+		int cy = vh / 2 + 14 + dy;
+
+		float ls = 120f;
+		RenderUtil.image(g, LOGO, cx - ls / 2f, cy - 130 - ls / 2f, cx + ls / 2f, cy - 130 + ls / 2f, cf);
+		RenderUtil.image(g, WORDMARK, cx - 112, cy - 62 - 16, cx + 112, cy - 62 + 15, cf);
+
+		legacyButton(g, "Play Game", cx - 200, cy - 20, () -> NativePlayScreen.open(this));
+		legacyButton(g, "Options", cx - 200, cy + 22, () -> open(new OptionsScreen(this, Minecraft.getInstance().options)));
+		legacyButton(g, "Dressing Room", cx - 200, cy + 64, () -> open(NativeMenuScreen.open("cosmetics")));
+
+		int iy = vh - 48 - 44;
+		legacyIcon(g, 0xF54F, cx - 24 - 50, iy, () -> open(NativeMenuScreen.open(null)));
+		legacyIcon(g, 0xF091, cx - 24, iy, () -> open(NativeMenuScreen.open(null)));
+		legacyIcon(g, 0xF0E0, cx - 24 + 50, iy, () -> infoOpen = true);
+	}
+
+	private void legacyButton(GuiGraphicsExtractor g, String label, int x, int y, Runnable action) {
+		boolean h = hov(x, y, 400, 40);
+		surface(g, x, y, 400, 40, 12, h);
+		txtCenter(g, label, x + 200, y + 20, 18, fa(TEXT));
+		hit(x, y, 400, 40, false, action);
+	}
+
+	private void legacyIcon(GuiGraphicsExtractor g, int cp, int x, int y, Runnable action) {
+		boolean h = hov(x, y, 48, 48);
+		surface(g, x, y, 48, 48, 14, h);
+		iconC(g, cp, x + 24, y + 24, 20, fa(TEXT));
+		hit(x, y, 48, 48, false, action);
+	}
+
+	private static java.nio.file.Path modeFile() {
+		return net.fabricmc.loader.api.FabricLoader.getInstance().getConfigDir().resolve("glacier").resolve("start_mode.txt");
+	}
+
+	private static boolean loadLegacy() {
+		try {
+			return "legacy".equals(java.nio.file.Files.readString(modeFile()).trim());
+		} catch (java.io.IOException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	private static void setLegacy(boolean on) {
+		legacy = on;
+		try {
+			java.nio.file.Files.createDirectories(modeFile().getParent());
+			java.nio.file.Files.writeString(modeFile(), on ? "legacy" : "default");
+		} catch (java.io.IOException | RuntimeException e) {
+			GlacierClient.LOGGER.warn("[ui] could not save the start layout", e);
+		}
+	}
+
+
 	/** Top-left player panel: 300x48 at (6,6). */
 	private void drawPlayer(GuiGraphicsExtractor g) {
 		surface(g, 6, 6, 56, 48, 14, false);
@@ -241,7 +305,7 @@ public class NativeStartScreen extends Screen {
 		boolean hd = hov(dx, 4, 152, 48);
 		Draw.round(g, dx, 4, 152, 48, 14, hd ? CARD_HOVER : DD_BG);
 		Draw.outline(g, dx, 4, 152, 48, 14, CARD_EDGE, 2);
-		txtCenter(g, "Default", dx + 76, 28, 16, TEXT);
+		txtCenter(g, legacy ? "Legacy" : "Default", dx + 76, 28, 16, TEXT);
 		iconC(g, 0xF078, dx + 135, 23, 14, DIM);
 		hit(dx, 4, 152, 48, false, () -> ddOpen = true);
 
@@ -258,12 +322,13 @@ public class NativeStartScreen extends Screen {
 		shadow(g, x, y, 152, 92, 16);
 		Draw.round(g, x, y, 152, 92, 16, PANEL);
 		Draw.outline(g, x, y, 152, 92, 16, PANEL_EDGE, 2);
-		Draw.round(g, x + 6, y + 6, 140, 38, 12, ACCENT);
-		txtCenter(g, "Default", x + 76, y + 25, 16, TEXT);
-		if (inRect(mxd, myd, x + 6, y + 48, 140, 38)) {
-			Draw.round(g, x + 6, y + 48, 140, 38, 12, ROW_HOVER);
+		for (int i = 0; i < 2; i++) {
+			int ry = y + 6 + 42 * i;
+			boolean on = (i == 1) == legacy;
+			if (on) Draw.round(g, x + 6, ry, 140, 38, 12, ACCENT);
+			else if (inRect(mxd, myd, x + 6, ry, 140, 38)) Draw.round(g, x + 6, ry, 140, 38, 12, ROW_HOVER);
+			txtCenter(g, i == 0 ? "Default" : "Legacy", x + 76, ry + 19, 16, on ? TEXT : DIM);
 		}
-		txtCenter(g, "Legacy", x + 76, y + 67, 16, DIM);
 	}
 
 	/** Bottom-right news flipbook: 202x128, one frame every 5 s. */
@@ -594,6 +659,11 @@ public class NativeStartScreen extends Screen {
 		// The dropdown's catch layer closes it on any click and passes nothing through.
 		if (ddOpen) {
 			ddOpen = false;
+			double dx = e.x() / scale, dy = e.y() / scale;
+			int px = vw - 208 + 6;
+			for (int i = 0; i < 2; i++) {
+				if (inRect(dx, dy, px, 56 + 6 + 42 * i, 140, 38)) setLegacy(i == 1);
+			}
 			return true;
 		}
 		double x = e.x() / scale, y = e.y() / scale;
