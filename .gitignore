@@ -19,3 +19,6 @@ hs_err_pid*
 # OS
 .DS_Store
 Thumbs.db
+
+# Packed release jars (tools/pack_universal.py)
+dist/
