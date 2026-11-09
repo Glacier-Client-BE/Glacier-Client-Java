@@ -20,20 +20,20 @@ final class AccessoryModels {
 		return Parts.BANDANA;
 	}
 
-	static ModelPart glasses() {
-		return Parts.GLASSES;
+	static ModelPart glasses(String design) {
+		return VARIANTS.computeIfAbsent("glasses/" + design, k -> bakeBoxes(24, 10, AccessoryShapes.glasses(design)));
 	}
 
-	static ModelPart braceletRight() {
-		return Parts.BRACELET_RIGHT;
+	static ModelPart braceletRight(String design) {
+		return VARIANTS.computeIfAbsent("braceletR/" + design, k -> bakeBoxes(20, 7, AccessoryShapes.bracelet(design, -1.0F)));
 	}
 
-	static ModelPart braceletLeft() {
-		return Parts.BRACELET_LEFT;
+	static ModelPart braceletLeft(String design) {
+		return VARIANTS.computeIfAbsent("braceletL/" + design, k -> bakeBoxes(20, 7, AccessoryShapes.bracelet(design, 1.0F)));
 	}
 
-	static ModelPart halo() {
-		return Parts.HALO;
+	static ModelPart halo(String design) {
+		return VARIANTS.computeIfAbsent("halo/" + design, k -> bakeBoxes(16, 8, AccessoryShapes.halo(design)));
 	}
 
 	private static BedrockModel glacierHalo;
@@ -75,8 +75,8 @@ final class AccessoryModels {
 	}
 
 	/** Backpack in body coordinates: sits on the back (+Z), straps over the shoulders and down the chest. */
-	static ModelPart backpack() {
-		return Parts.BACKPACK;
+	static ModelPart backpack(String design) {
+		return VARIANTS.computeIfAbsent("backpack/" + design, k -> bakeBoxes(64, 32, AccessoryShapes.backpack(design)));
 	}
 
 	/** Hat in head coordinates: crown, flat brim, top ornament and a cap bill. Designs hide the pieces they do not use. */
@@ -85,53 +85,53 @@ final class AccessoryModels {
 	}
 
 	/** Tail segment 0..3, each extending along +Z from its own origin; the layer chains them with a pose per segment. */
-	static ModelPart tailSegment(int i) {
-		return Parts.TAIL[i];
+	static ModelPart tailSegment(String design, int i) {
+		return VARIANTS.computeIfAbsent("tail/" + design + "/" + i, k -> bakeBoxes(64, 32, AccessoryShapes.tail(design, i)));
 	}
 
 	/** Length in model pixels of tail segment i, to step the pose to the next segment. */
-	static float tailLength(int i) {
-		return TAIL_LEN[i];
+	static float tailLength(String design, int i) {
+		return AccessoryShapes.tailStep(design, i);
 	}
 
 	/** Pet body, centred on the pet origin (x = 0 is the shoulder centre, y = 0 the top of the arm). */
-	static ModelPart petBody() {
-		return Parts.PET_BODY;
+	static ModelPart petBody(String design) {
+		return VARIANTS.computeIfAbsent("petBody/" + design, k -> bakeBoxes(64, 32, AccessoryShapes.petBody(design)));
 	}
 
 	/** Pet head with ears, relative to its neck pivot (0, -3, -2.5 from the pet origin). */
-	static ModelPart petHead() {
-		return Parts.PET_HEAD;
+	static ModelPart petHead(String design) {
+		return VARIANTS.computeIfAbsent("petHead/" + design, k -> bakeBoxes(64, 32, AccessoryShapes.petHead(design)));
 	}
 
 	/** Pet tail relative to its root (0, -1.5, 2.5 from the pet origin), already pitched up. */
-	static ModelPart petTail() {
-		return Parts.PET_TAIL;
+	static ModelPart petTail(String design) {
+		return VARIANTS.computeIfAbsent("petTail/" + design, k -> bakeBoxes(64, 32, AccessoryShapes.petTail(design)));
 	}
 
 	/** Neck collar in body coordinates. */
-	static ModelPart scarfCollar() {
-		return Parts.SCARF_COLLAR;
+	static ModelPart scarfCollar(String design) {
+		return VARIANTS.computeIfAbsent("scarfC/" + design, k -> bakeBoxes(64, 32, AccessoryShapes.scarfCollar(design)));
 	}
 
 	/** Long hanging scarf end, relative to its top pivot. */
-	static ModelPart scarfFlapA() {
-		return Parts.SCARF_A;
+	static ModelPart scarfFlapA(String design) {
+		return VARIANTS.computeIfAbsent("scarfA/" + design, k -> bakeBoxes(64, 32, AccessoryShapes.scarfFlap(design, true)));
 	}
 
 	/** Short hanging scarf end, relative to its top pivot. */
-	static ModelPart scarfFlapB() {
-		return Parts.SCARF_B;
+	static ModelPart scarfFlapB(String design) {
+		return VARIANTS.computeIfAbsent("scarfB/" + design, k -> bakeBoxes(64, 32, AccessoryShapes.scarfFlap(design, false)));
 	}
 
 	/** Face plate plus head band in head coordinates. */
-	static ModelPart mask() {
-		return Parts.MASK;
+	static ModelPart mask(String design) {
+		return VARIANTS.computeIfAbsent("mask/" + design, k -> bakeBoxes(64, 32, AccessoryShapes.mask(design)));
 	}
 
 
 	/** One box of a variant model: texture offset, origin, size, pivot and rotation in degrees (x, y, z). */
-	private record Box(String name, int tx, int ty, float x, float y, float z, int w, int h, int d,
+	record Box(String name, int tx, int ty, float x, float y, float z, int w, int h, int d,
 					   float px, float py, float pz, float rx, float ry, float rz) {
 		static Box of(String name, int tx, int ty, float x, float y, float z, int w, int h, int d) {
 			return new Box(name, tx, ty, x, y, z, w, h, d, 0, 0, 0, 0, 0, 0);
@@ -142,7 +142,7 @@ final class AccessoryModels {
 		}
 	}
 
-	private static ModelPart bakeBoxes(int texW, int texH, java.util.List<Box> boxes) {
+	static ModelPart bakeBoxes(int texW, int texH, java.util.List<Box> boxes) {
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition holder = mesh.getRoot().addOrReplaceChild("accessory", CubeListBuilder.create(), PartPose.ZERO);
 		float r = (float) (Math.PI / 180.0);
