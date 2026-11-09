@@ -8,7 +8,7 @@ import net.glacier.setting.SliderSetting;
 public class MenuFpsLimit extends Module {
 	private static MenuFpsLimit instance;
 
-	private final SliderSetting cap = add(new SliderSetting("Menu FPS", 30, 10, 60, 5));
+	private final SliderSetting cap = add(new SliderSetting("Menu FPS", 30, 20, 60, 5));
 
 	public MenuFpsLimit() {
 		super("Menu FPS Limit", "Caps the frame rate in menus to save power.", Category.RENDER);
