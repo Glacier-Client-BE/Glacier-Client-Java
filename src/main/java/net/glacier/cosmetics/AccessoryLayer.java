@@ -106,7 +106,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 			float twitch = phase < 6.0F ? Mth.sin(phase * 1.0472F) * 0.12F : 0.0F;
 			ROT.rotationZ(twitch);
 			pose.rotate(ROT);
-			draw(collector, pose, light, AccessoryModels.ears(), Accessories.texture(Type.EARS, design));
+			draw(collector, pose, light, AccessoryModels.ears(design), Accessories.texture(Type.EARS, design));
 			pose.popPose();
 		}
 
@@ -207,7 +207,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 		if (design != null) {
 			pose.pushPose();
 			model.head.translateAndRotate(pose);
-			draw(collector, pose, light, AccessoryModels.hat(), Accessories.texture(Type.HAT, design));
+			draw(collector, pose, light, AccessoryModels.hat(design), Accessories.texture(Type.HAT, design));
 			pose.popPose();
 		}
 
