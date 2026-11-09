@@ -333,6 +333,8 @@ public final class CosmeticsPage {
 	private float tileDt = 0.016f;
 	private long tileNanos;
 	private int extractBudget, tilesDrawn;
+	/** Cards allowed to render in 3D this frame besides the hovered one; shrinks when the frame rate drops. */
+	private int tileCap = 6;
 
 	/** Per-frame bookkeeping: frame delta, extraction budget, and dropping stale tile registrations. */
 	private void beginTiles() {
@@ -354,7 +356,7 @@ public final class CosmeticsPage {
 	 * None tile, scrolling fast, extraction budget used up, or a failure).
 	 */
 	private boolean model3d(MenuKit k, TileSpec s, boolean hov, float x, float y, float w, float h, float baseY) {
-		if (s.value == null || NONE.equals(s.value) || tilesDrawn >= 12) return false;
+		if (s.value == null || NONE.equals(s.value) || (!hov && tilesDrawn >= tileCap)) return false;
 		Minecraft mc = Minecraft.getInstance();
 		LocalPlayer p = mc.player;
 		if (p == null || mc.level == null || !k.visibleY(y, h)) return false;
