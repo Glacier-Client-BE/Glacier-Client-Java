@@ -113,6 +113,11 @@ public class CosmeticsModule extends Module {
 		tileActive = true;
 	}
 
+	/** True while the state being drawn is an accessory tile (type != null): the equipped cape must not show there. */
+	public static boolean tileHidesCape() {
+		return tileActive && tileType != null;
+	}
+
 	/** Drops every tile registration and the active binding (screen close, start of each page frame). */
 	public static void clearTiles() {
 		tileStates.clear();

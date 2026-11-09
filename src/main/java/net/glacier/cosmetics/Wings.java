@@ -72,7 +72,7 @@ enum Wings {
 				float sign = s == 0 ? 1.0F : -1.0F;
 				m.scale(p + "wing", 0.2F);
 				m.offset(p + "wing", 0.3F * sign, 0.0F, push);
-				m.rotate(p + "wing", 25.0F + 13.0F * amp * c150, sign * (23.0F + 20.0F * amp * sin), sign * (20.0F + 15.0F * amp * sin));
+				m.rotate(p + "wing", -25.0F - 13.0F * amp * c150, sign * (23.0F + 20.0F * amp * sin), sign * (20.0F + 15.0F * amp * sin));
 				m.rotate(p + "wing2", 0.0F, 0.0F, sign * (-35.0F - 38.0F * amp * cos));
 			}
 			return m.root;

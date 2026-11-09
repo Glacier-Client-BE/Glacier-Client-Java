@@ -54,6 +54,10 @@ public final class ModulesPage {
 	private ModuleGroup group;
 	private String query = "";
 	private boolean typing;
+
+	public boolean isTyping() {
+		return typing && openId == null;
+	}
 	private float scroll;
 	private String openId;
 	private String selKey;

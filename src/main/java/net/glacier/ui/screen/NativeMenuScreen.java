@@ -102,9 +102,15 @@ public class NativeMenuScreen extends Screen {
 
 	@Override
 	public void removed() {
+		if (textOn) {
+			textOn = false;
+			Minecraft.getInstance().textInputManager().stopTextInput(this);
+		}
 		net.glacier.module.impl.CosmeticsModule.clearPreview();
 		super.removed();
 	}
+
+	private boolean textOn;
 
 	private void enter(int t) {
 		if (t == 1) elements.enter();
@@ -153,6 +159,14 @@ public class NativeMenuScreen extends Screen {
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor g, int mxs, int mys, float partial) {
+		// 26.x only delivers typed characters while text input is switched on, as an EditBox does when focused.
+		boolean wantText = tab == 0 && modules.isTyping();
+		if (wantText != textOn) {
+			textOn = wantText;
+			var tim = Minecraft.getInstance().textInputManager();
+			if (wantText) tim.startTextInput(this);
+			else tim.stopTextInput(this);
+		}
 		fit();
 		hits.clear();
 		long now = System.currentTimeMillis();

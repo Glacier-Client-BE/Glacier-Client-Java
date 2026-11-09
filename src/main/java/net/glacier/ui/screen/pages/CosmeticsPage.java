@@ -236,7 +236,9 @@ public final class CosmeticsPage {
 			l.boundingBoxHeight /= l.scale;
 			l.scale = 1f;
 		}
-		float pixPerBlock = (y1 - y0) / 2.15f * zoomShown / entityScale;
+		float fit = 1f;
+		if (pvType == Accessories.Type.WINGS || !NONE.equals(selectedAccessory(Accessories.Type.WINGS))) fit = 0.78f;
+		float pixPerBlock = (y1 - y0) / 2.15f * zoomShown * fit / entityScale;
 		Quaternionf rot = new Quaternionf().rotateZ((float) Math.PI);
 		Quaternionf cam = new Quaternionf().rotateX(PITCH);
 		rot.mul(cam);
@@ -430,7 +432,7 @@ public final class CosmeticsPage {
 			default -> { base = 0f; amp = 32f; focus = 1.7f; ppb = 120f; }
 		}
 		float ang = base + amp * (float) Math.sin(m.phase) + (hov ? 40f * (float) Math.sin(m.phase * 0.5f) : 0f);
-		float scale = ppb * (ih / 96f);
+		float scale = ppb * TILE_ZOOM * (ih / 96f);
 		if (st instanceof LivingEntityRenderState l) l.bodyRot = ang;
 		st.ageInTicks = tileNanos / 5e7f;
 		CosmeticsModule.registerTile(st, s.type, s.type == null ? null : s.value);
@@ -446,6 +448,9 @@ public final class CosmeticsPage {
 		tilesDrawn++;
 		return true;
 	}
+
+	/** The per-type ppb values were tuned for a larger art box; this brings every accessory fully into its tile. */
+	private static final float TILE_ZOOM = 0.52f;
 
 	private static final Identifier BLANK = Identifier.fromNamespaceAndPath("glacier", "textures/cosmetics/blank.png");
 

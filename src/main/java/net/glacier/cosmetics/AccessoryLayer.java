@@ -183,7 +183,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 			}
 		}
 
-		net.glacier.cosmetics.Capes.Cape packCape = capeToDraw();
+		net.glacier.cosmetics.Capes.Cape packCape = net.glacier.module.impl.CosmeticsModule.tileHidesCape() ? null : capeToDraw();
 		if (packCape != null) {
 			PolyMesh mesh = AccessoryModels.glacierCape();
 			if (mesh != null) {
