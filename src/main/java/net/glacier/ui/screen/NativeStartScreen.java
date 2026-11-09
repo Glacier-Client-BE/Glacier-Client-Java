@@ -224,7 +224,7 @@ public class NativeStartScreen extends Screen {
 		RenderUtil.image(g, WORDMARK, cx - 112, cy - 62 - 16, cx + 112, cy - 62 + 15, cf);
 
 		legacyButton(g, "Play Game", cx - 200, cy - 20, () -> NativePlayScreen.open(this));
-		legacyButton(g, "Options", cx - 200, cy + 22, () -> open(new OptionsScreen(this, Minecraft.getInstance().options)));
+		legacyButton(g, "Options", cx - 200, cy + 22, () -> open(ScreenFactory.options(this)));
 		legacyButton(g, "Dressing Room", cx - 200, cy + 64, () -> open(NativeMenuScreen.open("cosmetics")));
 
 		int iy = vh - 48 - 44;
