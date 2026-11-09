@@ -2,7 +2,7 @@ package net.glacier.hud.impl;
 
 import net.glacier.hud.HudModule;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.BowItem;
 
 /** A draw-progress bar while a bow is held drawn back. Hidden otherwise. Green at full power. */
@@ -22,7 +22,7 @@ public class BowIndicator extends HudModule {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int sw, int sh) {
+	public void render(GuiGraphicsExtractor g, int sw, int sh) {
 		if (drawing()) super.render(g, sw, sh);
 	}
 
@@ -37,7 +37,7 @@ public class BowIndicator extends HudModule {
 	}
 
 	@Override
-	protected void drawContent(GuiGraphics g, int x, int y) {
+	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		float power = mc.player == null ? 0f : BowItem.getPowerForTime(mc.player.getTicksUsingItem());
 		power = Math.max(0f, Math.min(1f, power));
 		g.fill(x, y, x + BAR_W, y + BAR_H, TRACK);

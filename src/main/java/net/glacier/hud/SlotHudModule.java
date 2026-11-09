@@ -3,7 +3,7 @@ package net.glacier.hud;
 import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -31,15 +31,15 @@ public abstract class SlotHudModule extends HudModule {
 	}
 
 	/** Draws a framed slot with the item centred and, for damageable items, the durability bar. */
-	protected final void drawSlot(GuiGraphics g, ItemStack st, int x, int y) {
+	protected final void drawSlot(GuiGraphicsExtractor g, ItemStack st, int x, int y) {
 		int s = slot();
 		drawFrame(g, x, y, s);
 		if (st.isEmpty()) return;
-		g.renderItem(st, x + (s - 16) / 2, y + (s - 16) / 2 - (showBar.on() ? 1 : 0));
+		g.item(st, x + (s - 16) / 2, y + (s - 16) / 2 - (showBar.on() ? 1 : 0));
 		if (showBar.on() && st.isDamageableItem()) drawBar(g, st, x, y, s);
 	}
 
-	protected final void drawFrame(GuiGraphics g, int x, int y, int s) {
+	protected final void drawFrame(GuiGraphicsExtractor g, int x, int y, int s) {
 		if (frame.is("None")) return;
 		int x2 = x + s, y2 = y + s;
 		g.fill(x, y, x2, y2, OUTLINE);
@@ -56,7 +56,7 @@ public abstract class SlotHudModule extends HudModule {
 		g.fill(x + 4, y + 4, x2 - 4, y2 - 4, INNER);
 	}
 
-	protected final void drawBar(GuiGraphics g, ItemStack st, int x, int y, int s) {
+	protected final void drawBar(GuiGraphicsExtractor g, ItemStack st, int x, int y, int s) {
 		int inset = 5;
 		int bx = x + inset, bw = s - inset * 2;
 		int by = y + s - 7;

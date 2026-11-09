@@ -16,7 +16,7 @@ public class DayEvent extends CachedRowsHud {
 	@Override
 	public void onTick() {
 		if (mc.level == null) return;
-		long time = mc.level.getDayTime();
+		long time = mc.level.getOverworldClockTime();
 		long day = time / 24000L;
 		long tick = time % 24000L;
 		int hours = (int) ((tick / 1000L + 6) % 24);

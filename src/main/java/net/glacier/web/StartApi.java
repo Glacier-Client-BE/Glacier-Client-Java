@@ -63,7 +63,7 @@ public final class StartApi {
 	}
 
 	private static Object open(Screen s) {
-		Minecraft.getInstance().setScreen(s);
+		Minecraft.getInstance().gui.setScreen(s);
 		return Undefined.instance;
 	}
 }

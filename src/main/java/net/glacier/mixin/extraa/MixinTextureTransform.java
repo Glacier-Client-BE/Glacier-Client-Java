@@ -17,15 +17,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin(TextureTransform.class)
 public abstract class MixinTextureTransform {
-	@Shadow
-	@Final
-	private String name;
-
-	@Inject(method = "getMatrix()Lorg/joml/Matrix4f;", at = @At("RETURN"), require = 0)
+	
+	@Inject(method = "createMatrix", at = @At("RETURN"), require = 0)
 	private void glacier$glintMatrix(CallbackInfoReturnable<Matrix4f> cir) {
 		if (!GlintColorizer.active()) return;
-		String n = this.name;
-		if (n == null || !n.endsWith("glint_texturing")) return;
+		Object self = this;
+		if (self != TextureTransform.GLINT_TEXTURING && self != TextureTransform.ENTITY_GLINT_TEXTURING && self != TextureTransform.ARMOR_ENTITY_GLINT_TEXTURING) return;
 		Matrix4f m = cir.getReturnValue();
 		if (m != null) GlintColorizer.adjust(m);
 	}

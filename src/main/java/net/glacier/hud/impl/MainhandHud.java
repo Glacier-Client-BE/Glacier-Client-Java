@@ -3,7 +3,7 @@ package net.glacier.hud.impl;
 import net.glacier.hud.SlotHudModule;
 import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.ToggleSetting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 
 /** The held item icon followed by its durability (damageable items) or stack count. Text is rebuilt per tick. */
@@ -74,7 +74,7 @@ public class MainhandHud extends SlotHudModule {
 	}
 
 	@Override
-	protected void drawContent(GuiGraphics g, int x, int y) {
+	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		if (stack.isEmpty()) return;
 		int tx = x;
 		if (iconShown()) {

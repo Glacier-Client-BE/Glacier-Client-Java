@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.ConnectScreen;
-import net.minecraft.client.gui.screens.ShareToLanScreen;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.options.OptionsScreen;
@@ -58,31 +57,31 @@ public final class ScreenApi {
 		put(js, o, "achievements", a -> run(() -> {
 			var conn = mc.getConnection();
 			ClientAdvancements adv = conn == null ? null : conn.getAdvancements();
-			if (adv != null) mc.setScreen(new AdvancementsScreen(adv, self));
+			if (adv != null) mc.gui.setScreen(new AdvancementsScreen(adv, self));
 		}));
-		put(js, o, "options", a -> run(() -> mc.setScreen(new OptionsScreen(self, mc.options))));
+		put(js, o, "options", a -> run(() -> mc.gui.setScreen(new OptionsScreen(self, mc.options))));
 		put(js, o, "canShareToLan", a -> canShareToLan());
 		put(js, o, "shareToLan", a -> run(() -> {
-			if (canShareToLan()) mc.setScreen(new ShareToLanScreen(self));
+			
 		}));
-		put(js, o, "screenshot", a -> run(() -> Screenshot.grab(mc.gameDirectory, mc.getMainRenderTarget(),
-				msg -> mc.execute(() -> mc.gui.getChat().addMessage(msg)))));
-		put(js, o, "mods", a -> run(() -> mc.setScreen(net.glacier.ui.screen.ScreenFactory.menu(null))));
-		put(js, o, "cosmetics", a -> run(() -> mc.setScreen(net.glacier.ui.screen.ScreenFactory.menu("cosmetics"))));
+		put(js, o, "screenshot", a -> run(() -> Screenshot.grab(mc.gameDirectory, mc.gameRenderer.mainRenderTarget(),
+				msg -> mc.execute(() -> mc.gui.hud.getChat().addClientSystemMessage(msg)))));
+		put(js, o, "mods", a -> run(() -> mc.gui.setScreen(net.glacier.ui.screen.ScreenFactory.menu(null))));
+		put(js, o, "cosmetics", a -> run(() -> mc.gui.setScreen(net.glacier.ui.screen.ScreenFactory.menu("cosmetics"))));
 		put(js, o, "disconnect", a -> run(() -> {
 			if (mc.isLocalServer()) mc.disconnectWithSavingScreen();
 			else mc.disconnect(new JoinMultiplayerScreen(new StartScreen()), false);
 		}));
-		put(js, o, "singleplayer", a -> run(() -> mc.setScreen(new SelectWorldScreen(self))));
-		put(js, o, "multiplayer", a -> run(() -> mc.setScreen(new JoinMultiplayerScreen(self))));
-		put(js, o, "addServer", a -> run(() -> mc.setScreen(new JoinMultiplayerScreen(self))));
-		put(js, o, "createWorld", a -> run(() -> CreateWorldScreen.openFresh(mc, () -> mc.setScreen(self))));
+		put(js, o, "singleplayer", a -> run(() -> mc.gui.setScreen(new SelectWorldScreen(self))));
+		put(js, o, "multiplayer", a -> run(() -> mc.gui.setScreen(new JoinMultiplayerScreen(self))));
+		put(js, o, "addServer", a -> run(() -> mc.gui.setScreen(new JoinMultiplayerScreen(self))));
+		put(js, o, "createWorld", a -> run(() -> CreateWorldScreen.openFresh(mc, () -> mc.gui.setScreen(self))));
 		put(js, o, "worlds", a -> worlds(js, mc));
 		put(js, o, "playWorld", a -> run(() -> {
 			int i = (int) JsBridge.argNumber(a, 0);
 			if (worldList != null && i >= 0 && i < worldList.size()) {
 				String id = worldList.get(i).getLevelId();
-				mc.createWorldOpenFlows().openWorld(id, () -> mc.setScreen(self));
+				mc.createWorldOpenFlows().openWorld(id, () -> mc.gui.setScreen(self));
 			}
 		}));
 		put(js, o, "servers", a -> servers(js, mc));
@@ -102,7 +101,7 @@ public final class ScreenApi {
 	/** Only an integrated server that is not yet opened to LAN can be shared. */
 	private static boolean canShareToLan() {
 		IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
-		return server != null && !server.isPublished();
+		return false; // ShareToLanScreen removed in 26.x
 	}
 
 	/** Loaded world summaries, newest first. Null until the async load finishes. */

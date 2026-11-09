@@ -240,7 +240,7 @@ public final class CosmeticsPage {
 		Quaternionf rot = new Quaternionf().rotateZ((float) Math.PI);
 		Quaternionf cam = new Quaternionf().rotateX(PITCH);
 		rot.mul(cam);
-		k.g.submitEntityRenderState(st, pixPerBlock, new Vector3f(0f, st.boundingBoxHeight / 2f + EYE_OFFSET, 0f), rot, cam,
+		k.g.entity(st, pixPerBlock, new Vector3f(0f, st.boundingBoxHeight / 2f + EYE_OFFSET, 0f), rot, cam,
 				x0, y0, x1, y1);
 	}
 
@@ -439,7 +439,7 @@ public final class CosmeticsPage {
 		rot.mul(cam);
 		k.scissor(ix, iy, iw, ih);
 		try {
-			k.g.submitEntityRenderState(st, scale, new Vector3f(0f, focus + EYE_OFFSET, 0f), rot, cam, x0, y0, x1, y1);
+			k.g.entity(st, scale, new Vector3f(0f, focus + EYE_OFFSET, 0f), rot, cam, x0, y0, x1, y1);
 		} finally {
 			k.endScissor();
 		}

@@ -6,8 +6,8 @@ import net.glacier.module.impl.EditorsModule;
 import net.glacier.module.impl.ElementsModule;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.Hud;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,35 +17,35 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Predicate;
 
-@Mixin(Gui.class)
+@Mixin(Hud.class)
 public class MixinGui {
-	@Inject(method = "render", at = @At("TAIL"))
-	private void glacier$renderHud(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+	@Inject(method = "extractRenderState", at = @At("TAIL"))
+	private void glacier$renderHud(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
 		GlacierClient.renderHud(guiGraphics);
 	}
 
-	@Inject(method = "renderBossOverlay", at = @At("HEAD"), cancellable = true)
-	private void glacier$hideBossBar(GuiGraphics g, DeltaTracker dt, CallbackInfo ci) {
+	@Inject(method = "extractBossOverlay", at = @At("HEAD"), cancellable = true)
+	private void glacier$hideBossBar(GuiGraphicsExtractor g, DeltaTracker dt, CallbackInfo ci) {
 		if (elements(e -> e.hideBossBar.on())) ci.cancel();
 	}
 
-	@Inject(method = "renderScoreboardSidebar", at = @At("HEAD"), cancellable = true)
-	private void glacier$hideScoreboard(GuiGraphics g, DeltaTracker dt, CallbackInfo ci) {
+	@Inject(method = "extractScoreboardSidebar", at = @At("HEAD"), cancellable = true)
+	private void glacier$hideScoreboard(GuiGraphicsExtractor g, DeltaTracker dt, CallbackInfo ci) {
 		if (elements(e -> e.hideScoreboard.on())) ci.cancel();
 	}
 
-	@Inject(method = "renderVignette", at = @At("HEAD"), cancellable = true)
-	private void glacier$hideVignette(GuiGraphics g, Entity entity, CallbackInfo ci) {
+	@Inject(method = "extractVignette", at = @At("HEAD"), cancellable = true)
+	private void glacier$hideVignette(GuiGraphicsExtractor g, Entity entity, CallbackInfo ci) {
 		if (elements(e -> e.hideVignette.on())) ci.cancel();
 	}
 
-	@Inject(method = "renderEffects", at = @At("HEAD"), cancellable = true)
-	private void glacier$hideEffects(GuiGraphics g, DeltaTracker dt, CallbackInfo ci) {
+	@Inject(method = "extractEffects", at = @At("HEAD"), cancellable = true)
+	private void glacier$hideEffects(GuiGraphicsExtractor g, DeltaTracker dt, CallbackInfo ci) {
 		if (elements(e -> e.hideEffects.on())) ci.cancel();
 	}
 
-	@Inject(method = "renderSelectedItemName", at = @At("HEAD"), cancellable = true)
-	private void glacier$hideItemName(GuiGraphics g, CallbackInfo ci) {
+	@Inject(method = "extractSelectedItemName", at = @At("HEAD"), cancellable = true)
+	private void glacier$hideItemName(GuiGraphicsExtractor g, CallbackInfo ci) {
 		if (elements(e -> e.hideItemName.on())) ci.cancel();
 	}
 
@@ -56,8 +56,8 @@ public class MixinGui {
 		if (elements(hidden)) ci.cancel();
 	}
 
-	@Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
-	private void glacier$customCrosshair(GuiGraphics g, DeltaTracker dt, CallbackInfo ci) {
+	@Inject(method = "extractCrosshair", at = @At("HEAD"), cancellable = true)
+	private void glacier$customCrosshair(GuiGraphicsExtractor g, DeltaTracker dt, CallbackInfo ci) {
 		if (!EditorsModule.customCrosshair()) return;
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.options == null || !mc.options.getCameraType().isFirstPerson()) return;

@@ -1,7 +1,7 @@
 package net.glacier.module.impl;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.glacier.GlacierClient;
 import net.glacier.module.Category;
 import net.glacier.module.Module;
@@ -10,7 +10,7 @@ import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 /**
  * Hold the zoom key (default C) to divide the FOV. The divisor eases toward its target once per tick and is
@@ -29,8 +29,8 @@ public class ZoomModule extends Module {
 	private final ToggleSetting adjustSensitivity = add(new ToggleSetting("Adjust Mouse Sensitivity", true));
 
 	/** Record equality: same id as the category GlacierClient registers, so the key lands in the Glacier group. */
-	private final KeyMapping key = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-			"key.glacier.zoom", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C,
+	private final KeyMapping key = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+			"key.glacier.zoom", InputConstants.Type.KEYBOARD, GLFW.GLFW_KEY_C,
 			new KeyMapping.Category(Identifier.fromNamespaceAndPath(GlacierClient.MOD_ID, "main"))));
 
 	private float prev = 1f, cur = 1f, progress;
@@ -45,7 +45,7 @@ public class ZoomModule extends Module {
 
 	@Override
 	public void onTick() {
-		zooming = mc.screen == null && key.isDown();
+		zooming = mc.gui.screen() == null && key.isDown();
 		if (!zooming) scrollMul = 1.0;
 		float target = (float) Math.max(1.0, factor.get() * scrollMul);
 		prev = cur;

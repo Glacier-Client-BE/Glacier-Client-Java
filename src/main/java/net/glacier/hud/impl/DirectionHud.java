@@ -5,7 +5,7 @@ import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
 import net.glacier.ui.Draw;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * Compass strip in the look of the Glacier v7 pack: an accent line across the top, short ticks every 11.25 degrees
@@ -60,7 +60,7 @@ public class DirectionHud extends HudModule {
 	}
 
 	@Override
-	protected void drawContent(GuiGraphics g, int x, int y) {
+	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		float b = bearing();
 		int width = stripWidth.i();
 		float spanDeg = span.f();

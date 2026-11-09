@@ -17,7 +17,7 @@ public class ToggleSprint extends Module {
 
 	@Override
 	public void onTick() {
-		if (mc.player == null || mc.screen != null) return;
+		if (mc.player == null || mc.gui.screen() != null) return;
 		boolean forward = mc.options.keyUp.isDown()
 				|| (allDirections.on() && (mc.options.keyDown.isDown() || mc.options.keyLeft.isDown() || mc.options.keyRight.isDown()));
 		if (!whileUsingItem.on() && mc.player.isUsingItem()) forward = false;

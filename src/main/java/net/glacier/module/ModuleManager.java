@@ -177,11 +177,11 @@ public final class ModuleManager {
 		int n = MODULES.size();
 		if (keyWasDown.length != n) keyWasDown = new boolean[n];
 		Minecraft mc = Minecraft.getInstance();
-		boolean active = mc.screen == null && mc.getWindow() != null;
+		boolean active = mc.gui.screen() == null && mc.getWindow() != null;
 		for (int i = 0; i < n; i++) {
 			Module m = MODULES.get(i);
 			int key = m.keyCode();
-			boolean down = active && key > 0 && InputConstants.isKeyDown(mc.getWindow(), key);
+			boolean down = active && key > 0 && InputConstants.isKeyDown(key);
 			if (down && !keyWasDown[i]) {
 				try {
 					m.toggle();

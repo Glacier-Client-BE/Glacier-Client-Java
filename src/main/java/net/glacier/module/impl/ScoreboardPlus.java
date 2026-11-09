@@ -6,7 +6,7 @@ import net.glacier.module.ModuleManager;
 import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * Sidebar scoreboard tweaks (NRC scoreboard module and the Bedrock scoreboard options): hide the red numbers, text
@@ -59,7 +59,7 @@ public class ScoreboardPlus extends Module {
 	}
 
 	/** Pushes the scale and offset transform around the sidebar. Returns true when a matrix was pushed. */
-	public static boolean push(GuiGraphics g) {
+	public static boolean push(GuiGraphicsExtractor g) {
 		ScoreboardPlus s = active();
 		if (s == null) return false;
 		float k = s.scale.f() / 100f;

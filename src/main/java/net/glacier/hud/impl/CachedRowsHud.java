@@ -1,7 +1,7 @@
 package net.glacier.hud.impl;
 
 import net.glacier.hud.RowsHudModule;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.List;
 
@@ -52,7 +52,7 @@ abstract class CachedRowsHud extends RowsHudModule {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int sw, int sh) {
+	public void render(GuiGraphicsExtractor g, int sw, int sh) {
 		if (!hidden()) super.render(g, sw, sh);
 	}
 

@@ -3,7 +3,7 @@ package net.glacier.mixin.extrab;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.glacier.module.impl.OldAnimations;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -18,18 +18,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Old Animations in the first-person renderer. Verified with javap on ItemInHandRenderer: renderArmWithItem applies
+ * Old Animations in the first-person renderer. Verified with javap on FirstPersonHandsAndItemsRenderer: renderArmWithItem applies
  * the use transform (eat, block, bow...) without swingArm while an item is in use, and calls renderItem last;
  * shouldInstantlyReplaceVisibleItem decides whether a changed stack re-plays the equip animation.
  */
-@Mixin(ItemInHandRenderer.class)
+@Mixin(FirstPersonHandsAndItemsRenderer.class)
 public abstract class MixinOldItemInHand {
 	@Shadow
 	protected abstract void swingArm(float swingProgress, PoseStack pose, int sign, HumanoidArm arm);
 
 	/** Adds the swing on top of the use pose (block hitting for BLOCK items, item usage swinging for the rest). */
 	@Inject(method = "renderArmWithItem", require = 0, at = @At(value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V"))
+			target = "Lnet/minecraft/client/renderer/FirstPersonHandsAndItemsRenderer;item(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V"))
 	private void glacier$swingWhileUsing(AbstractClientPlayer player, float partialTick, float pitch, InteractionHand hand,
 										 float swingProgress, ItemStack stack, float equip, PoseStack pose,
 										 SubmitNodeCollector collector, int light, CallbackInfo ci) {

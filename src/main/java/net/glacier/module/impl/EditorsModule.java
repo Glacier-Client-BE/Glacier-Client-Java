@@ -6,7 +6,7 @@ import net.glacier.module.ModuleManager;
 import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 
@@ -122,7 +122,7 @@ public class EditorsModule extends Module {
 	}
 
 	/** Draws a crosshair centred on (cx, cy). Used by the live HUD (MixinGui) and by the Editors page preview. */
-	public void drawCrosshair(GuiGraphics g, int cx, int cy, boolean custom) {
+	public void drawCrosshair(GuiGraphicsExtractor g, int cx, int cy, boolean custom) {
 		if (!custom || crosshairStyle.is("Vanilla")) {
 			plus(g, cx, cy, 6, 1, 1, 0, VANILLA_ARGB);
 			return;
@@ -140,7 +140,7 @@ public class EditorsModule extends Module {
 		stamp(g, drawn, x0, y0, size, argb);
 	}
 
-	private void stamp(GuiGraphics g, boolean drawn, int x0, int y0, int size, int argb) {
+	private void stamp(GuiGraphicsExtractor g, boolean drawn, int x0, int y0, int size, int argb) {
 		if (!drawn) {
 			int idx = crosshairPreset.i();
 			int t = presetTexSize(idx);
@@ -159,7 +159,7 @@ public class EditorsModule extends Module {
 		}
 	}
 
-	private static void plus(GuiGraphics g, int cx, int cy, int arm, int gap, int thick, int pad, int argb) {
+	private static void plus(GuiGraphicsExtractor g, int cx, int cy, int arm, int gap, int thick, int pad, int argb) {
 		int lo = thick / 2;
 		int x0 = cx - lo - pad;
 		int x1 = cx - lo + thick + pad;

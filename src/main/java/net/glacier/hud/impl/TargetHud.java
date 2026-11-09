@@ -1,6 +1,6 @@
 package net.glacier.hud.impl;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.EntityHitResult;
 
@@ -40,7 +40,7 @@ public class TargetHud extends CachedRowsHud {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int sw, int sh) {
+	public void render(GuiGraphicsExtractor g, int sw, int sh) {
 		if (has) super.render(g, sw, sh);
 	}
 }

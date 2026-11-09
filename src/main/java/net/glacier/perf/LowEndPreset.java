@@ -141,7 +141,7 @@ public final class LowEndPreset {
 
 	/** 60 FPS, or the monitor's refresh rate when it is lower, never below the option's minimum. */
 	private static int lowEndFps(Minecraft mc) {
-		int refresh = mc.getWindow().getRefreshRate();
+		int refresh = (int) mc.getWindow().findBestMonitor().currentMode().getRefreshRate();
 		int target = refresh > 0 ? Math.min(MAX_LOW_END_FPS, refresh) : MAX_LOW_END_FPS;
 		return Math.max(MIN_FPS, target);
 	}

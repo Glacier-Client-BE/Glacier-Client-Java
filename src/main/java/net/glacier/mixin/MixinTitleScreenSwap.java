@@ -18,7 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /** Swaps the vanilla title screen for {@link NativeStartScreen}. Off with "customTitle": false in performance.json. */
-@Mixin(Minecraft.class)
+@Mixin(net.minecraft.client.gui.Gui.class)
 public abstract class MixinTitleScreenSwap {
 	@Unique
 	private static final boolean GLACIER_CUSTOM_TITLE = glacier$readSwitch();
@@ -28,7 +28,7 @@ public abstract class MixinTitleScreenSwap {
 		if (!GLACIER_CUSTOM_TITLE) return screen;
 		if (screen != null && screen.getClass() == TitleScreen.class) return net.glacier.ui.screen.ScreenFactory.start();
 		// vanilla turns a null screen into a TitleScreen when no world is loaded
-		if (screen == null && ((Minecraft) (Object) this).level == null) return net.glacier.ui.screen.ScreenFactory.start();
+		if (screen == null && Minecraft.getInstance().level == null) return net.glacier.ui.screen.ScreenFactory.start();
 		return screen;
 	}
 

@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  */
 @Mixin(RenderSetup.class)
 public class MixinRenderSetup {
-	@Redirect(method = "getTextures()Ljava/util/Map;",
+	@Redirect(method = "prepareTextures",
 			at = @At(value = "INVOKE",
 					target = "Lnet/minecraft/client/renderer/texture/TextureManager;getTexture(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/texture/AbstractTexture;"),
 			require = 0)

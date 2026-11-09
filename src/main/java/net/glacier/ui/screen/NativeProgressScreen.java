@@ -5,7 +5,7 @@ import net.glacier.mixin.MixinProgressScreenAccessor;
 import net.glacier.ui.Draw;
 import net.glacier.ui.Theme;
 import net.glacier.web.RenderUtil;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -13,7 +13,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.LevelLoadTracker;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 /**
  * The loading and saving screen as plain Java widgets (replaces progress.html). It wraps the vanilla screen it
@@ -106,11 +106,11 @@ public final class NativeProgressScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 		WebPage.drawPanorama(g, width, height);
 		readProgress();
 		layout();
@@ -186,7 +186,7 @@ public final class NativeProgressScreen extends Screen {
 		pose.popMatrix();
 	}
 
-	private static void fillBar(GuiGraphics g, float x0, float x1, float y) {
+	private static void fillBar(GuiGraphicsExtractor g, float x0, float x1, float y) {
 		int a = Math.round(x0), b = Math.round(x1);
 		if (b > a) Draw.round(g, a, Math.round(y), b - a, 10, 5, ACCENT);
 	}
@@ -264,7 +264,7 @@ public final class NativeProgressScreen extends Screen {
 		if (source instanceof MixinLevelLoadingAccessor level && this.minecraft != null) {
 			LevelLoadTracker tracker = level.glacier$loadTracker();
 			if (tracker != null && tracker.isLevelReady()) {
-				this.minecraft.setScreen(null);
+				this.minecraft.gui.setScreen(null);
 			}
 		}
 	}

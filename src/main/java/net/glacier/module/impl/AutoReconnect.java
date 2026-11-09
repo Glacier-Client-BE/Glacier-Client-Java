@@ -65,7 +65,7 @@ public class AutoReconnect extends Module {
 			b.setMessage(Component.literal("Auto Reconnect cancelled"));
 			b.active = false;
 		}).bounds(w / 2 - 100, h - 28, 200, 20).build();
-		Screens.getButtons(screen).add(button);
+		Screens.getWidgets(screen).add(button);
 		final Button mine = button;
 		ScreenEvents.afterTick(screen).register(s -> {
 			if (ticksLeft < 0 || button != mine || !isEnabled()) return;

@@ -6,7 +6,7 @@ import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
 import net.glacier.ui.Draw;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.ArrayDeque;
 
@@ -118,16 +118,16 @@ public class Keystrokes extends HudModule {
 		return glacier() && pressedColor.argb() == Theme.HUD_KEY_PRESSED ? Theme.GLACIER_KEY_PRESSED : pressedColor.argb();
 	}
 
-	private void cap(GuiGraphics g, int x, int y, int w, int h, String label, boolean pressed) {
+	private void cap(GuiGraphicsExtractor g, int x, int y, int w, int h, String label, boolean pressed) {
 		Draw.round(g, x, y, w, h, radius(), pressed ? pressedFill() : idleFill());
 		int tx = x + (w - textWidth(label)) / 2;
 		int ty = y + (h - lineHeight()) / 2 + 1;
-		if (pressed && !glacier()) g.drawString(mc.font, label, tx, ty, Theme.HUD_INK, false);
+		if (pressed && !glacier()) g.text(mc.font, label, tx, ty, Theme.HUD_INK, false);
 		else drawText(g, label, tx, ty, pressed ? Theme.HUD_INK : TEXT);
 	}
 
 	/** Mouse cap: the button label with the CPS line below, the pair centred vertically in the cap. */
-	private void mouseCap(GuiGraphics g, int x, int y, String label, int cps, boolean pressed) {
+	private void mouseCap(GuiGraphicsExtractor g, int x, int y, String label, int cps, boolean pressed) {
 		int wide = wide();
 		int mh = mouseH();
 		Draw.round(g, x, y, wide, mh, radius(), pressed ? pressedFill() : idleFill());
@@ -156,7 +156,7 @@ public class Keystrokes extends HudModule {
 	}
 
 	@Override
-	protected void drawContent(GuiGraphics g, int x, int y) {
+	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		var o = mc.options;
 		boolean w = o.keyUp.isDown();
 		boolean a = o.keyLeft.isDown();

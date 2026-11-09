@@ -2,7 +2,7 @@ package net.glacier.hud.impl;
 
 import net.glacier.hud.HudModule;
 import net.glacier.ui.Draw;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.Mob;
 
 /** A sword icon while the crosshair is on a mob. Hidden otherwise. */
@@ -16,7 +16,7 @@ public class MobIndicator extends HudModule {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int sw, int sh) {
+	public void render(GuiGraphicsExtractor g, int sw, int sh) {
 		if (mc.crosshairPickEntity instanceof Mob) super.render(g, sw, sh);
 	}
 
@@ -31,7 +31,7 @@ public class MobIndicator extends HudModule {
 	}
 
 	@Override
-	protected void drawContent(GuiGraphics g, int x, int y) {
+	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		drawParts(g, x, y, icon(SWORD, TEXT));
 	}
 }

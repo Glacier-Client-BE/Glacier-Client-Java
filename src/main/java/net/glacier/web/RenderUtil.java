@@ -4,7 +4,7 @@ import net.glacier.GlacierClient;
 import net.glacier.ui.Draw;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
@@ -113,7 +113,7 @@ public final class RenderUtil {
 	}
 
 	/** Draws one line of text with its top-left corner at (x, y), scaled to CSS font size px. */
-	public static void drawText(GuiGraphics g, String s, float x, float y, float px, boolean bold, String fa, int argb) {
+	public static void drawText(GuiGraphicsExtractor g, String s, float x, float y, float px, boolean bold, String fa, int argb) {
 		if (s == null || s.isEmpty()) return;
 		drawPrepared(g, textComponent(s, bold, fa), textScale(px), x, y, argb);
 	}
@@ -122,17 +122,17 @@ public final class RenderUtil {
 	 * Draws a component prepared by {@link #textComponent} at (x, y) with scale sc. The same calls as
 	 * {@link #drawText}, without the component or the scale lookup: used by the retained display list.
 	 */
-	public static void drawPrepared(GuiGraphics g, Component c, float sc, float x, float y, int argb) {
+	public static void drawPrepared(GuiGraphicsExtractor g, Component c, float sc, float x, float y, int argb) {
 		var pose = g.pose();
 		pose.pushMatrix();
 		pose.translate(x, y);
 		pose.scale(sc, sc);
-		g.drawString(font(), c, 0, 0, argb, false);
+		g.text(font(), c, 0, 0, argb, false);
 		pose.popMatrix();
 	}
 
 	/** Draws one line of text centred on (cx, cy). */
-	public static void drawTextCentered(GuiGraphics g, String s, float cx, float cy, float px, String fa, int argb) {
+	public static void drawTextCentered(GuiGraphicsExtractor g, String s, float cx, float cy, float px, String fa, int argb) {
 		float tw = textWidth(s, false, px, fa);
 		drawText(g, s, cx - tw / 2f, cy - px / 2f, px, false, fa, argb);
 	}
@@ -150,13 +150,13 @@ public final class RenderUtil {
 	/* ---------------------------------------------------------------- shapes */
 
 	/** Filled rounded rectangle with anti-aliased corners. */
-	public static void fillRounded(GuiGraphics g, float fx0, float fy0, float fx1, float fy1, float[] radii, int argb) {
+	public static void fillRounded(GuiGraphicsExtractor g, float fx0, float fy0, float fx1, float fy1, float[] radii, int argb) {
 		int x0 = Math.round(fx0), y0 = Math.round(fy0), x1 = Math.round(fx1), y1 = Math.round(fy1);
 		shape(g, x0, y0, x1 - x0, y1 - y0, radii, 0, false, argb);
 	}
 
 	/** Anti-aliased rounded ring drawn inside the given bounds. Thickness is rounded to whole pixels, minimum 1. */
-	public static void ringRounded(GuiGraphics g, float fx0, float fy0, float fx1, float fy1, float[] radii,
+	public static void ringRounded(GuiGraphicsExtractor g, float fx0, float fy0, float fx1, float fy1, float[] radii,
 								   float thickness, int argb) {
 		if (thickness <= 0f) return;
 		int x0 = Math.round(fx0), y0 = Math.round(fy0), x1 = Math.round(fx1), y1 = Math.round(fy1);
@@ -165,7 +165,7 @@ public final class RenderUtil {
 	}
 
 	/** Axis-aligned rectangle with no rounding. Empty rectangles are skipped. */
-	public static void rect(GuiGraphics g, float fx0, float fy0, float fx1, float fy1, int argb) {
+	public static void rect(GuiGraphicsExtractor g, float fx0, float fy0, float fx1, float fy1, int argb) {
 		int x0 = Math.round(fx0), y0 = Math.round(fy0), x1 = Math.round(fx1), y1 = Math.round(fy1);
 		if (x1 <= x0 || y1 <= y0 || (argb >>> 24) == 0) return;
 		g.fill(x0, y0, x1, y1, argb);
@@ -209,7 +209,7 @@ public final class RenderUtil {
 	 * (size, radii, thickness) into a cached {@link Mask}; a frame only replays its fills. Adjacent pixels with
 	 * equal coverage are one fill, and rows with identical fills are one fill.
 	 */
-	private static void shape(GuiGraphics g, int x, int y, int w, int h, float[] radii, int t, boolean ring, int argb) {
+	private static void shape(GuiGraphicsExtractor g, int x, int y, int w, int h, float[] radii, int t, boolean ring, int argb) {
 		if (w <= 0 || h <= 0 || (argb >>> 24) == 0) return;
 		float[] r = clampRadii(radii, w, h);
 		MaskKey key = new MaskKey(w, h, r[0], r[1], r[2], r[3], t, ring);
@@ -370,7 +370,7 @@ public final class RenderUtil {
 	}
 
 	/** Draws {@link #roundedRects} output at origin (ox, oy). */
-	public static void fillRects(GuiGraphics g, int ox, int oy, int[] rects) {
+	public static void fillRects(GuiGraphicsExtractor g, int ox, int oy, int[] rects) {
 		for (int i = 0; i < rects.length; i += 5) {
 			g.fill(ox + rects[i], oy + rects[i + 1], ox + rects[i + 2], oy + rects[i + 3], rects[i + 4]);
 		}
@@ -382,7 +382,7 @@ public final class RenderUtil {
 	 * linear-gradient background with rounded corners. Gradients are drawn as one-pixel
 	 * rows (vertical-ish angles) or columns (horizontal-ish angles); corners are not anti-aliased.
 	 */
-	public static void gradientRounded(GuiGraphics g, float fx0, float fy0, float fx1, float fy1, float[] radii,
+	public static void gradientRounded(GuiGraphicsExtractor g, float fx0, float fy0, float fx1, float fy1, float[] radii,
 									   Css.Gradient gr, float op) {
 		int x = Math.round(fx0), y = Math.round(fy0);
 		int w = Math.round(fx1) - x, h = Math.round(fy1) - y;
@@ -503,7 +503,7 @@ public final class RenderUtil {
 	}
 
 	/** Draws a whole PNG stretched to the given box, tinted by opacity op. Logs once when the PNG cannot be read. */
-	public static void image(GuiGraphics g, Identifier id, float fx0, float fy0, float fx1, float fy1, float op) {
+	public static void image(GuiGraphicsExtractor g, Identifier id, float fx0, float fy0, float fx1, float fy1, float op) {
 		int[] nat = imageSize(id);
 		if (nat == null) {
 			if (WARNED.add(id)) GlacierClient.LOGGER.warn("[ui] image not loaded {}", id);
@@ -517,7 +517,7 @@ public final class RenderUtil {
 	 * texels of the natural size: a region smaller than the texture shows only that part of it (used for panning).
 	 * The blit must get the region size as uWidth/uHeight; passing the box size there samples only the top-left corner.
 	 */
-	public static void imageUv(GuiGraphics g, Identifier id, float fx0, float fy0, float fx1, float fy1,
+	public static void imageUv(GuiGraphicsExtractor g, Identifier id, float fx0, float fy0, float fx1, float fy1,
 							   float u, float v, float uw, float uh, float op) {
 		int[] nat = imageSize(id);
 		if (nat == null || op <= 0f) return;

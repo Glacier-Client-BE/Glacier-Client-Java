@@ -14,7 +14,7 @@ public final class MenuFps {
 		if (cap <= 0 || cap >= vanilla) return vanilla;
 		Minecraft mc = Minecraft.getInstance();
 		if (mc == null) return vanilla;
-		boolean inMenu = mc.level == null || (mc.screen != null && !(mc.screen instanceof PauseScreen));
+		boolean inMenu = mc.level == null || (mc.gui.screen() != null && !(mc.gui.screen() instanceof PauseScreen));
 		return inMenu ? cap : vanilla;
 	}
 }

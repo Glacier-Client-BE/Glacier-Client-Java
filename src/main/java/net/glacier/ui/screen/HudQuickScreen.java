@@ -6,12 +6,12 @@ import net.glacier.web.JsBridge;
 import net.glacier.web.Node;
 import net.glacier.web.WebApi;
 import net.glacier.web.WebView;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 /**
  * Right Shift screen, like the Glacier DLL: the live HUD stays visible and every HUD module can be dragged (and
@@ -95,7 +95,7 @@ public class HudQuickScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 		fit();
 		bridge.tick();
 		boolean grid = gridOn();
@@ -113,7 +113,7 @@ public class HudQuickScreen extends Screen {
 
 	/** No blur or dim: the game and the HUD stay fully visible. */
 	@Override
-	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 	}
 
 	@Override

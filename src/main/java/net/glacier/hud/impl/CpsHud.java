@@ -2,7 +2,7 @@ package net.glacier.hud.impl;
 
 import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.ToggleSetting;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 /** Clicks per second for the left and right mouse buttons, counted over a sliding one second window. */
 public class CpsHud extends CachedRowsHud {
@@ -37,8 +37,8 @@ public class CpsHud extends CachedRowsHud {
 	public void onTick() {
 		if (mc.getWindow() == null) return;
 		long now = System.currentTimeMillis();
-		boolean l = mc.screen == null && GLFW.glfwGetMouseButton(mc.getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
-		boolean r = mc.screen == null && GLFW.glfwGetMouseButton(mc.getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
+		boolean l = mc.gui.screen() == null && mc.mouseHandler.isLeftPressed();
+		boolean r = mc.gui.screen() == null && mc.mouseHandler.isRightPressed();
 		if (l && !lDown) left[li++ & 63] = now;
 		if (r && !rDown) right[ri++ & 63] = now;
 		lDown = l;

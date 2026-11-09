@@ -1,7 +1,7 @@
 package net.glacier.social;
 
 import com.mojang.authlib.exceptions.AuthenticationException;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.minecraft.SessionService;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 
@@ -19,9 +19,9 @@ final class SessionAuth {
 		private final UUID profileId;
 		private final String name;
 		private final String accessToken;
-		private final MinecraftSessionService service;
+		private final SessionService service;
 
-		private Credentials(UUID profileId, String name, String accessToken, MinecraftSessionService service) {
+		private Credentials(UUID profileId, String name, String accessToken, SessionService service) {
 			this.profileId = profileId;
 			this.name = name;
 			this.accessToken = accessToken;

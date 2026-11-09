@@ -2,13 +2,13 @@ package net.glacier.ui.screen;
 
 import net.glacier.web.ScreenApi;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 /**
  * The Glacier play screen (play.html): a chooser for worlds, friends and servers, in the pack's layout. Worlds open
@@ -28,21 +28,21 @@ public final class PlayWebScreen extends Screen {
 
 	/** Shows the play screen on top of parent; closing it returns to parent. */
 	public static void open(Screen parent) {
-		Minecraft.getInstance().setScreen(new PlayWebScreen(parent));
+		Minecraft.getInstance().gui.setScreen(new PlayWebScreen(parent));
 	}
 
 	private void back() {
-		Minecraft.getInstance().setScreen(parent);
+		Minecraft.getInstance().gui.setScreen(parent);
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 		WebPage.drawPanorama(g, width, height);
-		page.render(g, mouseX, mouseY, width, height);
+		page.extractRenderState(g, mouseX, mouseY, width, height);
 	}
 
 	@Override

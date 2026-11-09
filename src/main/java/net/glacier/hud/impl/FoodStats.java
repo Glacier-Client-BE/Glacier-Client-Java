@@ -2,7 +2,7 @@ package net.glacier.hud.impl;
 
 import net.glacier.setting.ToggleSetting;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.food.FoodProperties;
@@ -84,7 +84,7 @@ public class FoodStats extends CachedRowsHud {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int sw, int sh) {
+	public void render(GuiGraphicsExtractor g, int sw, int sh) {
 		if (visible) super.render(g, sw, sh);
 	}
 }

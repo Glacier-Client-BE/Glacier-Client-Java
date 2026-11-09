@@ -1,8 +1,8 @@
 package net.glacier.mixin.extrac;
 
 import net.glacier.module.impl.PlayerTabList;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.PlayerFaceRenderer;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.PlayerFaceExtractor;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.resources.Identifier;
@@ -22,9 +22,9 @@ import java.util.List;
  * <ul>
  * <li>private getPlayerInfos() returns stream().sorted(PLAYER_COMPARATOR).limit(80L).toList(): the limit is the
  * only long constant 80, and the returned list is reordered at RETURN.</li>
- * <li>render(GuiGraphics, int, Scoreboard, Objective) contains one bipush 20 (rows per column), fill(IIIII)
- * calls for the panel, header, footer and cells, and one PlayerFaceRenderer.draw call per player.</li>
- * <li>protected renderPingIcon(GuiGraphics, int, int, int, PlayerInfo) draws the ping sprite.</li>
+ * <li>render(GuiGraphicsExtractor, int, Scoreboard, Objective) contains one bipush 20 (rows per column), fill(IIIII)
+ * calls for the panel, header, footer and cells, and one PlayerFaceExtractor.draw call per player.</li>
+ * <li>protected extractPingIcon(GuiGraphicsExtractor, int, int, int, PlayerInfo) draws the ping sprite.</li>
  * </ul>
  * MixinPlayerTabOverlay (getNameForDisplay) and Nr2StreamerTab hook other members of the same class.
  */
@@ -43,27 +43,27 @@ public class ExtraCTabList {
 		return PlayerTabList.limitOr(vanilla);
 	}
 
-	@ModifyConstant(method = "render", constant = @Constant(intValue = 20), require = 0)
+	@ModifyConstant(method = "extractRenderState", constant = @Constant(intValue = 20), require = 0)
 	private int glacier$rows(int vanilla) {
 		return PlayerTabList.rowsOr(vanilla);
 	}
 
-	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;fill(IIIII)V"), require = 0)
-	private void glacier$fill(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {
+	@Redirect(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;fill(IIIII)V"), require = 0)
+	private void glacier$fill(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1, int color) {
 		PlayerTabList.fill(g, x0, y0, x1, y1, color);
 	}
 
-	@Redirect(method = "render", at = @At(value = "INVOKE",
-			target = "Lnet/minecraft/client/gui/components/PlayerFaceRenderer;draw(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/Identifier;IIIZZI)V"), require = 0)
-	private void glacier$face(GuiGraphics g, Identifier skin, int x, int y, int size, boolean hat, boolean flip, int argb) {
+	@Redirect(method = "extractRenderState", at = @At(value = "INVOKE",
+			target = "Lnet/minecraft/client/gui/components/PlayerFaceExtractor;extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/resources/Identifier;IIIZZI)V"), require = 0)
+	private void glacier$face(GuiGraphicsExtractor g, Identifier skin, int x, int y, int size, boolean hat, boolean flip, int argb) {
 		PlayerTabList t = PlayerTabList.active();
 		if (t != null && t.hideFaces.on()) return;
-		PlayerFaceRenderer.draw(g, skin, x, y, size, hat, flip, argb);
+		PlayerFaceExtractor.extractRenderState(g, skin, x, y, size, hat, flip, argb);
 	}
 
-	@Inject(method = "renderPingIcon(Lnet/minecraft/client/gui/GuiGraphics;IIILnet/minecraft/client/multiplayer/PlayerInfo;)V",
+	@Inject(method = "extractPingIcon(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIILnet/minecraft/client/multiplayer/PlayerInfo;)V",
 			at = @At("HEAD"), cancellable = true, require = 0)
-	private void glacier$ping(GuiGraphics g, int cellWidth, int x, int y, PlayerInfo info, CallbackInfo ci) {
+	private void glacier$ping(GuiGraphicsExtractor g, int cellWidth, int x, int y, PlayerInfo info, CallbackInfo ci) {
 		if (PlayerTabList.drawPing(g, cellWidth, x, y, info)) ci.cancel();
 	}
 }

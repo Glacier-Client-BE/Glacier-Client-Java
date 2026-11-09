@@ -2,7 +2,7 @@ package net.glacier.mixin.extrac;
 
 import net.glacier.module.impl.ChatPlus;
 import net.glacier.module.impl.ChatTextLookup;
-import net.minecraft.client.GuiMessage;
+import net.minecraft.client.multiplayer.chat.GuiMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.components.ChatComponent;
@@ -34,7 +34,7 @@ import java.util.List;
  */
 @Mixin(ChatComponent.class)
 public abstract class ExtraCChat implements ChatTextLookup {
-	private static final String RENDER = "render(Lnet/minecraft/client/gui/components/ChatComponent$ChatGraphicsAccess;IIZ)V";
+	private static final String RENDER = "extractRenderState";
 	private static final String OPTION_GET = "Lnet/minecraft/client/OptionInstance;get()Ljava/lang/Object;";
 
 	@Shadow
@@ -70,7 +70,7 @@ public abstract class ExtraCChat implements ChatTextLookup {
 		return 0;
 	}
 
-	@ModifyVariable(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V",
+	@ModifyVariable(method = "addPlayerMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/multiplayer/chat/GuiMessageTag;)V",
 			at = @At("HEAD"), argsOnly = true, require = 0)
 	private Component glacier$chatPlus(Component c) {
 		ChatPlus p = ChatPlus.active();

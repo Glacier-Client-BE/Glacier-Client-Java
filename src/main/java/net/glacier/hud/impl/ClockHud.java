@@ -3,7 +3,7 @@ package net.glacier.hud.impl;
 import net.glacier.hud.HudModule;
 import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.ToggleSetting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -84,7 +84,7 @@ public class ClockHud extends HudModule {
 	}
 
 	@Override
-	protected void drawContent(GuiGraphics g, int x, int y) {
+	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		int cx = x;
 		int ty = y + (contentHeight() - lineHeight()) / 2;
 		if (showClock.on()) {
@@ -93,12 +93,12 @@ public class ClockHud extends HudModule {
 		}
 		if (showCompass.on()) {
 			if (compass == null) compass = new ItemStack(Items.COMPASS);
-			g.renderItem(compass, cx, y);
+			g.item(compass, cx, y);
 			cx += SLOT + GAP;
 		}
 		if (showRecovery.on()) {
 			if (recovery == null) recovery = new ItemStack(Items.RECOVERY_COMPASS);
-			g.renderItem(recovery, cx, y);
+			g.item(recovery, cx, y);
 		}
 	}
 }

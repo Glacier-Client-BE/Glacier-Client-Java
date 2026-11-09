@@ -1,11 +1,11 @@
 package net.glacier.hud;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import net.glacier.module.ModuleManager;
 import net.glacier.module.impl.EditorsModule;
 import net.glacier.ui.Draw;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 
@@ -42,7 +42,7 @@ public final class HotbarSkin {
 	}
 
 	/** Draws the hotbar background at the vanilla position (x, y = top-left of the 182x22 bar). */
-	public static void hotbarBackground(GuiGraphics g, int x, int y) {
+	public static void hotbarBackground(GuiGraphicsExtractor g, int x, int y) {
 		EditorsModule e = ed();
 		if (e == null) return;
 		String style = e.hotbarStyle.get();
@@ -62,7 +62,7 @@ public final class HotbarSkin {
 	}
 
 	/** Draws the selected-slot highlight. (x, y) is the top-left of the vanilla 24x23 selection sprite. */
-	public static void hotbarSelection(GuiGraphics g, int x, int y) {
+	public static void hotbarSelection(GuiGraphicsExtractor g, int x, int y) {
 		EditorsModule e = ed();
 		if (e == null) return;
 		if (e.hotbarStyle.is("Glacier")) {
@@ -81,7 +81,7 @@ public final class HotbarSkin {
 	}
 
 	/** Draws a 13x5 pack bar texture as a three-slice, so it can be any width. */
-	public static void expBar(GuiGraphics g, boolean full, int x, int y, int width) {
+	public static void expBar(GuiGraphicsExtractor g, boolean full, int x, int y, int width) {
 		EditorsModule e = ed();
 		if (e == null || width < 2) return;
 		boolean chroma = e.expColor.is("Chroma");

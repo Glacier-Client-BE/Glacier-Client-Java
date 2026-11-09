@@ -9,14 +9,14 @@ import net.glacier.ui.screen.pages.ModulesPage;
 import net.glacier.ui.screen.pages.MusicPage;
 import net.glacier.ui.screen.pages.PerformancePage;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +52,7 @@ public class NativeMenuScreen extends Screen {
 	private MenuKit.Hit active;
 	private static final ModulesPage modules = new ModulesPage();
 	private static final ElementsPage elements = new ElementsPage();
-	private static final EditorsPage editors = new EditorsPage(() -> Minecraft.getInstance().setScreen(new HudEditorScreen(Minecraft.getInstance().screen)));
+	private static final EditorsPage editors = new EditorsPage(() -> Minecraft.getInstance().gui.setScreen(new HudEditorScreen(Minecraft.getInstance().gui.screen())));
 	private static final MusicPage music = new MusicPage();
 	private static final CosmeticsPage cosmetics = new CosmeticsPage();
 	private static final PerformancePage performance = new PerformancePage();
@@ -147,7 +147,7 @@ public class NativeMenuScreen extends Screen {
 	// ----------------------------------------------------------------- render
 
 	@Override
-	public void render(GuiGraphics g, int mxs, int mys, float partial) {
+	public void extractRenderState(GuiGraphicsExtractor g, int mxs, int mys, float partial) {
 		fit();
 		hits.clear();
 		long now = System.currentTimeMillis();

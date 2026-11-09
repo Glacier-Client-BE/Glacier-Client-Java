@@ -6,8 +6,8 @@ import net.glacier.module.impl.TitlesPlus;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.Hud;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.scores.Objective;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,24 +23,24 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * Scoreboard, title and action bar hooks on Gui. Everything was read with javap on the 1.21.11 merged jar:
  * <ul>
- * <li>private displayScoreboardSidebar(GuiGraphics, Objective): two Options.getBackgroundColor(F) calls (rows 0.3f,
+ * <li>private displayScoreboardSidebar(GuiGraphicsExtractor, Objective): two Options.getBackgroundColor(F) calls (rows 0.3f,
  * title 0.4f) and three drawString(Font, Component, IIIZ) calls with ordinals 0 title, 1 entry name, 2 score. Ordinal 2
  * belongs to MixinGuiElements (hide scores), so only 0 and 1 are redirected here.</li>
- * <li>private renderTitle(GuiGraphics, DeltaTracker) draws the title (ordinal 0) and then the subtitle (ordinal 1)
- * with drawStringWithBackdrop(Font, Component, IIII).</li>
- * <li>private renderOverlayMessage(GuiGraphics, DeltaTracker) draws at (guiWidth / 2, guiHeight - 68).</li>
+ * <li>private renderTitle(GuiGraphicsExtractor, DeltaTracker) draws the title (ordinal 0) and then the subtitle (ordinal 1)
+ * with textWithBackdrop(Font, Component, IIII).</li>
+ * <li>private renderOverlayMessage(GuiGraphicsExtractor, DeltaTracker) draws at (guiWidth / 2, guiHeight - 68).</li>
  * <li>public setOverlayMessage(Component, boolean) stores {@code bipush 60} as the display time; public
  * setTimes(int, int, int) takes fade in, stay, fade out.</li>
  * </ul>
  * Transforms are pushed at HEAD and popped at every RETURN of the same method; a flag keeps the pair balanced.
  */
-@Mixin(Gui.class)
+@Mixin(Hud.class)
 public class ExtraCGui {
-	private static final String SIDEBAR = "displayScoreboardSidebar(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/scores/Objective;)V";
-	private static final String TITLE = "renderTitle(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V";
-	private static final String OVERLAY = "renderOverlayMessage(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V";
-	private static final String DRAW_STRING = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIZ)V";
-	private static final String BACKDROP = "Lnet/minecraft/client/gui/GuiGraphics;drawStringWithBackdrop(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIII)V";
+	private static final String SIDEBAR = "displayScoreboardSidebar(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/world/scores/Objective;)V";
+	private static final String TITLE = "extractTitle(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V";
+	private static final String OVERLAY = "extractOverlayMessage(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V";
+	private static final String DRAW_STRING = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;text(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIZ)V";
+	private static final String BACKDROP = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;textWithBackdrop(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIII)V";
 
 	@Unique
 	private boolean glacier$sidebarPushed;
@@ -52,12 +52,12 @@ public class ExtraCGui {
 	/* ------------------------------------------------------------ scoreboard */
 
 	@Inject(method = SIDEBAR, at = @At("HEAD"), require = 0)
-	private void glacier$sidebarPush(GuiGraphics g, Objective objective, CallbackInfo ci) {
+	private void glacier$sidebarPush(GuiGraphicsExtractor g, Objective objective, CallbackInfo ci) {
 		glacier$sidebarPushed = ScoreboardPlus.push(g);
 	}
 
 	@Inject(method = SIDEBAR, at = @At("RETURN"), require = 0)
-	private void glacier$sidebarPop(GuiGraphics g, Objective objective, CallbackInfo ci) {
+	private void glacier$sidebarPop(GuiGraphicsExtractor g, Objective objective, CallbackInfo ci) {
 		if (glacier$sidebarPushed) {
 			g.pose().popMatrix();
 			glacier$sidebarPushed = false;
@@ -70,19 +70,19 @@ public class ExtraCGui {
 	}
 
 	@Redirect(method = SIDEBAR, at = @At(value = "INVOKE", target = DRAW_STRING, ordinal = 0), require = 0)
-	private void glacier$sidebarTitle(GuiGraphics g, Font font, Component text, int x, int y, int color, boolean shadow) {
-		g.drawString(font, text, x, y, color, ScoreboardPlus.shadowOr(shadow));
+	private void glacier$sidebarTitle(GuiGraphicsExtractor g, Font font, Component text, int x, int y, int color, boolean shadow) {
+		g.text(font, text, x, y, color, ScoreboardPlus.shadowOr(shadow));
 	}
 
 	@Redirect(method = SIDEBAR, at = @At(value = "INVOKE", target = DRAW_STRING, ordinal = 1), require = 0)
-	private void glacier$sidebarName(GuiGraphics g, Font font, Component text, int x, int y, int color, boolean shadow) {
-		g.drawString(font, text, x, y, color, ScoreboardPlus.shadowOr(shadow));
+	private void glacier$sidebarName(GuiGraphicsExtractor g, Font font, Component text, int x, int y, int color, boolean shadow) {
+		g.text(font, text, x, y, color, ScoreboardPlus.shadowOr(shadow));
 	}
 
 	/* ------------------------------------------------------------ titles */
 
 	@Inject(method = TITLE, at = @At("HEAD"), cancellable = true, require = 0)
-	private void glacier$titlePush(GuiGraphics g, DeltaTracker delta, CallbackInfo ci) {
+	private void glacier$titlePush(GuiGraphicsExtractor g, DeltaTracker delta, CallbackInfo ci) {
 		if (TitlesPlus.hideAll()) {
 			ci.cancel();
 			return;
@@ -91,7 +91,7 @@ public class ExtraCGui {
 	}
 
 	@Inject(method = TITLE, at = @At("RETURN"), require = 0)
-	private void glacier$titlePop(GuiGraphics g, DeltaTracker delta, CallbackInfo ci) {
+	private void glacier$titlePop(GuiGraphicsExtractor g, DeltaTracker delta, CallbackInfo ci) {
 		if (glacier$titlePushed) {
 			g.pose().popMatrix();
 			glacier$titlePushed = false;
@@ -99,13 +99,13 @@ public class ExtraCGui {
 	}
 
 	@Redirect(method = TITLE, at = @At(value = "INVOKE", target = BACKDROP, ordinal = 0), require = 0)
-	private void glacier$title(GuiGraphics g, Font font, Component text, int x, int y, int width, int color) {
-		if (!TitlesPlus.hideTitleNow()) g.drawStringWithBackdrop(font, text, x, y, width, color);
+	private void glacier$title(GuiGraphicsExtractor g, Font font, Component text, int x, int y, int width, int color) {
+		if (!TitlesPlus.hideTitleNow()) g.textWithBackdrop(font, text, x, y, width, color);
 	}
 
 	@Redirect(method = TITLE, at = @At(value = "INVOKE", target = BACKDROP, ordinal = 1), require = 0)
-	private void glacier$subtitle(GuiGraphics g, Font font, Component text, int x, int y, int width, int color) {
-		if (!TitlesPlus.hideSubtitleNow()) g.drawStringWithBackdrop(font, text, x, y, width, color);
+	private void glacier$subtitle(GuiGraphicsExtractor g, Font font, Component text, int x, int y, int width, int color) {
+		if (!TitlesPlus.hideSubtitleNow()) g.textWithBackdrop(font, text, x, y, width, color);
 	}
 
 	/** setTimes(fadeIn, stay, fadeOut): the second int argument is the stay time. */
@@ -127,7 +127,7 @@ public class ExtraCGui {
 	/* ------------------------------------------------------------ action bar */
 
 	@Inject(method = OVERLAY, at = @At("HEAD"), cancellable = true, require = 0)
-	private void glacier$overlayPush(GuiGraphics g, DeltaTracker delta, CallbackInfo ci) {
+	private void glacier$overlayPush(GuiGraphicsExtractor g, DeltaTracker delta, CallbackInfo ci) {
 		if (ActionBarPlus.hidden()) {
 			ci.cancel();
 			return;
@@ -136,7 +136,7 @@ public class ExtraCGui {
 	}
 
 	@Inject(method = OVERLAY, at = @At("RETURN"), require = 0)
-	private void glacier$overlayPop(GuiGraphics g, DeltaTracker delta, CallbackInfo ci) {
+	private void glacier$overlayPop(GuiGraphicsExtractor g, DeltaTracker delta, CallbackInfo ci) {
 		if (glacier$overlayPushed) {
 			g.pose().popMatrix();
 			glacier$overlayPushed = false;

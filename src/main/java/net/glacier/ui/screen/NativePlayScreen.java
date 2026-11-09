@@ -4,7 +4,7 @@ import net.glacier.GlacierClient;
 import net.glacier.ui.Draw;
 import net.glacier.web.RenderUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -18,7 +18,7 @@ import net.minecraft.client.multiplayer.ServerList;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelSummary;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,7 +81,7 @@ public final class NativePlayScreen extends Screen {
 
 	/** Shows the play screen on top of parent; closing it returns to parent. */
 	public static void open(Screen parent) {
-		Minecraft.getInstance().setScreen(new NativePlayScreen(parent));
+		Minecraft.getInstance().gui.setScreen(new NativePlayScreen(parent));
 	}
 
 	@Override
@@ -95,7 +95,7 @@ public final class NativePlayScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics g, int mx, int my, float partial) {
+	public void extractBackground(GuiGraphicsExtractor g, int mx, int my, float partial) {
 	}
 
 	/** Same rule as WebPage.fit. */
@@ -113,7 +113,7 @@ public final class NativePlayScreen extends Screen {
 	// ------------------------------------------------------------------ render
 
 	@Override
-	public void render(GuiGraphics g, int mxs, int mys, float partial) {
+	public void extractRenderState(GuiGraphicsExtractor g, int mxs, int mys, float partial) {
 		hits.clear();
 		listX = listY = listW = listH = listContentH = 0;
 		if (!worldsRequested) requestWorlds();
@@ -145,7 +145,7 @@ public final class NativePlayScreen extends Screen {
 		pose.popMatrix();
 	}
 
-	private void drawHeader(GuiGraphics g, int mx, int my, int ix, int iy, int iw, int x0, int x1) {
+	private void drawHeader(GuiGraphicsExtractor g, int mx, int my, int ix, int iy, int iw, int x0, int x1) {
 		// 48 px tall incl. a 2 px bottom border; its top corners follow the window's inner radius (12)
 		Draw.round(g, ix, iy, iw, 48, 12, HEADER);
 		g.fill(ix, iy + 24, ix + iw, iy + 46, HEADER);
@@ -170,7 +170,7 @@ public final class NativePlayScreen extends Screen {
 		else text(g, RenderUtil.ellipsize(query, maxW, false, 13, null), tx, mid, 13, false, TEXT);
 	}
 
-	private void drawTabs(GuiGraphics g, int mx, int my, int x0, int x1) {
+	private void drawTabs(GuiGraphicsExtractor g, int mx, int my, int x0, int x1) {
 		// .pl-tabs: padding 8 12, gap 8; flex-grow 1 on content-sized (auto basis) tabs
 		float[] basis = new float[3];
 		float sum = 0;
@@ -206,11 +206,11 @@ public final class NativePlayScreen extends Screen {
 
 	// ----------------------------------------------------------------- worlds
 
-	private void drawWorlds(GuiGraphics g, int mx, int my, int bx, int by, int bw, int bh) {
+	private void drawWorlds(GuiGraphicsExtractor g, int mx, int my, int bx, int by, int bw, int bh) {
 		int half = (bw - 10) / 2;
 		button(g, mx, my, bx, by, half, 34, 10, 14, "Create New World", true, () -> run(() -> {
 			Minecraft mc = Minecraft.getInstance();
-			CreateWorldScreen.openFresh(mc, () -> mc.setScreen(this));
+			CreateWorldScreen.openFresh(mc, () -> mc.gui.setScreen(this));
 		}));
 		button(g, mx, my, bx + half + 10, by, bw - half - 10, 34, 10, 14, "Browse Worlds", false,
 				() -> show(() -> new SelectWorldScreen(this)));
@@ -252,7 +252,7 @@ public final class NativePlayScreen extends Screen {
 			Minecraft mc = Minecraft.getInstance();
 			List<LevelSummary> all = worlds;
 			if (all == null || index < 0 || index >= all.size()) return;
-			mc.createWorldOpenFlows().openWorld(all.get(index).getLevelId(), () -> mc.setScreen(this));
+			mc.createWorldOpenFlows().openWorld(all.get(index).getLevelId(), () -> mc.gui.setScreen(this));
 		});
 	}
 
@@ -279,7 +279,7 @@ public final class NativePlayScreen extends Screen {
 
 	// ---------------------------------------------------------------- friends
 
-	private void drawFriends(GuiGraphics g, int mx, int my, int bx, int by, int bw) {
+	private void drawFriends(GuiGraphicsExtractor g, int mx, int my, int bx, int by, int bw) {
 		int half = (bw - 10) / 2;
 		button(g, mx, my, bx, by, half, 34, 10, 14, "Add Friend", true, () -> show(() -> new JoinMultiplayerScreen(this)));
 		button(g, mx, my, bx + half + 10, by, bw - half - 10, 34, 10, 14, "Join by Code", false,
@@ -289,7 +289,7 @@ public final class NativePlayScreen extends Screen {
 
 	// ---------------------------------------------------------------- servers
 
-	private void drawServers(GuiGraphics g, int mx, int my, int bx, int by, int bw, int bh) {
+	private void drawServers(GuiGraphicsExtractor g, int mx, int my, int bx, int by, int bw, int bh) {
 		text(g, "Servers", bx, by + 17, 15, true, TEXT);
 		button(g, mx, my, bx + bw - 150, by + 3, 150, 28, 10, 13, "Add Server", false,
 				() -> show(() -> new JoinMultiplayerScreen(this)));
@@ -343,11 +343,11 @@ public final class NativePlayScreen extends Screen {
 	// ----------------------------------------------------------------- helpers
 
 	/** Text at css font size px, vertically centred on cy (the engine centres a 1.25 line box on the glyph box). */
-	private static void text(GuiGraphics g, String s, float x, float cy, float px, boolean bold, int argb) {
+	private static void text(GuiGraphicsExtractor g, String s, float x, float cy, float px, boolean bold, int argb) {
 		RenderUtil.drawText(g, s, x, cy - px / 2f, px, bold, null, argb);
 	}
 
-	private static void icon(GuiGraphics g, int cp, float x, float cy, float px, int argb) {
+	private static void icon(GuiGraphicsExtractor g, int cp, float x, float cy, float px, int argb) {
 		RenderUtil.drawText(g, new String(Character.toChars(cp)), x, cy - px / 2f, px, false, FA, argb);
 	}
 
@@ -368,7 +368,7 @@ public final class NativePlayScreen extends Screen {
 	}
 
 	/** .pl-item: 46 px card, 2 px border, radius 10, padding 0 12, bold name over a muted 12 px line. */
-	private static void row(GuiGraphics g, int x, int y, int w, String name, String detail, boolean hover) {
+	private static void row(GuiGraphicsExtractor g, int x, int y, int w, String name, String detail, boolean hover) {
 		Draw.round(g, x, y, w, ROW_H, 10, hover ? CARD_HOVER : CARD);
 		Draw.outline(g, x, y, w, ROW_H, 10, hover ? CARD_HOVER_EDGE : CARD_EDGE, 2);
 		float tw = w - 28;
@@ -378,7 +378,7 @@ public final class NativePlayScreen extends Screen {
 	}
 
 	/** .pl-btn: accent fill, or card with a hover fill (the border stays). */
-	private void button(GuiGraphics g, int mx, int my, int x, int y, int w, int h, int radius, float px, String label,
+	private void button(GuiGraphicsExtractor g, int mx, int my, int x, int y, int w, int h, int radius, float px, String label,
 						boolean accent, Runnable action) {
 		boolean hover = inside(mx, my, x, y, w, h);
 		int fill = accent ? (hover ? ACCENT_HOVER : ACCENT) : (hover ? CARD_HOVER : CARD);
@@ -390,7 +390,7 @@ public final class NativePlayScreen extends Screen {
 	}
 
 	/** .pl-sq: 32 px square icon button, radius 9, 14 px glyph. */
-	private void iconBox(GuiGraphics g, int mx, int my, int x, int y, int codepoint, Runnable action) {
+	private void iconBox(GuiGraphicsExtractor g, int mx, int my, int x, int y, int codepoint, Runnable action) {
 		boolean hover = inside(mx, my, x, y, 32, 32);
 		Draw.round(g, x, y, 32, 32, 9, hover ? CARD_HOVER : CARD);
 		Draw.outline(g, x, y, 32, 32, 9, hover ? CARD_HOVER_EDGE : CARD_EDGE, 2);
@@ -431,11 +431,11 @@ public final class NativePlayScreen extends Screen {
 
 	/** Opens a screen built at click time. */
 	private static void show(Supplier<Screen> screen) {
-		run(() -> Minecraft.getInstance().setScreen(screen.get()));
+		run(() -> Minecraft.getInstance().gui.setScreen(screen.get()));
 	}
 
 	private void back() {
-		run(() -> Minecraft.getInstance().setScreen(parent));
+		run(() -> Minecraft.getInstance().gui.setScreen(parent));
 	}
 
 	private void openMods() {

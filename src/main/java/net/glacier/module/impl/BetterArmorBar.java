@@ -6,7 +6,7 @@ import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.ColorSetting;
 import net.glacier.setting.ToggleSetting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -42,7 +42,7 @@ public class BetterArmorBar extends Module {
 	}
 
 	/** Draws the bar in the 81x9 area the vanilla armor row occupies; x,y is its top-left corner. */
-	public static void render(GuiGraphics g, Player player, int x, int y) {
+	public static void render(GuiGraphicsExtractor g, Player player, int x, int y) {
 		BetterArmorBar b = instance;
 		if (b == null) return;
 		int armor = player.getArmorValue();
@@ -70,7 +70,7 @@ public class BetterArmorBar extends Module {
 		if (b.number.on()) {
 			Minecraft mc = Minecraft.getInstance();
 			String t = text(armor);
-			g.drawString(mc.font, t, x - 2 - mc.font.width(t), y, 0xFFFFFFFF, true);
+			g.text(mc.font, t, x - 2 - mc.font.width(t), y, 0xFFFFFFFF, true);
 		}
 	}
 }

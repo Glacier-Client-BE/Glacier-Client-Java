@@ -12,7 +12,7 @@ import net.glacier.setting.ColorSetting;
 import net.glacier.setting.Setting;
 import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 import java.util.ArrayList;
 import java.util.Comparator;

@@ -23,7 +23,7 @@ public class ConfirmDisconnect extends Module {
 		ScreenEvents.AFTER_INIT.register((client, screen, w, h) -> {
 			if (!(screen instanceof PauseScreen)) return;
 			AbstractWidget leave = null;
-			for (AbstractWidget wd : Screens.getButtons(screen)) {
+			for (AbstractWidget wd : Screens.getWidgets(screen)) {
 				if (wd.getMessage().getContents() instanceof TranslatableContents tc
 						&& (tc.getKey().equals("menu.disconnect") || tc.getKey().equals("menu.returnToMenu"))) {
 					leave = wd;

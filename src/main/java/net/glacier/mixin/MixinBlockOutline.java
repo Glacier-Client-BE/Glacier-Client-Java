@@ -13,12 +13,12 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
  */
 @Mixin(LevelRenderer.class)
 public class MixinBlockOutline {
-	@ModifyVariable(method = "renderHitOutline", at = @At("HEAD"), argsOnly = true)
+	@ModifyVariable(method = "submitHitOutline", at = @At("HEAD"), argsOnly = true)
 	private int glacier$outlineColor(int color) {
 		return BlockOutline.active() ? BlockOutline.color() : color;
 	}
 
-	@ModifyVariable(method = "renderHitOutline", at = @At("HEAD"), argsOnly = true)
+	@ModifyVariable(method = "submitHitOutline", at = @At("HEAD"), argsOnly = true)
 	private float glacier$outlineWidth(float width) {
 		return BlockOutline.active() ? BlockOutline.width(width) : width;
 	}

@@ -36,7 +36,7 @@ public abstract class MixinChatIcon {
 	/** Prefixes the Glacier icon on a player chat line. Messages without a known sender are not changed. */
 	@ModifyArg(method = "showMessageToPlayer",
 			at = @At(value = "INVOKE",
-					target = "Lnet/minecraft/client/gui/components/ChatComponent;addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V"),
+					target = "Lnet/minecraft/client/gui/components/ChatComponent;addPlayerMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/multiplayer/chat/GuiMessageTag;)V"),
 			index = 0)
 	private Component glacier$chatIcon(Component message) {
 		try {

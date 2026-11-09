@@ -19,7 +19,7 @@ public class DayCounter extends CachedRowsHud {
 	@Override
 	public void onTick() {
 		if (mc.level == null) return;
-		long time = mc.level.getDayTime();
+		long time = mc.level.getOverworldClockTime();
 		long day = time / DAY_TICKS;
 		boolean withTime = style.is("Day N + Time");
 		long minuteOfDay = withTime ? ((time % DAY_TICKS) * 60L / 1000L + START_HOUR * 60L) % (24 * 60L) : 0;

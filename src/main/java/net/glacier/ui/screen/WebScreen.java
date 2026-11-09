@@ -6,13 +6,13 @@ import net.glacier.web.JsBridge;
 import net.glacier.web.Node;
 import net.glacier.web.WebApi;
 import net.glacier.web.WebView;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -111,7 +111,7 @@ public class WebScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 		Fit f = fit();
 		viewW = f.w();
 		viewH = f.h();

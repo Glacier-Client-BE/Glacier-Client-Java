@@ -18,7 +18,6 @@ public final class UtilityRegistry {
 		register.accept(new net.glacier.module.impl.AutoReconnect());
 		register.accept(new net.glacier.module.impl.ConfirmDisconnect());
 		register.accept(new net.glacier.module.impl.ChatFilter());
-		register.accept(new net.glacier.module.impl.BorderlessFullscreen());
 		register.accept(new net.glacier.module.impl.StreamerMode());
 		register.accept(new net.glacier.module.impl.SmoothChat());
 		register.accept(new net.glacier.module.impl.ClearBackground());

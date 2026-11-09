@@ -25,7 +25,7 @@ import java.nio.file.Path;
  * title swap ({@link MixinTitleScreenSwap}, TitleScreen only) and its own replacements alone. Off with
  * "customScreens": false in performance.json, read once when the game starts.
  */
-@Mixin(Minecraft.class)
+@Mixin(net.minecraft.client.gui.Gui.class)
 public abstract class MixinScreenSwap {
 	@Unique
 	private static final boolean GLACIER_CUSTOM_SCREENS = glacier$readSwitch();

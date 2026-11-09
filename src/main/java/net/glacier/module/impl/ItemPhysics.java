@@ -66,16 +66,16 @@ public class ItemPhysics extends Module {
 	public static void rotate(PoseStack pose, ItemEntityRenderState s, AABB box, org.joml.Quaternionfc vanilla) {
 		ItemPhysics p = instance;
 		if (p == null || !p.isEnabled()) {
-			pose.mulPose(vanilla);
+			pose.rotate(vanilla);
 			return;
 		}
 		switch (p.rotation.get()) {
-			case "Static" -> pose.mulPose(Axis.YP.rotation(s.bobOffset));
-			case "Slow Spin" -> pose.mulPose(Axis.YP.rotation(ItemEntity.getSpin(s.ageInTicks * p.slow.f(), s.bobOffset)));
-			default -> pose.mulPose(vanilla);
+			case "Static" -> pose.rotate(Axis.YP.rotation(s.bobOffset));
+			case "Slow Spin" -> pose.rotate(Axis.YP.rotation(ItemEntity.getSpin(s.ageInTicks * p.slow.f(), s.bobOffset)));
+			default -> pose.rotate(vanilla);
 		}
 		if (p.flat.on() && box != null && isFlatSprite(box)) {
-			pose.mulPose(Axis.XP.rotationDegrees(-90f));
+			pose.rotate(Axis.XP.rotationDegrees(-90f));
 			pose.translate(-(float) ((box.minX + box.maxX) * 0.5), -(float) ((box.minY + box.maxY) * 0.5), 0f);
 		}
 	}

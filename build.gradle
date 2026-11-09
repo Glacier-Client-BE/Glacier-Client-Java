@@ -1,5 +1,5 @@
 plugins {
-	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 }
 
 version = project.mod_version
@@ -45,18 +45,17 @@ loom {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.officialMojangMappings()
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
 	// Pure-Java JavaScript engine for the custom UI scripting layer (bundled into the jar)
 	include implementation("org.mozilla:rhino:1.7.15")
 
 	// Built-in performance mods (jar-in-jar, unmodified). Credits: assets/glacier/THIRD_PARTY.md
-	include modImplementation("maven.modrinth:sodium:mc1.21.11-0.8.14-fabric")
-	include modImplementation("maven.modrinth:lithium:mc1.21.11-0.21.4-fabric")
-	include modImplementation("maven.modrinth:ferrite-core:8.2.0-fabric")
-	include modImplementation("maven.modrinth:immediatelyfast:1.14.3+1.21.11-fabric")
+	include implementation("maven.modrinth:sodium:mc26.3-0.9.3-beta.4-fabric")
+	include implementation("maven.modrinth:lithium:mc26.3-0.26.3-fabric")
+	include implementation("maven.modrinth:ferrite-core:9.0.0-fabric")
+	include implementation("maven.modrinth:immediatelyfast:1.17.1+26.3-fabric")
 
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

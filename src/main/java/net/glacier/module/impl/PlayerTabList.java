@@ -7,7 +7,7 @@ import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
 import net.glacier.ui.Draw;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.world.level.GameType;
 
@@ -72,7 +72,7 @@ public class PlayerTabList extends Module {
 	public static List<PlayerInfo> sorted(List<PlayerInfo> vanilla) {
 		PlayerTabList t = active();
 		if (t == null || t.sort.is("Vanilla") || vanilla.size() < 2) return vanilla;
-		int tick = mc.gui == null ? 0 : mc.gui.getGuiTicks();
+		int tick = mc.gui.hud == null ? 0 : mc.gui.hud.getGuiTicks();
 		if (tick != t.cacheTick || vanilla.size() != t.cacheSize) {
 			t.cache.clear();
 			t.cache.addAll(vanilla);
@@ -94,7 +94,7 @@ public class PlayerTabList extends Module {
 	 * Replacement for the fill calls of PlayerTabOverlay.render. The panel, header and footer use 0x80000000; every
 	 * other fill is a player cell. Draws everything the same way as vanilla when no option changes it.
 	 */
-	public static void fill(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {
+	public static void fill(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1, int color) {
 		PlayerTabList t = active();
 		if (t == null) {
 			g.fill(x0, y0, x1, y1, color);
@@ -117,7 +117,7 @@ public class PlayerTabList extends Module {
 	}
 
 	/** Draws the ping of a player in the slot vanilla uses for its icon. Returns false to let vanilla draw it. */
-	public static boolean drawPing(GuiGraphics g, int cellWidth, int x, int y, PlayerInfo info) {
+	public static boolean drawPing(GuiGraphicsExtractor g, int cellWidth, int x, int y, PlayerInfo info) {
 		PlayerTabList t = active();
 		if (t == null || t.pingStyle.is("Vanilla")) return false;
 		if (t.pingStyle.is("Hidden")) return true;
@@ -126,7 +126,7 @@ public class PlayerTabList extends Module {
 		if (t.pingStyle.is("Number")) {
 			String s = ping < 0 ? "?" : ping >= 999 ? "999+" : number(ping);
 			int w = mc.font.width(s);
-			g.drawString(mc.font, s, x + cellWidth - 1 - w, y, color(ping), true);
+			g.text(mc.font, s, x + cellWidth - 1 - w, y, color(ping), true);
 			return true;
 		}
 		int lit = ping < 0 ? 0 : ping < 80 ? 5 : ping < 150 ? 4 : ping < 300 ? 3 : ping < 600 ? 2 : 1;

@@ -4,13 +4,13 @@ import net.glacier.config.Config;
 import net.glacier.ui.Draw;
 import net.glacier.web.RenderUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 /**
  * Right Shift screen as plain Java widgets (replaces quickbar.html and the web layer of HudQuickScreen). The live HUD
@@ -111,7 +111,7 @@ public final class NativeQuickBar extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 		fit();
 		boolean gridShown = gridOn;
 		if (gridShown) HudEditorScreen.Dragger.drawGrid(g, width, height);
@@ -126,7 +126,7 @@ public final class NativeQuickBar extends Screen {
 		pose.popMatrix();
 	}
 
-	private void drawBar(GuiGraphics g, int mx, int my) {
+	private void drawBar(GuiGraphicsExtractor g, int mx, int my) {
 		RenderUtil.image(g, LOGO, logoX, logoY, logoX + LOGO_SIZE, logoY + LOGO_SIZE, 1f);
 
 		float f = fs(22);
@@ -153,21 +153,21 @@ public final class NativeQuickBar extends Screen {
 	}
 
 	/** Button background plus 1px border ring, lifted 2 css px on hover; returns the drawn box. */
-	private Box button(GuiGraphics g, Box rest, boolean hover, boolean on) {
+	private Box button(GuiGraphicsExtractor g, Box rest, boolean hover, boolean on) {
 		Box b = hover ? new Box(rest.x(), rest.y() - LIFT, rest.w(), rest.h()) : rest;
 		Draw.round(g, b.x(), b.y(), b.w(), b.h(), BTN_R, hover ? NAVY_HOVER : NAVY);
 		Draw.outline(g, b.x(), b.y(), b.w(), b.h(), BTN_R, on ? ACCENT : hover ? NAVY_BORDER_HOVER : NAVY_BORDER, 1);
 		return b;
 	}
 
-	private static void icon(GuiGraphics g, int cp, Box b, int argb) {
+	private static void icon(GuiGraphicsExtractor g, int cp, Box b, int argb) {
 		float f = fs(15);
 		Draw.icon(g, cp, b.x() + (b.w() - Draw.iconWidth(cp, f)) / 2f, b.y() + b.h() / 2f - 4f * f, f, argb);
 	}
 
 	/** No blur or dim: the game and the HUD stay fully visible. */
 	@Override
-	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 	}
 
 	@Override
@@ -186,9 +186,9 @@ public final class NativeQuickBar extends Screen {
 		if (over(back, x, y)) {
 			onClose();
 		} else if (over(mods, x, y)) {
-			Minecraft.getInstance().setScreen(NativeMenuScreen.open(null));
+			Minecraft.getInstance().gui.setScreen(NativeMenuScreen.open(null));
 		} else if (over(settings, x, y)) {
-			Minecraft.getInstance().setScreen(NativeMenuScreen.open("Performance"));
+			Minecraft.getInstance().gui.setScreen(NativeMenuScreen.open("Performance"));
 		} else if (over(grid, x, y)) {
 			gridOn = !gridOn;
 		}

@@ -3,7 +3,7 @@ package net.glacier.hud.impl;
 import net.glacier.hud.HudModule;
 import net.glacier.setting.ToggleSetting;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * Depth chart of where each common ore generates (one bar per ore across the world height), with its best mining
@@ -83,7 +83,7 @@ public class OreVisualizer extends HudModule {
 	}
 
 	@Override
-	protected void drawContent(GuiGraphics g, int x, int y) {
+	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		if (!hideTitle.on()) drawText(g, "Ore Visualizer", x, y, TEXT);
 		if (!hideY.on() && mc.player != null) {
 			int py = (int) Math.floor(mc.player.getY());

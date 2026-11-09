@@ -480,7 +480,7 @@ public final class WebApi {
 	}
 
 	private static void open(Screen s) {
-		Minecraft.getInstance().setScreen(s);
+		Minecraft.getInstance().gui.setScreen(s);
 	}
 
 	private static String iconFor(Module m) {

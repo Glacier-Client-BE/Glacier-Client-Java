@@ -8,7 +8,7 @@ import net.glacier.web.StartApi;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.client.input.KeyEvent;
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The Glacier start screen (start.html / start.css / start.js) as plain Java widgets drawn on GuiGraphics.
+ * The Glacier start screen (start.html / start.css / start.js) as plain Java widgets drawn on GuiGraphicsExtractor.
  * Layout is in the same css-px design units as the web page (design height 540, scaled to the window), so the
  * positions match it one to one. Immediate mode like {@link NativeMenuScreen}: each frame records the click regions.
  */
@@ -99,7 +99,7 @@ public class NativeStartScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 	}
 
 	@Override
@@ -115,7 +115,7 @@ public class NativeStartScreen extends Screen {
 	// ------------------------------------------------------------------ render
 
 	@Override
-	public void render(GuiGraphics g, int mx, int my, float partialTick) {
+	public void extractRenderState(GuiGraphicsExtractor g, int mx, int my, float partialTick) {
 		hits.clear();
 		scale = fitScale();
 		vw = (int) Math.ceil(width / scale);
@@ -148,7 +148,7 @@ public class NativeStartScreen extends Screen {
 		return s < 0.5f ? Math.max(0.1f, s) : (float) Math.floor(s / STEP) * STEP;
 	}
 
-	private void drawBackground(GuiGraphics g) {
+	private void drawBackground(GuiGraphicsExtractor g) {
 		g.fill(0, 0, width, height, BG);
 		int[] nat = RenderUtil.imageSize(PANORAMA);
 		if (nat != null && width > 0 && height > 0) {
@@ -166,7 +166,7 @@ public class NativeStartScreen extends Screen {
 	}
 
 	/** Darkens the top and bottom edges in steps. The bands are disjoint, so each row is filled once. */
-	private void vignette(GuiGraphics g) {
+	private void vignette(GuiGraphicsExtractor g) {
 		int band = Math.max(1, (int) (height * VIGNETTE_BAND) / VIGNETTE_STEPS);
 		for (int i = 0; i < VIGNETTE_STEPS; i++) {
 			int c = (VIGNETTE_MAX * (VIGNETTE_STEPS - i) / VIGNETTE_STEPS) << 24;
@@ -177,7 +177,7 @@ public class NativeStartScreen extends Screen {
 	}
 
 	/** Centre card: 392x400 css px, stack of brand and five buttons, rising in after the logo intro. */
-	private void drawCard(GuiGraphics g) {
+	private void drawCard(GuiGraphicsExtractor g) {
 		int dy = Math.round(cardDy);
 		int ox = (vw - 396) / 2;
 		int oy = 24 + (vh - 24 - 404) / 2 + dy;
@@ -208,7 +208,7 @@ public class NativeStartScreen extends Screen {
 	}
 
 	/** Top-left player panel: 300x48 at (6,6). */
-	private void drawPlayer(GuiGraphics g) {
+	private void drawPlayer(GuiGraphicsExtractor g) {
 		surface(g, 6, 6, 56, 48, 14, false);
 		iconC(g, 0xF007, 34, 30, 18, ACCENT);
 
@@ -223,7 +223,7 @@ public class NativeStartScreen extends Screen {
 	}
 
 	/** Top-right controls: achievements, inbox, version dropdown and quit, 304 css px wide, right edge at 4. */
-	private void drawTop(GuiGraphics g) {
+	private void drawTop(GuiGraphicsExtractor g) {
 		int s = vw - 308;
 
 		boolean ha = hov(s, 4, 48, 48);
@@ -253,7 +253,7 @@ public class NativeStartScreen extends Screen {
 	}
 
 	/** Version dropdown under the header; rows only close it, as in start.js. */
-	private void drawDropdown(GuiGraphics g) {
+	private void drawDropdown(GuiGraphicsExtractor g) {
 		int x = vw - 208, y = 56;
 		shadow(g, x, y, 152, 92, 16);
 		Draw.round(g, x, y, 152, 92, 16, PANEL);
@@ -267,7 +267,7 @@ public class NativeStartScreen extends Screen {
 	}
 
 	/** Bottom-right news flipbook: 202x128, one frame every 5 s. */
-	private void drawNews(GuiGraphics g) {
+	private void drawNews(GuiGraphicsExtractor g) {
 		long secs = (System.nanoTime() - startNs) / 1_000_000_000L;
 		int frame = (int) ((secs / (long) NEWS_FRAME_S) % NEWS.length);
 		int nx = vw - 212, ny = vh - 164;
@@ -275,7 +275,7 @@ public class NativeStartScreen extends Screen {
 	}
 
 	/** Footer: version badge and Discord button at the bottom left, version badge at the bottom right. */
-	private void drawFoot(GuiGraphics g) {
+	private void drawFoot(GuiGraphicsExtractor g) {
 		String left = "Glacier v7";
 		int lw = badgeWidth(left);
 		int by = vh - 33;
@@ -292,7 +292,7 @@ public class NativeStartScreen extends Screen {
 	}
 
 	/** Logo intro: pops in, grows, holds, then flies up and fades out. */
-	private void drawLogo(GuiGraphics g) {
+	private void drawLogo(GuiGraphicsExtractor g) {
 		if (logoA <= 0f) return;
 		float x = vw / 2f - logoSize / 2f;
 		float y = vh / 2f - logoSize / 2f + logoY;
@@ -300,7 +300,7 @@ public class NativeStartScreen extends Screen {
 	}
 
 	/** Full-screen scrim with the Information window: changelog, tutorials and credits. */
-	private void drawInfo(GuiGraphics g) {
+	private void drawInfo(GuiGraphicsExtractor g) {
 		g.fill(0, 0, vw, vh, SCRIM);
 		int ww = Math.round(vw * 0.88f), wh = Math.round(vh * 0.86f);
 		int wx = (vw - ww) / 2, wy = (vh - wh) / 2;
@@ -364,7 +364,7 @@ public class NativeStartScreen extends Screen {
 	}
 
 	/** Lays out a flex column of changelog entries (gap 6, word wrap). Returns the height, drawing only when asked. */
-	private float entries(GuiGraphics g, String[][] es, float x, float y, float w, boolean draw) {
+	private float entries(GuiGraphicsExtractor g, String[][] es, float x, float y, float w, boolean draw) {
 		float yy = y;
 		for (int i = 0; i < es.length; i++) {
 			if (i > 0) yy += 6;
@@ -419,26 +419,26 @@ public class NativeStartScreen extends Screen {
 
 	// ----------------------------------------------------------------- widgets
 
-	private void button(GuiGraphics g, String label, int x, int y, Runnable action) {
+	private void button(GuiGraphicsExtractor g, String label, int x, int y, Runnable action) {
 		surface(g, x, y, 352, 44, 14, hov(x, y, 352, 44));
 		txtCenter(g, label, x + 176, y + 22, 18, fa(TEXT));
 		hit(x, y, 352, 44, false, action);
 	}
 
 	/** Card surface: card fill with a 2 px card-edge border, lighter when hovered. */
-	private void surface(GuiGraphics g, int x, int y, int w, int h, int r, boolean hover) {
+	private void surface(GuiGraphicsExtractor g, int x, int y, int w, int h, int r, boolean hover) {
 		Draw.round(g, x, y, w, h, r, fa(hover ? CARD_HOVER : CARD));
 		Draw.outline(g, x, y, w, h, r, fa(hover ? CARD_HOVER_EDGE : CARD_EDGE), 2);
 	}
 
 	/** Soft drop shadow (0 8px 30px), approximated with stacked translucent rounded rects. */
-	private void shadow(GuiGraphics g, int x, int y, int w, int h, int r) {
+	private void shadow(GuiGraphicsExtractor g, int x, int y, int w, int h, int r) {
 		for (int k = 6; k >= 1; k--) {
 			Draw.round(g, x - 3 * k, y + 8 - 3 * k, w + 6 * k, h + 6 * k, r + 3 * k, 0x14000000);
 		}
 	}
 
-	private void badge(GuiGraphics g, String s, int x, int y, int w) {
+	private void badge(GuiGraphicsExtractor g, String s, int x, int y, int w) {
 		Draw.round(g, x, y, w, 29, 8, BADGE);
 		Draw.outline(g, x, y, w, 29, 8, BADGE_EDGE, 2);
 		txt(g, s, x + 8, y + 4, 18, TEXT);
@@ -473,28 +473,28 @@ public class NativeStartScreen extends Screen {
 		return css / 9f;
 	}
 
-	private static void txt(GuiGraphics g, String s, float x, float y, float css, int argb) {
+	private static void txt(GuiGraphicsExtractor g, String s, float x, float y, float css, int argb) {
 		Draw.text(g, s, x, y, fs(css), argb);
 	}
 
 	/** Left-aligned text centred vertically on cy. */
-	private static void txtMid(GuiGraphics g, String s, float x, float cy, float css, int argb) {
+	private static void txtMid(GuiGraphicsExtractor g, String s, float x, float cy, float css, int argb) {
 		float f = fs(css);
 		Draw.text(g, s, x, cy - 4f * f, f, argb);
 	}
 
-	private static void txtCenter(GuiGraphics g, String s, float cx, float cy, float css, int argb) {
+	private static void txtCenter(GuiGraphicsExtractor g, String s, float cx, float cy, float css, int argb) {
 		float f = fs(css);
 		Draw.text(g, s, cx - Draw.textWidth(s, f) / 2f, cy - 4f * f, f, argb);
 	}
 
-	private static void iconC(GuiGraphics g, int cp, float cx, float cy, float css, int argb) {
+	private static void iconC(GuiGraphicsExtractor g, int cp, float cx, float cy, float css, int argb) {
 		float f = fs(css);
 		Draw.icon(g, cp, cx - Draw.iconWidth(cp, f) / 2f, cy - 4f * f, f, argb);
 	}
 
 	/** Font Awesome brands glyph (Discord), which the Draw helpers do not cover. */
-	private static void brandIconC(GuiGraphics g, int cp, float cx, float cy, float css, int argb) {
+	private static void brandIconC(GuiGraphicsExtractor g, int cp, float cx, float cy, float css, int argb) {
 		float f = fs(css);
 		Font font = Minecraft.getInstance().font;
 		Component c = Component.literal(new String(Character.toChars(cp)))
@@ -503,7 +503,7 @@ public class NativeStartScreen extends Screen {
 		p.pushMatrix();
 		p.translate(cx - font.width(c) * f / 2f, cy - 4f * f);
 		p.scale(f, f);
-		g.drawString(font, c, 0, 0, argb, false);
+		g.text(font, c, 0, 0, argb, false);
 		p.popMatrix();
 	}
 
@@ -579,7 +579,7 @@ public class NativeStartScreen extends Screen {
 	}
 
 	private static void open(Screen s) {
-		Minecraft.getInstance().setScreen(s);
+		Minecraft.getInstance().gui.setScreen(s);
 	}
 
 	private static Identifier id(String path) {

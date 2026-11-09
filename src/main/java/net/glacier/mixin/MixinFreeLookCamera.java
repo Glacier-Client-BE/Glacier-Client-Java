@@ -16,8 +16,8 @@ public abstract class MixinFreeLookCamera {
 	@Shadow
 	protected abstract void setRotation(float yaw, float pitch);
 
-	@Inject(method = "setup", at = @At("TAIL"))
-	private void glacier$freeLook(Level level, Entity entity, boolean detached, boolean mirrored, float partial, CallbackInfo ci) {
+	@Inject(method = "update", at = @At("TAIL"))
+	private void glacier$freeLook(net.minecraft.client.DeltaTracker dt, CallbackInfo ci) {
 		if (FreeLook.active()) setRotation(FreeLook.yaw(), FreeLook.pitch());
 	}
 }

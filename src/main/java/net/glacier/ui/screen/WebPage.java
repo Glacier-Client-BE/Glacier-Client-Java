@@ -7,7 +7,7 @@ import net.glacier.web.ScreenApi;
 import net.glacier.web.WebApi;
 import net.glacier.web.WebView;
 import net.glacier.web.RenderUtil;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.resources.Identifier;
@@ -69,7 +69,7 @@ public final class WebPage {
 	}
 
 	/** Draws the page over whatever the owner already drew. */
-	public void render(GuiGraphics g, int mouseX, int mouseY, int w, int h) {
+	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, int w, int h) {
 		fit(w, h);
 		bridge.tick();
 		var pose = g.pose();
@@ -125,7 +125,7 @@ public final class WebPage {
 	 * Draws the cover-fitted panorama across the window, panned by the wall clock, and a flat dim over it. The
 	 * page sits on top of this, so the page itself has no background.
 	 */
-	public static void drawPanorama(GuiGraphics g, int w, int h) {
+	public static void drawPanorama(GuiGraphicsExtractor g, int w, int h) {
 		g.fill(0, 0, w, h, BG);
 		int[] nat = RenderUtil.imageSize(PANORAMA);
 		if (nat != null && w > 0 && h > 0) {

@@ -3,14 +3,14 @@ package net.glacier.ui.screen;
 import net.glacier.mixin.MixinLevelLoadingAccessor;
 import net.glacier.mixin.MixinProgressScreenAccessor;
 import net.glacier.web.ScreenApi;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.LevelLoadTracker;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 /**
  * The loading and saving screen (progress.html). It wraps the vanilla screen it replaces ({@code LevelLoadingScreen}
@@ -38,13 +38,13 @@ public final class ProgressWebScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 		WebPage.drawPanorama(g, width, height);
-		page.render(g, mouseX, mouseY, width, height);
+		page.extractRenderState(g, mouseX, mouseY, width, height);
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public final class ProgressWebScreen extends Screen {
 		if (source instanceof MixinLevelLoadingAccessor level && this.minecraft != null) {
 			LevelLoadTracker tracker = level.glacier$loadTracker();
 			if (tracker != null && tracker.isLevelReady()) {
-				this.minecraft.setScreen(null);
+				this.minecraft.gui.setScreen(null);
 				return;
 			}
 		}

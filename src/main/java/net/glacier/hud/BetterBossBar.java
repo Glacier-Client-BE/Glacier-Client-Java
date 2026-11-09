@@ -2,7 +2,7 @@ package net.glacier.hud;
 
 import net.glacier.module.impl.ElementsModule;
 import net.glacier.ui.Draw;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.BossEvent;
@@ -38,7 +38,7 @@ public final class BetterBossBar {
 	private BetterBossBar() {
 	}
 
-	public static void render(GuiGraphics g, Map<UUID, LerpingBossEvent> events, ElementsModule e) {
+	public static void render(GuiGraphicsExtractor g, Map<UUID, LerpingBossEvent> events, ElementsModule e) {
 		if (events.isEmpty()) {
 			if (!STATES.isEmpty()) STATES.clear();
 			return;
@@ -150,7 +150,7 @@ public final class BetterBossBar {
 		}
 	}
 
-	private static void drawSegments(GuiGraphics g, int x, int y, int w, int h, float p, int fill, int div) {
+	private static void drawSegments(GuiGraphicsExtractor g, int x, int y, int w, int h, float p, int fill, int div) {
 		int n = div > 0 ? div : 10;
 		int gap = 2;
 		float segW = (w - gap * (n - 1)) / (float) n;

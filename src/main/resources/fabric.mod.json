@@ -20,7 +20,7 @@
 	, "glacier-extra-a.mixins.json", "glacier-extra-b.mixins.json", "glacier-extra-c.mixins.json"],
 	"depends": {
 		"fabricloader": ">=0.19.0",
-		"minecraft": "~1.21.11",
+		"minecraft": "~26.3",
 		"java": ">=21",
 		"fabric-api": "*"
 	},

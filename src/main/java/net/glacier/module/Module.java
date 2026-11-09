@@ -2,7 +2,7 @@ package net.glacier.module;
 
 import net.glacier.setting.Setting;
 import net.minecraft.client.Minecraft;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,14 +78,12 @@ public abstract class Module {
 	public String keyName() {
 		int k = keyCode;
 		if (k <= 0) return "None";
-		String n = null;
-		try {
-			n = GLFW.glfwGetKeyName(k, 0);
-		} catch (Throwable ignored) {
-		}
-		if (n != null && !n.isEmpty()) return n.toUpperCase(java.util.Locale.ROOT);
-		if (k >= GLFW.GLFW_KEY_F1 && k <= GLFW.GLFW_KEY_F25) return "F" + (k - GLFW.GLFW_KEY_F1 + 1);
-		if (k >= GLFW.GLFW_KEY_KP_0 && k <= GLFW.GLFW_KEY_KP_9) return "NUM" + (k - GLFW.GLFW_KEY_KP_0);
+		if (k >= 4 && k <= 29) return String.valueOf((char) ('A' + k - 4));
+		if (k >= 30 && k <= 38) return String.valueOf(k - 29);
+		if (k == 39) return "0";
+		if (k >= GLFW.GLFW_KEY_F1 && k <= GLFW.GLFW_KEY_F1 + 11) return "F" + (k - GLFW.GLFW_KEY_F1 + 1);
+		if (k >= 89 && k <= 97) return "NUM" + (k - 88);
+		if (k == GLFW.GLFW_KEY_KP_0) return "NUM0";
 		return switch (k) {
 			case GLFW.GLFW_KEY_SPACE -> "SPACE";
 			case GLFW.GLFW_KEY_LEFT_SHIFT -> "LSHIFT";

@@ -5,7 +5,7 @@ import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.ToggleSetting;
 import net.glacier.ui.Draw;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
@@ -58,7 +58,7 @@ public class InventoryHud extends SlotHudModule {
 	}
 
 	@Override
-	protected void drawContent(GuiGraphics g, int x, int y) {
+	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		if (mc.player == null) return;
 		Inventory inv = mc.player.getInventory();
 		int n = rows();
@@ -78,11 +78,11 @@ public class InventoryHud extends SlotHudModule {
 				drawSlot(g, st, sx, sy);
 				if (highlight.on() && hotbarRow && slot == sel) Draw.outline(g, sx, sy, slot(), slot(), 0, SELECTED, 1);
 				if (slotNumbers.on()) {
-					g.drawString(mc.font, NUMBERS[slot], sx + 2, sy + 2, Theme.HUD_MUTED, true);
+					g.text(mc.font, NUMBERS[slot], sx + 2, sy + 2, Theme.HUD_MUTED, true);
 				}
 				if (!st.isEmpty() && counts.on() && st.getCount() > 1) {
 					int ox = (slot() - 16) / 2, oy = (slot() - 16) / 2 - (showBar.on() ? 1 : 0);
-					g.renderItemDecorations(mc.font, st, sx + ox, sy + oy);
+					g.itemDecorations(mc.font, st, sx + ox, sy + oy);
 				}
 			}
 		}

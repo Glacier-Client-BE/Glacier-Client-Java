@@ -4,7 +4,7 @@ import net.glacier.module.Category;
 import net.glacier.module.Module;
 import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * Action bar text tweaks (NRC actionbar module): hide, scale, vertical offset and how long a message stays. Hooks are
@@ -43,7 +43,7 @@ public class ActionBarPlus extends Module {
 	}
 
 	/** Pushes scale and offset about the text anchor (centre, 68 px above the bottom). True when a matrix was pushed. */
-	public static boolean push(GuiGraphics g) {
+	public static boolean push(GuiGraphicsExtractor g) {
 		ActionBarPlus a = active();
 		if (a == null) return false;
 		float k = a.scale.f() / 100f;

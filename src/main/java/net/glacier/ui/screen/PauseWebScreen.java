@@ -2,12 +2,12 @@ package net.glacier.ui.screen;
 
 import net.glacier.web.ScreenApi;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 /**
  * The pause menu (pause.html) that replaces the vanilla {@link PauseScreen}. It extends PauseScreen so existing
@@ -22,7 +22,7 @@ public final class PauseWebScreen extends PauseScreen {
 
 	public PauseWebScreen(boolean showPauseMenu) {
 		super(showPauseMenu);
-		ScreenApi api = new ScreenApi(this, () -> Minecraft.getInstance().setScreen(null));
+		ScreenApi api = new ScreenApi(this, () -> Minecraft.getInstance().gui.setScreen(null));
 		this.page = new WebPage(this, api, "pause.html", "pause.css", "pause.js");
 	}
 
@@ -32,7 +32,7 @@ public final class PauseWebScreen extends PauseScreen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 	}
 
 	@Override
@@ -41,9 +41,9 @@ public final class PauseWebScreen extends PauseScreen {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 		g.fill(0, 0, width, height, DIM);
-		page.render(g, mouseX, mouseY, width, height);
+		page.extractRenderState(g, mouseX, mouseY, width, height);
 	}
 
 	@Override

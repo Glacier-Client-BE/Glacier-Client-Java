@@ -25,7 +25,7 @@
  * - PoseStack (com.mojang.blaze3d.vertex): translate(float,float,float), mulPose(Quaternionfc), pushPose, popPose.
  *   Quaternionf from org.joml (joml 1.10.8): rotationX(float), rotationY(float).
  * - Registration: fabric-rendering-v1 16.2.10 has
- *   net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback.EVENT, callback
+ *   net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback.EVENT, callback
  *   (EntityType, LivingEntityRenderer, RegistrationHelper, EntityRendererProvider.Context); helper.register(RenderLayer<T, ? extends EntityModel<T>>).
  *   Used instead of a mixin, so glacier.mixins.json is untouched.
  *
@@ -35,7 +35,7 @@
 package net.glacier.cosmetics;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.glacier.cosmetics.Accessories.Type;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
@@ -82,7 +82,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 
 	/** Adds the layer to every player renderer. Call once from the client initializer. */
 	public static void register() {
-		LivingEntityFeatureRendererRegistrationCallback.EVENT.register((entityType, entityRenderer, helper, context) -> {
+		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, entityRenderer, helper, context) -> {
 			if (entityRenderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new AccessoryLayer(avatar));
 			}
@@ -105,7 +105,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 			float phase = age % 100.0F;
 			float twitch = phase < 6.0F ? Mth.sin(phase * 1.0472F) * 0.12F : 0.0F;
 			ROT.rotationZ(twitch);
-			pose.mulPose(ROT);
+			pose.rotate(ROT);
 			draw(collector, pose, light, AccessoryModels.ears(), Accessories.texture(Type.EARS, design));
 			pose.popPose();
 		}
@@ -140,7 +140,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 			} else {
 				pose.translate(0.0F, Mth.sin(age * 0.1D) * 0.5F * PX, 0.0F);
 				ROT.rotationY(age * 0.03F);
-				pose.mulPose(ROT);
+				pose.rotate(ROT);
 				draw(collector, pose, FULL_BRIGHT, AccessoryModels.halo(), Accessories.texture(Type.HALO, design));
 			}
 			pose.popPose();
@@ -196,7 +196,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 				model.body.translateAndRotate(pose);
 				pose.translate(0.0F, 0.0F, 2.0F * PX);
 				ROT.rotationX(lean).rotateZ(-roll);
-				pose.mulPose(ROT);
+				pose.rotate(ROT);
 				pose.translate(0.0F, 0.0F, -2.0F * PX);
 				drawMesh(collector, pose, light, mesh, packCape.texture());
 				pose.popPose();
@@ -254,7 +254,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 			pose.translate(0.0F, 10.0F * PX, 2.0F * PX);
 			for (int i = 0; i < TAIL_PITCH.length; i++) {
 				ROT.rotationX(TAIL_PITCH[i]).rotateY(Mth.sin(wagT - i * 0.7F) * wagAmp * (0.5F + 0.2F * i));
-				pose.mulPose(ROT);
+				pose.rotate(ROT);
 				draw(collector, pose, light, AccessoryModels.tailSegment(i), texture);
 				pose.translate(0.0F, 0.0F, AccessoryModels.tailLength(i) * PX);
 			}
@@ -272,14 +272,14 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 			pose.pushPose();
 			pose.translate(0.0F, -3.0F * PX, -2.5F * PX);
 			ROT.rotationY(Mth.sin(age * 0.05F) * 0.45F).rotateX(Mth.sin(age * 0.07F + 1.0F) * 0.12F);
-			pose.mulPose(ROT);
+			pose.rotate(ROT);
 			draw(collector, pose, light, AccessoryModels.petHead(), texture);
 			pose.popPose();
 
 			pose.pushPose();
 			pose.translate(0.0F, -1.5F * PX, 2.5F * PX);
 			ROT.rotationY(Mth.sin(age * 0.2F) * 0.5F);
-			pose.mulPose(ROT);
+			pose.rotate(ROT);
 			draw(collector, pose, light, AccessoryModels.petTail(), texture);
 			pose.popPose();
 
@@ -293,7 +293,7 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 		pose.pushPose();
 		pose.translate(x * PX, y * PX, z * PX);
 		ROT.rotationX(swing);
-		pose.mulPose(ROT);
+		pose.rotate(ROT);
 		draw(collector, pose, light, part, texture);
 		pose.popPose();
 	}
@@ -301,15 +301,15 @@ public final class AccessoryLayer extends RenderLayer<AvatarRenderState, PlayerM
 	private static void applyTilt(PoseStack pose, boolean crouching) {
 		if (!crouching) return;
 		ROT.rotationX(CROUCH_TILT);
-		pose.mulPose(ROT);
+		pose.rotate(ROT);
 	}
 
 	private void draw(SubmitNodeCollector collector, PoseStack pose, int light, ModelPart part, Identifier texture) {
-		collector.submitModelPart(part, pose, renderType(texture), light, OverlayTexture.NO_OVERLAY, null, false, false);
+		collector.submitModelPart(part, pose, renderType(texture), light, OverlayTexture.NO_OVERLAY, null);
 	}
 
 	private void drawMesh(SubmitNodeCollector collector, PoseStack pose, int light, PolyMesh mesh, Identifier texture) {
-		RenderType type = meshTypes.computeIfAbsent(texture, RenderTypes::entityCutoutNoCull);
+		RenderType type = meshTypes.computeIfAbsent(texture, RenderTypes::entityCutout);
 		collector.submitCustomGeometry(pose, type, (p, vc) -> mesh.render(p, vc, light, OverlayTexture.NO_OVERLAY));
 	}
 

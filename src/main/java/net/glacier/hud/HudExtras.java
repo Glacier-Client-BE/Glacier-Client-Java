@@ -5,7 +5,7 @@ import net.glacier.module.impl.EditorsModule;
 import net.glacier.ui.Draw;
 import net.glacier.ui.Theme;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 
 /** Hotbar and EXP bar decorations from the Editors page, drawn over the vanilla bars. */
@@ -19,7 +19,7 @@ public final class HudExtras {
 	private HudExtras() {
 	}
 
-	public static void draw(GuiGraphics g) {
+	public static void draw(GuiGraphicsExtractor g) {
 		EditorsModule editors = ModuleManager.get(EditorsModule.class);
 		if (editors == null) return;
 		LocalPlayer player = Minecraft.getInstance().player;

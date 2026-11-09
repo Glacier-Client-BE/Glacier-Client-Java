@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.glacier.config.Config;
 import net.glacier.hud.HudExtras;
 import net.glacier.hud.HudModule;
@@ -13,9 +13,9 @@ import net.glacier.social.GlacierRegistry;
 import net.glacier.util.PerfStats;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,16 +33,16 @@ public class GlacierClient implements ClientModInitializer {
 
 		KeyMapping.Category category = KeyMapping.Category.register(
 				Identifier.fromNamespaceAndPath(MOD_ID, "main"));
-		KeyMapping openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+		KeyMapping openMenuKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 				"key.glacier.menu",
-				InputConstants.Type.KEYSYM,
+				InputConstants.Type.KEYBOARD,
 				GLFW.GLFW_KEY_RIGHT_SHIFT,
 				category));
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (openMenuKey.consumeClick()) {
-				if (client.screen == null) {
-					client.setScreen(net.glacier.ui.screen.ScreenFactory.quickBar());
+				if (client.gui.screen() == null) {
+					client.gui.setScreen(net.glacier.ui.screen.ScreenFactory.quickBar());
 				}
 			}
 			ModuleManager.tick();
@@ -57,9 +57,9 @@ public class GlacierClient implements ClientModInitializer {
 	}
 
 	/** Called from MixinGui at the end of the in-game HUD render. */
-	public static void renderHud(GuiGraphics g) {
+	public static void renderHud(GuiGraphicsExtractor g) {
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.player == null || mc.options.hideGui || mc.screen != null) return;
+		if (mc.player == null || mc.gui.hud.isHidden() || mc.gui.screen() != null) return;
 
 		int w = g.guiWidth();
 		int h = g.guiHeight();

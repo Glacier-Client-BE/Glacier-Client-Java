@@ -2,7 +2,7 @@ package net.glacier.hud.impl;
 
 import net.glacier.hud.SlotHudModule;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 
 /** The item in the off hand with its count (stackables) or remaining durability. Hidden when empty. */
@@ -32,7 +32,7 @@ public class OffhandHud extends SlotHudModule {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int sw, int sh) {
+	public void render(GuiGraphicsExtractor g, int sw, int sh) {
 		if (!stack.isEmpty()) super.render(g, sw, sh);
 	}
 
@@ -47,7 +47,7 @@ public class OffhandHud extends SlotHudModule {
 	}
 
 	@Override
-	protected void drawContent(GuiGraphics g, int x, int y) {
+	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		if (stack.isEmpty()) return;
 		drawSlot(g, stack, x, y);
 		if (!text.isEmpty()) drawText(g, text, x + slot() + GAP, y + (slot() - lineHeight()) / 2 + 1, TEXT);

@@ -1,10 +1,10 @@
 package net.glacier.ui.screen.pages;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import net.glacier.ui.Draw;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
@@ -35,12 +35,12 @@ public final class MenuKit {
 		}
 	}
 
-	public final GuiGraphics g;
+	public final GuiGraphicsExtractor g;
 	public final double mx, my;
 	public final List<Hit> hits;
 	private float clipTop = -1e9f, clipBottom = 1e9f;
 
-	public MenuKit(GuiGraphics g, double mx, double my, List<Hit> hits) {
+	public MenuKit(GuiGraphicsExtractor g, double mx, double my, List<Hit> hits) {
 		this.g = g;
 		this.mx = mx;
 		this.my = my;
@@ -238,7 +238,7 @@ public final class MenuKit {
 		p.pushMatrix();
 		p.translate(x, y);
 		p.scale(sc, sc);
-		g.drawString(font(), c, 0, 0, argb, false);
+		g.text(font(), c, 0, 0, argb, false);
 		p.popMatrix();
 	}
 

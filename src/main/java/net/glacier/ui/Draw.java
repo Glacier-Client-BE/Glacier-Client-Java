@@ -2,7 +2,7 @@ package net.glacier.ui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Style;
@@ -23,7 +23,7 @@ public final class Draw {
 	}
 
 	/** Filled rectangle with anti-aliased rounded corners. */
-	public static void round(GuiGraphics g, int x, int y, int w, int h, int radius, int argb) {
+	public static void round(GuiGraphicsExtractor g, int x, int y, int w, int h, int radius, int argb) {
 		int r = Math.min(Math.min(radius, 16), Math.min(w, h) / 2);
 		if (r >= 1 && w >= 2 * r + 1 && h >= 2 * r + 1) {
 			sprite(g, "r" + r, x, y, w, h, argb);
@@ -69,7 +69,7 @@ public final class Draw {
 	 * nine quads per panel. argb tints the texture (its alpha is the opacity). w and h must be at least 2x the corner
 	 * size; smaller shapes should use {@link #round}.
 	 */
-	public static void sprite(GuiGraphics g, String name, int x, int y, int w, int h, int argb) {
+	public static void sprite(GuiGraphicsExtractor g, String name, int x, int y, int w, int h, int argb) {
 		if (w <= 0 || h <= 0 || (argb >>> 24) == 0) return;
 		NineSlice n = nine(name);
 		int b = Math.min(n.border, Math.min(w, h) / 2);
@@ -92,7 +92,7 @@ public final class Draw {
 	}
 
 	/** Anti-aliased rounded rectangle ring, drawn inside the given bounds. */
-	public static void outline(GuiGraphics g, int x, int y, int w, int h, int radius, int argb, int thickness) {
+	public static void outline(GuiGraphicsExtractor g, int x, int y, int w, int h, int radius, int argb, int thickness) {
 		if (thickness <= 0) return;
 		int r = Math.min(Math.min(radius, 16), Math.min(w, h) / 2);
 		if (thickness <= 2 && r > thickness && w >= 2 * r + 1 && h >= 2 * r + 1) {
@@ -102,16 +102,16 @@ public final class Draw {
 		shape(g, x, y, w, h, radius, thickness, true, argb);
 	}
 
-	public static void text(GuiGraphics g, String s, int x, int y, int argb) {
-		g.drawString(font(), uiText(s), x, y, argb, false);
+	public static void text(GuiGraphicsExtractor g, String s, int x, int y, int argb) {
+		g.text(font(), uiText(s), x, y, argb, false);
 	}
 
-	public static void text(GuiGraphics g, String s, float x, float y, float scale, int argb) {
+	public static void text(GuiGraphicsExtractor g, String s, float x, float y, float scale, int argb) {
 		var p = g.pose();
 		p.pushMatrix();
 		p.translate(x, y);
 		p.scale(scale, scale);
-		g.drawString(font(), uiText(s), 0, 0, argb, false);
+		g.text(font(), uiText(s), 0, 0, argb, false);
 		p.popMatrix();
 	}
 
@@ -142,17 +142,17 @@ public final class Draw {
 		return Math.round(8 * scale);
 	}
 
-	public static void centered(GuiGraphics g, String s, int cx, int y, float scale, int argb) {
+	public static void centered(GuiGraphicsExtractor g, String s, int cx, int y, float scale, int argb) {
 		text(g, s, cx - textWidth(s, scale) / 2f, y, scale, argb);
 	}
 
 	/** Font Awesome solid glyph by codepoint. */
-	public static void icon(GuiGraphics g, int codepoint, float x, float y, float scale, int argb) {
+	public static void icon(GuiGraphicsExtractor g, int codepoint, float x, float y, float scale, int argb) {
 		var p = g.pose();
 		p.pushMatrix();
 		p.translate(x, y);
 		p.scale(scale, scale);
-		g.drawString(font(), iconText(codepoint), 0, 0, argb, false);
+		g.text(font(), iconText(codepoint), 0, 0, argb, false);
 		p.popMatrix();
 	}
 
@@ -209,7 +209,7 @@ public final class Draw {
 	 * Only the left and right edge bands are sampled per row; the straight middle is one fill,
 	 * and the shape is horizontally symmetric so the right band mirrors the left.
 	 */
-	private static void shape(GuiGraphics g, int x, int y, int w, int h, int radius, int t, boolean ring, int argb) {
+	private static void shape(GuiGraphicsExtractor g, int x, int y, int w, int h, int radius, int t, boolean ring, int argb) {
 		if (w <= 0 || h <= 0 || (argb >>> 24) == 0) return;
 		int r = Math.max(0, Math.min(radius, Math.min(w, h) / 2));
 		if (r == 0 && !ring) {
@@ -251,7 +251,7 @@ public final class Draw {
 		}
 	};
 
-	private static void filled(GuiGraphics g, int x, int y, int w, int h, int r, int argb) {
+	private static void filled(GuiGraphicsExtractor g, int x, int y, int w, int h, int r, int argb) {
 		int edge = Math.min((w + 1) / 2, r + 1);
 		long key = ((long) w << 40) | ((long) h << 20) | r;
 		float[] cov = FILL_CACHE.get(key);
@@ -271,7 +271,7 @@ public final class Draw {
 		}
 	}
 
-	private static void plot(GuiGraphics g, int x, int y, int w, int yy, int i, float cov, int argb) {
+	private static void plot(GuiGraphicsExtractor g, int x, int y, int w, int yy, int i, float cov, int argb) {
 		if (cov <= 0f) return;
 		int col = cov >= 0.999f ? argb : alpha(argb, cov);
 		g.fill(x + i, y + yy, x + i + 1, y + yy + 1, col);

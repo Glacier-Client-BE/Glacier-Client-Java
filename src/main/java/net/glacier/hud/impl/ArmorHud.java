@@ -6,7 +6,7 @@ import net.glacier.setting.ColorSetting;
 import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -113,7 +113,7 @@ public class ArmorHud extends SlotHudModule {
 	}
 
 	@Override
-	protected void drawContent(GuiGraphics g, int x, int y) {
+	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		refresh();
 		int s = size();
 		boolean hor = horizontal();
@@ -129,7 +129,7 @@ public class ArmorHud extends SlotHudModule {
 					g.blitSprite(RenderPipelines.GUI_TEXTURED, EMPTY_SPRITES[sprite[i]], ix, iy, 16, 16, SILHOUETTE);
 				continue;
 			}
-			g.renderItem(st, ix, iy);
+			g.item(st, ix, iy);
 			if (showBar.on() && st.isDamageableItem()) drawBar(g, st, sx, sy, s);
 			String t = durText[i];
 			if (t != null) {

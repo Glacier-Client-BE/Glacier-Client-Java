@@ -4,7 +4,7 @@ import net.glacier.hud.HudModule;
 import net.glacier.setting.ColorSetting;
 import net.glacier.setting.ToggleSetting;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.level.Level;
 
 import java.util.Random;
@@ -105,7 +105,7 @@ public class ChunkMap extends HudModule {
 	}
 
 	@Override
-	protected void drawContent(GuiGraphics g, int x, int y) {
+	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		boolean letters = !hideDirections.on();
 		int size = gridSize();
 		int n = cells();

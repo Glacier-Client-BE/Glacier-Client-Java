@@ -7,7 +7,6 @@ import net.glacier.setting.ChoiceSetting;
 import net.glacier.setting.ColorSetting;
 import net.glacier.setting.SliderSetting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -26,6 +25,8 @@ import java.util.Optional;
  * MixinTextureTransform. Both mixins are optional: if one fails to apply the module just does less.
  */
 public class GlintColorizer extends Module {
+	private static final Identifier GLINT_ITEM = Identifier.withDefaultNamespace("textures/misc/enchanted_glint_item.png");
+	private static final Identifier GLINT_ARMOR = Identifier.withDefaultNamespace("textures/misc/enchanted_glint_armor.png");
 	private static GlintColorizer instance;
 
 	private final ChoiceSetting color = add(new ChoiceSetting("Color", "Blue", "Red", "Blue", "Yellow", "Orange",
@@ -85,8 +86,8 @@ public class GlintColorizer extends Module {
 	}
 
 	private AbstractTexture lookup(Identifier id) {
-		boolean isItem = id.equals(ItemRenderer.ENCHANTED_GLINT_ITEM);
-		boolean isArmor = !isItem && id.equals(ItemRenderer.ENCHANTED_GLINT_ARMOR);
+		boolean isItem = id.equals(GLINT_ITEM);
+		boolean isArmor = !isItem && id.equals(GLINT_ARMOR);
 		if (!isItem && !isArmor) return null;
 		Minecraft mc = Minecraft.getInstance();
 		TextureManager tm = mc.getTextureManager();

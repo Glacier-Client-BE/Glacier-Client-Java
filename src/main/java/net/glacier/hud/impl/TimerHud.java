@@ -58,9 +58,9 @@ public class TimerHud extends CachedRowsHud {
 
 	private void pollKey(long now) {
 		int code = key.is("None") ? -1 : key.get().charAt(0);
-		boolean down = code > 0 && mc.screen == null && InputConstants.isKeyDown(mc.getWindow(), code);
+		boolean down = code > 0 && mc.gui.screen() == null && InputConstants.isKeyDown(code);
 		if (down && !keyWasDown) {
-			if (InputConstants.isKeyDown(mc.getWindow(), SHIFT)) {
+			if (InputConstants.isKeyDown(SHIFT)) {
 				running = false;
 				elapsedBefore = 0;
 			} else if (running) {

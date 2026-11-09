@@ -16,7 +16,7 @@ public class AutoRespawn extends Module {
 
 	@Override
 	public void onTick() {
-		if (mc.player == null || !(mc.screen instanceof DeathScreen) || !mc.player.isDeadOrDying()) {
+		if (mc.player == null || !(mc.gui.screen() instanceof DeathScreen) || !mc.player.isDeadOrDying()) {
 			waited = 0;
 			return;
 		}

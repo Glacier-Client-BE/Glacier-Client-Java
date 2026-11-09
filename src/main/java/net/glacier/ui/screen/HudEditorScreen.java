@@ -5,7 +5,7 @@ import net.glacier.hud.HudModule;
 import net.glacier.module.ModuleManager;
 import net.glacier.ui.Draw;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -143,7 +143,7 @@ public class HudEditorScreen extends Screen {
 		}
 
 		/** Draws every enabled module with an outline; the hovered one gets the accent. Returns the hovered one. */
-		public HudModule renderModules(GuiGraphics g, int sw, int sh, int mouseX, int mouseY, boolean idleOutline) {
+		public HudModule renderModules(GuiGraphicsExtractor g, int sw, int sh, int mouseX, int mouseY, boolean idleOutline) {
 			HudModule hover = resizing != null ? resizing : dragging != null ? dragging : moduleAt(mouseX, mouseY, sw, sh);
 			List<HudModule> list = ModuleManager.hud();
 			for (int i = 0, n = list.size(); i < n; i++) {
@@ -165,7 +165,7 @@ public class HudEditorScreen extends Screen {
 		}
 
 		/** Crisp whole-pixel 1px frame (no sprites, so it never blurs); the active one gets corner handles. */
-		private static void box(GuiGraphics g, int x, int y, int w, int h, int color, boolean handles) {
+		private static void box(GuiGraphicsExtractor g, int x, int y, int w, int h, int color, boolean handles) {
 			g.fill(x, y, x + w, y + 1, color);
 			g.fill(x, y + h - 1, x + w, y + h, color);
 			g.fill(x, y + 1, x + 1, y + h - 1, color);
@@ -174,7 +174,7 @@ public class HudEditorScreen extends Screen {
 			g.fill(x + w - HANDLE, y + h - HANDLE, x + w + 1, y + h + 1, color);
 		}
 
-		public static void drawGrid(GuiGraphics g, int sw, int sh) {
+		public static void drawGrid(GuiGraphicsExtractor g, int sw, int sh) {
 			for (int x = 0; x < sw; x += GRID) g.fill(x, 0, x + 1, sh, GRID_LINE);
 			for (int y = 0; y < sh; y += GRID) g.fill(0, y, sw, y + 1, GRID_LINE);
 			g.fill(sw / 2, 0, sw / 2 + 1, sh, AXIS_LINE);
@@ -187,7 +187,7 @@ public class HudEditorScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 		g.fill(0, 0, width, height, DIM);
 		Dragger.drawGrid(g, width, height);
 		HudModule hover = dragger.renderModules(g, width, height, mouseX, mouseY, true);
@@ -226,7 +226,7 @@ public class HudEditorScreen extends Screen {
 	@Override
 	public void onClose() {
 		dragger.saveIfDirty();
-		minecraft.setScreen(parent);
+		minecraft.gui.setScreen(parent);
 	}
 
 	@Override

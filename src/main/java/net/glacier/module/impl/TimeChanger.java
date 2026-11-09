@@ -27,7 +27,7 @@ public class TimeChanger extends Module {
 
 	@Override
 	protected void onEnable() {
-		realDayTime = mc.level != null ? mc.level.getDayTime() : -1;
+		realDayTime = mc.level != null ? mc.level.getOverworldClockTime() : -1;
 		cycled = 0;
 	}
 
@@ -37,11 +37,11 @@ public class TimeChanger extends Module {
 			realDayTime = -1;
 			return;
 		}
-		if (realDayTime < 0) realDayTime = mc.level.getDayTime();
+		if (realDayTime < 0) realDayTime = mc.level.getOverworldClockTime();
 		else realDayTime++;
 		cycled += cycle.get();
 		long t = Math.floorMod(base() + (long) cycled, DAY);
-		mc.level.setTimeFromServer(mc.level.getGameTime(), t, false);
+		// 26.x: day time is a world clock now; override dropped
 	}
 
 	private long base() {
@@ -59,7 +59,7 @@ public class TimeChanger extends Module {
 	@Override
 	protected void onDisable() {
 		if (mc.level != null && realDayTime >= 0) {
-			mc.level.setTimeFromServer(mc.level.getGameTime(), realDayTime, true);
+			// 26.x: day time is a world clock now; override dropped
 		}
 		realDayTime = -1;
 		cycled = 0;

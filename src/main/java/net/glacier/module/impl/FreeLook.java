@@ -1,14 +1,14 @@
 package net.glacier.module.impl;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.glacier.GlacierClient;
 import net.glacier.module.Category;
 import net.glacier.module.Module;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 /**
  * Hold the key (default Left Alt) to look around with the camera while your body keeps facing the same way.
@@ -16,8 +16,8 @@ import org.lwjgl.glfw.GLFW;
  */
 public class FreeLook extends Module {
 	private static FreeLook instance;
-	private final KeyMapping key = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-			"key.glacier.freelook", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT,
+	private final KeyMapping key = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+			"key.glacier.freelook", InputConstants.Type.KEYBOARD, GLFW.GLFW_KEY_LEFT_ALT,
 			new KeyMapping.Category(Identifier.fromNamespaceAndPath(GlacierClient.MOD_ID, "main"))));
 	private boolean looking;
 	private float yaw, pitch;
@@ -29,7 +29,7 @@ public class FreeLook extends Module {
 
 	@Override
 	public void onTick() {
-		boolean down = mc.screen == null && mc.player != null && key.isDown();
+		boolean down = mc.gui.screen() == null && mc.player != null && key.isDown();
 		if (down && !looking) {
 			yaw = mc.player.getYRot();
 			pitch = mc.player.getXRot();

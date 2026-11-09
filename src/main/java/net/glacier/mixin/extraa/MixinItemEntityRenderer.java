@@ -6,7 +6,7 @@ import net.glacier.module.impl.ItemPhysics;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.state.ItemEntityRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.AABB;
@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(ItemEntityRenderer.class)
 public abstract class MixinItemEntityRenderer {
-	private static final String SUBMIT = "submit(Lnet/minecraft/client/renderer/entity/state/ItemEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V";
+	private static final String SUBMIT = "submit(Lnet/minecraft/client/renderer/entity/state/ItemEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V";
 
 	private ItemEntityRenderState glacier$state;
 	private AABB glacier$box;
@@ -57,12 +57,12 @@ public abstract class MixinItemEntityRenderer {
 	}
 
 	@Redirect(method = SUBMIT, at = @At(value = "INVOKE",
-			target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionfc;)V"), require = 0)
+			target = "Lcom/mojang/blaze3d/vertex/PoseStack;rotate(Lorg/joml/Quaternionfc;)V"), require = 0)
 	private void glacier$spin(PoseStack pose, Quaternionfc vanilla) {
 		if (ItemPhysics.active() && this.glacier$state != null) {
 			ItemPhysics.rotate(pose, this.glacier$state, this.glacier$box, vanilla);
 		} else {
-			pose.mulPose(vanilla);
+			pose.rotate(vanilla);
 		}
 	}
 

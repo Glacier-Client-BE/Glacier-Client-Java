@@ -10,7 +10,7 @@ import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
 import net.glacier.ui.Draw;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -159,7 +159,7 @@ public abstract class HudModule extends Module {
 	public abstract int contentHeight();
 
 	/** Draws the content with its top-left corner at (x, y) in unscaled box coordinates. */
-	protected abstract void drawContent(GuiGraphics g, int x, int y);
+	protected abstract void drawContent(GuiGraphicsExtractor g, int x, int y);
 
 	protected final int pad() {
 		return padding.i();
@@ -271,12 +271,12 @@ public abstract class HudModule extends Module {
 		setPos(x / (float) maxX, y / (float) maxY);
 	}
 
-	public void render(GuiGraphics g, int sw, int sh) {
+	public void render(GuiGraphicsExtractor g, int sw, int sh) {
 		applyAutoPlace(sw, sh);
 		renderAt(g, screenX(sw), screenY(sh));
 	}
 
-	public void renderAt(GuiGraphics g, int px, int py) {
+	public void renderAt(GuiGraphicsExtractor g, int px, int py) {
 		var pose = g.pose();
 		float s = scaleSetting.f();
 		pose.pushMatrix();
@@ -291,7 +291,7 @@ public abstract class HudModule extends Module {
 	}
 
 	/** The box behind the content: vanilla flat black, or the Glacier navy panel or pill. */
-	private void drawPanel(GuiGraphics g, int w, int h) {
+	private void drawPanel(GuiGraphicsExtractor g, int w, int h) {
 		int r;
 		int fill;
 		if (glacier()) {
@@ -339,19 +339,19 @@ public abstract class HudModule extends Module {
 		return c;
 	}
 
-	protected final void drawText(GuiGraphics g, String s, int x, int y) {
+	protected final void drawText(GuiGraphicsExtractor g, String s, int x, int y) {
 		drawText(g, s, x, y, TEXT);
 	}
 
 	/** Glacier design draws the UI font, with the Text Shadow setting applied as in the vanilla design. */
-	protected final void drawText(GuiGraphics g, String s, int x, int y, int argb) {
+	protected final void drawText(GuiGraphicsExtractor g, String s, int x, int y, int argb) {
 		int c = resolve(argb);
-		if (glacier()) g.drawString(mc.font, fontText(s), x, y, c, textShadow.on());
-		else g.drawString(mc.font, s, x, y, c, textShadow.on());
+		if (glacier()) g.text(mc.font, fontText(s), x, y, c, textShadow.on());
+		else g.text(mc.font, s, x, y, c, textShadow.on());
 	}
 
 	/** Draws parts left to right with their top at y. */
-	protected final void drawParts(GuiGraphics g, int x, int y, Part... parts) {
+	protected final void drawParts(GuiGraphicsExtractor g, int x, int y, Part... parts) {
 		int cx = x;
 		for (Part p : parts) {
 			if (p.cp >= 0) {

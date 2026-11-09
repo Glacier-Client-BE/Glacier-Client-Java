@@ -250,15 +250,15 @@ public class ChatPlus extends Module {
 	/** Handles a click in the chat screen. True when the click copied a message and must not go on. */
 	public static boolean tryCopy(MouseButtonEvent e) {
 		ChatPlus p = active();
-		if (p == null || mc.gui == null) return false;
+		if (p == null || mc.gui.hud == null) return false;
 		boolean hit = (p.copy.is("Ctrl+Click") && e.button() == 0 && e.hasControlDown())
 				|| (p.copy.is("Right Click") && e.button() == 1);
-		if (!hit || !(mc.gui.getChat() instanceof ChatTextLookup lookup)) return false;
+		if (!hit || !(mc.gui.hud.getChat() instanceof ChatTextLookup lookup)) return false;
 		String text = lookup.glacier$textAt(e.x(), e.y());
 		if (text == null || text.isBlank()) return false;
 		if (p.timestamps.on()) text = STAMP.matcher(text).replaceFirst("");
 		mc.keyboardHandler.setClipboard(text);
-		mc.gui.setOverlayMessage(Component.literal("Copied chat message"), false);
+		mc.gui.hud.setOverlayMessage(Component.literal("Copied chat message"), false);
 		mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.2f));
 		return true;
 	}

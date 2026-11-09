@@ -7,7 +7,7 @@ import net.glacier.web.RenderUtil;
 import net.glacier.web.StartApi;
 import net.glacier.web.WebApi;
 import net.glacier.web.WebView;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -71,11 +71,11 @@ public class StartScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
 		fit();
 		drawBackground(g);
 		bridge.tick();
@@ -91,7 +91,7 @@ public class StartScreen extends Screen {
 	 * The panorama is cropped to the window's aspect ratio, so it always fills the window, and its horizontal
 	 * position follows the wall clock, so the pan speed does not depend on the frame rate.
 	 */
-	private void drawBackground(GuiGraphics g) {
+	private void drawBackground(GuiGraphicsExtractor g) {
 		g.fill(0, 0, width, height, BG);
 		int[] nat = RenderUtil.imageSize(PANORAMA);
 		if (nat != null && width > 0 && height > 0) {
@@ -109,7 +109,7 @@ public class StartScreen extends Screen {
 	}
 
 	/** Darkens the top and bottom edges in steps. The bands are disjoint, so each row is filled once. */
-	private void vignette(GuiGraphics g) {
+	private void vignette(GuiGraphicsExtractor g) {
 		int band = Math.max(1, (int) (height * VIGNETTE_BAND) / VIGNETTE_STEPS);
 		for (int i = 0; i < VIGNETTE_STEPS; i++) {
 			int c = (VIGNETTE_MAX * (VIGNETTE_STEPS - i) / VIGNETTE_STEPS) << 24;

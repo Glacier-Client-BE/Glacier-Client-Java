@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import net.fabricmc.loader.api.FabricLoader;
 import net.glacier.ui.Draw;
 import net.glacier.ui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * An HTML document rendered with GuiGraphics. Owns the Node tree, the stylesheets and the layout,
+ * An HTML document rendered with GuiGraphicsExtractor. Owns the Node tree, the stylesheets and the layout,
  * paints it, and turns mouse and key input into DOM-style events.
  *
  * <p>Coordinates passed in and out are relative to the WebView's top-left corner; the caller must
@@ -216,7 +216,7 @@ public class WebView {
 	private final List<Cmd> cmdList = new ArrayList<>();
 	private final List<Cmd> tmpCmds = new ArrayList<>();
 	/** The graphics the current render writes to; set only while {@link #render} runs. */
-	private GuiGraphics gui;
+	private GuiGraphicsExtractor gui;
 
 	/** Parses the document; css is the author stylesheet, applied before the document's own styles. */
 	public WebView(String html, String css) {
@@ -258,7 +258,7 @@ public class WebView {
 	 * Draws the profiler lines in the top-left corner of the screen. Does nothing unless profiling is enabled
 	 * (-Dglacier.uiProfile=true, or "uiProfile": true in config/glacier/performance.json).
 	 */
-	public static void drawProfile(GuiGraphics g) {
+	public static void drawProfile(GuiGraphicsExtractor g) {
 		if (!PROFILE) return;
 		Profile p = profile();
 		String[] lines = {
@@ -292,7 +292,7 @@ public class WebView {
 	/* ---------------------------------------------------------------- render */
 
 	/** Draws the page. Runs the cascade and layout only when they are dirty, then replays the display list. */
-	public void render(GuiGraphics g, int mx, int my) {
+	public void render(GuiGraphicsExtractor g, int mx, int my) {
 		if (root == null || width <= 0 || height <= 0) return;
 		long f0 = 0L;
 		if (PROFILE) {
@@ -713,7 +713,7 @@ public class WebView {
 		RenderUtil.image(gui, c.image, x0, y0, x1, y1, c.op);
 	}
 
-	private static void paintBorder(GuiGraphics g, Node n, float x0, float y0, float x1, float y1, float o) {
+	private static void paintBorder(GuiGraphicsExtractor g, Node n, float x0, float y0, float x1, float y1, float o) {
 		float[] bw = n.borderWidth;
 		int[] bc = n.borderColor;
 		if (bw[0] <= 0 && bw[1] <= 0 && bw[2] <= 0 && bw[3] <= 0) return;
@@ -728,7 +728,7 @@ public class WebView {
 		RenderUtil.rect(g, x0, y0, x0 + bw[3], y1, Draw.alpha(bc[3], o));
 	}
 
-	private void paintRange(GuiGraphics g, Node n, float x0, float y0, float x1, float y1, float o) {
+	private void paintRange(GuiGraphicsExtractor g, Node n, float x0, float y0, float x1, float y1, float o) {
 		float min = attrF(n, "min", 0f), max = attrF(n, "max", 100f);
 		float val = attrF(n, "value", min);
 		float t = max > min ? clamp01((val - min) / (max - min)) : 0f;
@@ -742,7 +742,7 @@ public class WebView {
 				R_THUMB, Draw.alpha(0xFFFFFFFF, o));
 	}
 
-	private void paintCheckbox(GuiGraphics g, Node n, float x0, float y0, float x1, float y1, float o) {
+	private void paintCheckbox(GuiGraphicsExtractor g, Node n, float x0, float y0, float x1, float y1, float o) {
 		if (n.hasAttr("checked")) {
 			RenderUtil.fillRounded(g, x0, y0, x1, y1, R_BOX, Draw.alpha(accentOf(n), o));
 			float px = Math.min(x1 - x0, y1 - y0) * 0.75f;

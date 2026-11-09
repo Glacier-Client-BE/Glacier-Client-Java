@@ -4,10 +4,9 @@ import net.glacier.GlacierClient;
 import net.glacier.ui.Draw;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.ShareToLanScreen;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.options.OptionsScreen;
@@ -17,14 +16,14 @@ import net.minecraft.client.multiplayer.ClientAdvancements;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
+import net.glacier.compat.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * The pause menu (pause.html) as plain Java widgets drawn on GuiGraphics. It still extends {@link PauseScreen} so the
+ * The pause menu (pause.html) as plain Java widgets drawn on GuiGraphicsExtractor. It still extends {@link PauseScreen} so the
  * existing {@code instanceof PauseScreen} checks (MenuFps) match. Immediate mode, like {@link NativeMenuScreen}: every
  * frame the buttons are drawn and their click regions recorded. The actions are the ones ScreenApi performed for the
  * web page. Swapped in by {@link net.glacier.mixin.MixinScreenSwap}.
@@ -67,7 +66,7 @@ public final class NativePauseScreen extends PauseScreen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics g, int mx, int my, float partialTick) {
+	public void extractBackground(GuiGraphicsExtractor g, int mx, int my, float partialTick) {
 	}
 
 	/** Same fit rule as the web page: height-driven, snapped to quarter steps, never below 0.1. */
@@ -90,18 +89,18 @@ public final class NativePauseScreen extends PauseScreen {
 	}
 
 	/** Text centred on a css y, positioned on whole GUI pixels, sized by the css font size times the scale. */
-	private void mid(GuiGraphics g, String s, float x, float cy, float css, int argb) {
+	private void mid(GuiGraphicsExtractor g, String s, float x, float cy, float css, int argb) {
 		float f = fs(css) * sc;
 		Draw.text(g, s, p(x), Math.round(p(cy) - 4f * f), f, argb);
 	}
 
-	private void center(GuiGraphics g, String s, float cx, float cy, float css, int argb) {
+	private void center(GuiGraphicsExtractor g, String s, float cx, float cy, float css, int argb) {
 		float f = fs(css) * sc;
 		Draw.text(g, s, Math.round(p(cx) - Draw.textWidth(s, f) / 2f), Math.round(p(cy) - 4f * f), f, argb);
 	}
 
 	@Override
-	public void render(GuiGraphics g, int rawX, int rawY, float partial) {
+	public void extractRenderState(GuiGraphicsExtractor g, int rawX, int rawY, float partial) {
 		hits.clear();
 		g.fill(0, 0, width, height, DIM);
 		sc = scale();
@@ -126,7 +125,7 @@ public final class NativePauseScreen extends PauseScreen {
 				() -> show(() -> NativeMenuScreen.open(null)));
 		if (canShareToLan()) {
 			button(g, mx, my, px + 203, py + 186, 168, 40, 14, "Open to LAN", Kind.PILL, live,
-					() -> show(() -> new ShareToLanScreen(this)));
+					() -> {});
 		}
 		if (showInfo) center(g, INFO, lw / 2f, py + 232 + 7, 12, MUTED);
 
@@ -135,13 +134,13 @@ public final class NativePauseScreen extends PauseScreen {
 	}
 
 	/** One nine-slice rect from css coordinates, both edges rounded so it lands on whole GUI pixels. */
-	private void box(GuiGraphics g, String tex, float x, float y, float w, float h, int argb) {
+	private void box(GuiGraphicsExtractor g, String tex, float x, float y, float w, float h, int argb) {
 		int x0 = p(x), y0 = p(y);
 		Draw.sprite(g, tex, x0, y0, Math.max(1, p(x + w) - x0), Math.max(1, p(y + h) - y0), argb);
 	}
 
 	/** .pz-status: 8,8, 176 wide, label 11px bold, row 14px icon + text with 8px gap. */
-	private void drawStatus(GuiGraphics g) {
+	private void drawStatus(GuiGraphicsExtractor g) {
 		int x = 8, y = 8, w = 176, h = 53;
 		box(g, "mm_card", x, y, w, h, WHITE);
 		mid(g, "Game Status:", x + 12, y + 16.5f, 11, MUTED);
@@ -152,7 +151,7 @@ public final class NativePauseScreen extends PauseScreen {
 	}
 
 	/** .pz-cbox: 352x124 centred over a second 50% dim, with its soft drop shadow. */
-	private void drawConfirm(GuiGraphics g, int mx, int my, float lw, float lh) {
+	private void drawConfirm(GuiGraphicsExtractor g, int mx, int my, float lw, float lh) {
 		g.fill(0, 0, width, height, DIM);
 		int bw = 352, bh = 124;
 		float bx = (lw - bw) / 2f, by = (lh - bh) / 2f;
@@ -172,7 +171,7 @@ public final class NativePauseScreen extends PauseScreen {
 	 * One css button drawn as a single nine-slice texture (the pack's mm_card / mm_pill / mm_pill_active) on whole GUI
 	 * pixels. Accent keeps its look on hover (slightly brighter tint); cards and pills swap to their hover texture.
 	 */
-	private void button(GuiGraphics g, int mx, int my, float x, float y, float w, float h, float font, String label,
+	private void button(GuiGraphicsExtractor g, int mx, int my, float x, float y, float w, float h, float font, String label,
 						Kind kind, boolean active, Runnable action) {
 		int x0 = p(x), y0 = p(y), w0 = Math.max(1, p(x + w) - x0), h0 = Math.max(1, p(y + h) - y0);
 		boolean hover = active && mx >= x0 && my >= y0 && mx < x0 + w0 && my < y0 + h0;
@@ -194,7 +193,7 @@ public final class NativePauseScreen extends PauseScreen {
 	// ----------------------------------------------------------------- actions
 
 	private void resume() {
-		run(() -> Minecraft.getInstance().setScreen(null));
+		run(() -> Minecraft.getInstance().gui.setScreen(null));
 	}
 
 	private void achievements() {
@@ -202,7 +201,7 @@ public final class NativePauseScreen extends PauseScreen {
 			Minecraft mc = Minecraft.getInstance();
 			var conn = mc.getConnection();
 			ClientAdvancements adv = conn == null ? null : conn.getAdvancements();
-			if (adv != null) mc.setScreen(new AdvancementsScreen(adv, this));
+			if (adv != null) mc.gui.setScreen(new AdvancementsScreen(adv, this));
 		});
 	}
 
@@ -213,8 +212,8 @@ public final class NativePauseScreen extends PauseScreen {
 	private void screenshot() {
 		run(() -> {
 			Minecraft mc = Minecraft.getInstance();
-			Screenshot.grab(mc.gameDirectory, mc.getMainRenderTarget(),
-					msg -> mc.execute(() -> mc.gui.getChat().addMessage(msg)));
+			Screenshot.grab(mc.gameDirectory, mc.gameRenderer.mainRenderTarget(),
+					msg -> mc.execute(() -> mc.gui.hud.getChat().addClientSystemMessage(msg)));
 		});
 	}
 
@@ -229,12 +228,12 @@ public final class NativePauseScreen extends PauseScreen {
 	/** Only an integrated server that is not yet opened to LAN can be shared. */
 	private static boolean canShareToLan() {
 		IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
-		return server != null && !server.isPublished();
+		return false; // ShareToLanScreen removed in 26.x
 	}
 
 	/** Opens a screen built at click time; the screen returns to this one where vanilla does that. */
 	private static void show(Supplier<Screen> screen) {
-		run(() -> Minecraft.getInstance().setScreen(screen.get()));
+		run(() -> Minecraft.getInstance().gui.setScreen(screen.get()));
 	}
 
 	/** Runs an action and logs a failure instead of letting it break the frame. */

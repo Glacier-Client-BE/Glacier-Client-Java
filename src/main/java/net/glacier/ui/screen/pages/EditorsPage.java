@@ -204,9 +204,9 @@ public final class EditorsPage {
 			g.blitSprite(RenderPipelines.GUI_TEXTURED, VANILLA_XP, 182, 5, 0, 0, bx, xy, fill, 5);
 		}
 		int lvl = "Chroma".equals(m.expColor.get()) ? HotbarSkin.chroma() : MenuKit.rgb(named(EXP, m.expColor.get(), "#80ff20"));
-		g.drawString(font, "7", -font.width("7") / 2, xy - 8, lvl, true);
+		g.text(font, "7", -font.width("7") / 2, xy - 8, lvl, true);
 		if (tab.equals("expbar") && m.xpPercent.on()) {
-			g.drawString(font, "64%", -font.width("64%") / 2, xy - 18, 0xFFFFFFFF, true);
+			g.text(font, "64%", -font.width("64%") / 2, xy - 18, 0xFFFFFFFF, true);
 		}
 		// hotbar background and selected slot
 		if (HotbarSkin.customHotbar()) HotbarSkin.hotbarBackground(g, bx, by);
@@ -218,10 +218,10 @@ public final class EditorsPage {
 		boolean numbers = tab.equals("hotbar") && m.slotNumbers.on();
 		for (int i = 0; i < 9; i++) {
 			int ix = bx + 3 + i * 20, iy = by + 3;
-			g.renderItem(items[i], ix, iy);
-			if (hideCount) g.renderItemDecorations(font, items[i], ix, iy, "");
-			else g.renderItemDecorations(font, items[i], ix, iy);
-			if (numbers) g.drawString(font, String.valueOf(i + 1), ix, iy - 1, 0xFFFFFFFF, true);
+			g.item(items[i], ix, iy);
+			if (hideCount) g.itemDecorations(font, items[i], ix, iy, "");
+			else g.itemDecorations(font, items[i], ix, iy);
+			if (numbers) g.text(font, String.valueOf(i + 1), ix, iy - 1, 0xFFFFFFFF, true);
 		}
 		pose.popMatrix();
 	}

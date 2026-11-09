@@ -4,7 +4,7 @@ import net.glacier.module.Category;
 import net.glacier.module.Module;
 import net.glacier.setting.SliderSetting;
 import net.glacier.setting.ToggleSetting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * Screen title and subtitle tweaks (NRC titles module): hide either, scale, vertical offset and how long the title
@@ -49,7 +49,7 @@ public class TitlesPlus extends Module {
 	}
 
 	/** Pushes scale and offset about the screen centre. Returns true when a matrix was pushed. */
-	public static boolean push(GuiGraphics g) {
+	public static boolean push(GuiGraphicsExtractor g) {
 		TitlesPlus t = active();
 		if (t == null) return false;
 		float k = t.scale.f() / 100f;

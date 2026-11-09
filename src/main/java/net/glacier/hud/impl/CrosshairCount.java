@@ -1,7 +1,7 @@
 package net.glacier.hud.impl;
 
 import net.glacier.hud.HudModule;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
@@ -34,7 +34,7 @@ public class CrosshairCount extends HudModule {
 	}
 
 	@Override
-	public void render(GuiGraphics g, int sw, int sh) {
+	public void render(GuiGraphicsExtractor g, int sw, int sh) {
 		if (!held.isEmpty()) super.render(g, sw, sh);
 	}
 
@@ -49,9 +49,9 @@ public class CrosshairCount extends HudModule {
 	}
 
 	@Override
-	protected void drawContent(GuiGraphics g, int x, int y) {
+	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		if (held.isEmpty()) return;
-		g.renderItem(held, x, y);
+		g.item(held, x, y);
 		drawText(g, "x" + total, x + SLOT + GAP, y + (SLOT - lineHeight()) / 2 + 1, TEXT);
 	}
 }

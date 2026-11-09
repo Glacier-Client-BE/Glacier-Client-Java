@@ -1,6 +1,6 @@
 package net.glacier.hud;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ public abstract class RowsHudModule extends HudModule {
 	}
 
 	@Override
-	protected void drawContent(GuiGraphics g, int x, int y) {
+	protected void drawContent(GuiGraphicsExtractor g, int x, int y) {
 		int cy = y;
 		for (Part[] row : rows()) {
 			drawParts(g, x, cy, row);
